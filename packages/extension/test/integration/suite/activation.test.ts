@@ -5,7 +5,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 
-const EXT_ID = 'ohos-lite-js-ide.ohos-lite-js-ide';
+const EXT_ID = 'samsong8610.ohos-lite-js-ide';
 
 async function waitFor(pred: () => boolean, ms: number): Promise<boolean> {
   const end = Date.now() + ms;

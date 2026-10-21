@@ -3,7 +3,7 @@
   "displayName": "OpenHarmony Lite JS IDE",
   "description": "Develop, deploy and debug ArkUI.Lite (JS) applications for OpenHarmony small-system devices",
   "version": "0.1.0",
-  "publisher": "ohos-lite-js-ide",
+  "publisher": "samsong8610",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
