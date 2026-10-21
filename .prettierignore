@@ -10,3 +10,4 @@ packages/schemas/sources.lock.json
 **/fixtures/**
 **/__snapshots__/**
 .vscode-test
+out-test

@@ -2,5 +2,7 @@
   "capabilities.untrusted": "在受限工作区中禁用设备部署和外部工具。",
   "config.tools.hdcPath": "hdc 可执行文件路径，留空则自动定位。",
   "config.device.profile": "设备配置 ID，或设备配置 JSON 文件路径。",
-  "config.advanced.outputEncoding": "外部工具输出的解码方式（auto：先按 UTF-8，失败再按 GBK）。"
+  "config.advanced.outputEncoding": "外部工具输出的解码方式（auto：先按 UTF-8，失败再按 GBK）。",
+  "config.device.profileOverrides": "覆盖当前设备配置中的路径、端口和命令模板。",
+  "config.device.display": "覆盖当前设备配置的屏幕分辨率。"
 }

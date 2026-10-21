@@ -26,6 +26,10 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       const ext = vscode.extensions.getExtension<{ isProject: boolean }>(EXT_ID)!;
       assert.ok(await waitFor(() => ext.isActive, 15000), 'extension did not activate');
       assert.strictEqual(ext.exports.isProject, true);
+      const profile = (ext.exports as { deviceProfile?: { id: string; display: { width: number } } })
+        .deviceProfile;
+      assert.strictEqual(profile?.id, '2k0300-1024x768');
+      assert.strictEqual(profile?.display.width, 1024);
     });
   } else {
     it('does not activate in a non-OpenHarmony workspace', async () => {

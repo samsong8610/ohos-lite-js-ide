@@ -1,0 +1,49 @@
+{
+  "$schema": "../dist/schemas/device-profile.schema.json",
+  "id": "2k0300-1024x768",
+  "name": "2K0300 Linux small system, 1024×768",
+  "description": "Built-in profile for the 2K0300 (LoongArch64) board with the 1024×768 main screen. Paths marked 'default' are pending firmware confirmation (F-5, V-4, Q10).",
+  "arch": "loongarch64",
+  "kernel": "linux",
+  "deviceType": "smartVision",
+  "display": { "width": 1024, "height": 768, "shape": "rect", "dpi": null },
+  "features": {
+    "FEATURE_COMPONENT_CANVAS": true,
+    "FEATURE_COMPONENT_QRCODE": true,
+    "FEATURE_COMPONENT_EDITTEXT": true,
+    "FEATURE_COMPONENT_CAMERA": true,
+    "FEATURE_COMPONENT_VIDEO": true,
+    "FEATURE_COMPONENT_TABS": false,
+    "FEATURE_COMPONENT_ANALOG_CLOCK": false,
+    "FEATURE_ROTATION_API": false,
+    "FEATURE_MODULE_DIALOG": true
+  },
+  "featuresSource": "assumed from upstream arkui_ace_engine_lite targets/linux/acelite_config.h (CAMERA/VIDEO require ACE_ENGINE_LITE_CAMERA_LITE_ENABLE / ACE_ENGINE_LITE_MEDIA_LITE_ENABLE); confirm against the 2K0300 firmware",
+  "connection": { "preferred": "tcp", "fallback": [], "tcpPort": 8710 },
+  "paths": {
+    "tmpDir": "/tmp/ohjs",
+    "snapshotFlag": "/user/data/js_snapshot_enable",
+    "appInstallRoot": "/storage/app/run",
+    "firmwareManifest": "/etc/ohjs/runtime-manifest.json"
+  },
+  "commands": {
+    "install": "bm install -p {hap}",
+    "uninstall": "bm uninstall -n {bundle}",
+    "list": "bm dump -l",
+    "start": "aa start -p {bundle} -n {ability}",
+    "stop": "aa terminate -p {bundle}",
+    "log": "hilogcat -L {level}",
+    "disableSignCheck": "bm set -s disable",
+    "setSnapshotMode": "touch {snapshotFlag}",
+    "setJsMode": "rm -f {snapshotFlag}",
+    "checkMode": "ls {snapshotFlag}",
+    "mkTmp": "mkdir -p {tmpDir}"
+  },
+  "debug": {
+    "port": 5001,
+    "enableMethod": "flagFile",
+    "enableFlag": "/user/data/ohjs_debugger_enable",
+    "requireDebugFirmware": true
+  },
+  "jerry": { "snapshotVersion": 49, "debuggerProtocol": 9, "cpointer32": null }
+}

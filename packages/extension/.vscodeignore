@@ -1,5 +1,6 @@
 **
 !dist/extension.js
+!dist/schemas/**
 !package.json
 !package.nls.json
 !package.nls.*.json

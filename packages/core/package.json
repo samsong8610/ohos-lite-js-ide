@@ -9,5 +9,7 @@
   "files": [
     "out"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "ajv": "^8.20.0"
+  }
 }

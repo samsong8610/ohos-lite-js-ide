@@ -63,9 +63,39 @@
           "default": "auto",
           "scope": "machine",
           "description": "%config.advanced.outputEncoding%"
+        },
+        "ohjs.device.profileOverrides": {
+          "type": "object",
+          "default": {},
+          "scope": "resource",
+          "description": "%config.device.profileOverrides%"
+        },
+        "ohjs.device.display": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "scope": "resource",
+          "description": "%config.device.display%"
         }
       }
-    }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "**/.ohjs/device-profiles/*.json",
+          "**/device-profiles/*.json"
+        ],
+        "url": "./dist/schemas/device-profile.schema.json"
+      }
+    ]
   },
   "scripts": {
     "bundle": "node esbuild.mjs --production",
@@ -74,7 +104,9 @@
     "test:integration": "pnpm run bundle && tsc -p test/integration/tsconfig.json && node out-test/runTest.js",
     "package": "vsce package --no-dependencies"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ohjs/core": "workspace:*"
+  },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/vscode": "~1.140.0",
