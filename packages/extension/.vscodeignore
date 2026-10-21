@@ -1,5 +1,7 @@
 **
 !dist/extension.js
+!dist/server.js
+!language-configuration.hml.json
 !dist/schemas/**
 !package.json
 !package.nls.json

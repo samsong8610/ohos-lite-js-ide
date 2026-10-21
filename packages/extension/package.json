@@ -28,7 +28,8 @@
   "main": "./dist/extension.js",
   "l10n": "./l10n",
   "activationEvents": [
-    "workspaceContains:**/src/main/config.json"
+    "workspaceContains:**/src/main/config.json",
+    "onLanguage:hml"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -84,6 +85,35 @@
           },
           "scope": "resource",
           "description": "%config.device.display%"
+        },
+        "ohjs.sdkVersion": {
+          "type": "string",
+          "enum": [
+            "5.0.3",
+            "6.1-lts"
+          ],
+          "enumDescriptions": [
+            "%config.sdkVersion.503%",
+            "%config.sdkVersion.61%"
+          ],
+          "default": "5.0.3",
+          "scope": "resource",
+          "description": "%config.sdkVersion%"
+        },
+        "ohjs.lang.rules": {
+          "type": "object",
+          "default": {},
+          "scope": "resource",
+          "additionalProperties": {
+            "enum": [
+              "error",
+              "warning",
+              "information",
+              "hint",
+              "off"
+            ]
+          },
+          "markdownDescription": "%config.lang.rules%"
         }
       }
     },
@@ -103,6 +133,19 @@
         "category": "OHJS",
         "enablement": "ohjs.isProject"
       }
+    ],
+    "languages": [
+      {
+        "id": "hml",
+        "aliases": [
+          "HML",
+          "hml"
+        ],
+        "extensions": [
+          ".hml"
+        ],
+        "configuration": "./language-configuration.hml.json"
+      }
     ]
   },
   "scripts": {
@@ -114,15 +157,18 @@
   },
   "dependencies": {
     "@ohjs/core": "workspace:*",
-    "@ohjs/transport-hdc": "workspace:*"
+    "@ohjs/language-server": "workspace:*",
+    "@ohjs/schemas": "workspace:*",
+    "@ohjs/transport-hdc": "workspace:*",
+    "vscode-languageclient": "^10.1.2"
   },
   "devDependencies": {
+    "@ohjs/test-kit": "workspace:*",
     "@types/mocha": "^10.0.10",
     "@types/vscode": "~1.140.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.2",
     "esbuild": "^0.25.11",
-    "mocha": "^11.7.4",
-    "@ohjs/test-kit": "workspace:*"
+    "mocha": "^11.7.4"
   }
 }

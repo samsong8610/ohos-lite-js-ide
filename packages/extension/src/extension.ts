@@ -14,12 +14,15 @@ import {
 } from '@ohjs/core';
 import { HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
+import { startLanguageClient } from './language-client';
 import { detectFromConfigJson } from './project-detector';
 
 export interface OhjsExtensionApi {
   readonly isProject: boolean;
   readonly reason: string;
   readonly deviceProfile?: DeviceProfile;
+  /** first ohjs/sdkStatus from the language server (undefined when it failed to start) */
+  readonly languageServer?: Promise<{ version: string; ok: boolean }>;
 }
 
 /** `ohjs.device.refresh`: lists hdc targets into the OHJS output channel (FR-DEP-001 groundwork). */
@@ -69,6 +72,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   if (!result.isProject) return result;
   registerDeviceCommands(context, output);
 
+  let languageServer: OhjsExtensionApi['languageServer'];
+  try {
+    languageServer = (await startLanguageClient(context, output)).firstStatus;
+  } catch (e) {
+    output.error(`language server failed to start: ${(e as Error).message}`);
+  }
+
   let deviceProfile: DeviceProfile | undefined;
   try {
     const registry = new DeviceProfileRegistry();
@@ -92,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   } catch (e) {
     output.error(`device profile error: ${(e as Error).message}`);
   }
-  return { ...result, deviceProfile };
+  return { ...result, deviceProfile, ...(languageServer ? { languageServer } : {}) };
 }
 
 export function deactivate(): void {

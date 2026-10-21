@@ -5,5 +5,9 @@
   "config.advanced.outputEncoding": "Encoding used to decode output of external tools (auto tries UTF-8 then GBK).",
   "config.device.profileOverrides": "Overrides for paths, ports and command templates of the active device profile.",
   "config.device.display": "Override the display resolution of the active device profile.",
-  "command.device.refresh": "Refresh Devices"
+  "command.device.refresh": "Refresh Devices",
+  "config.sdkVersion": "OpenHarmony SDK version whose component schema drives HML completion and diagnostics.",
+  "config.sdkVersion.503": "OpenHarmony 5.0.3-Release",
+  "config.sdkVersion.61": "OpenHarmony 6.1-LTS (provisional schema)",
+  "config.lang.rules": "Per-rule severity overrides, e.g. `{ \"hml/unknown-attribute\": \"warning\", \"hml/for-with-if\": \"off\" }`."
 }

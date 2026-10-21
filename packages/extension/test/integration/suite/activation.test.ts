@@ -32,6 +32,40 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.strictEqual(profile?.display.width, 1024);
     });
 
+    it('language server: HML diagnostics and completion from the 5.0.3 schema', async () => {
+      const ext = vscode.extensions.getExtension<{
+        languageServer?: Promise<{ version: string; ok: boolean }>;
+      }>(EXT_ID)!;
+      assert.ok(await waitFor(() => ext.isActive, 15000));
+      const st = await ext.exports.languageServer;
+      assert.deepStrictEqual({ version: st?.version, ok: st?.ok }, { version: '5.0.3', ok: true });
+      const [uri] = await vscode.workspace.findFiles('**/pages/index/index.hml');
+      assert.ok(uri, 'fixture index.hml not found');
+      const doc = await vscode.workspace.openTextDocument(uri);
+      assert.strictEqual(doc.languageId, 'hml');
+      await vscode.window.showTextDocument(doc);
+      assert.ok(
+        await waitFor(() => vscode.languages.getDiagnostics(uri).some((d) => d.source === 'ohjs'), 15000),
+        'no ohjs diagnostics',
+      );
+      const diags = vscode.languages.getDiagnostics(uri).filter((d) => d.source === 'ohjs');
+      assert.deepStrictEqual(
+        diags.map((d) => [String(typeof d.code === 'object' ? d.code.value : d.code), d.range.start.line]),
+        [['hml/unknown-component', 4]],
+      );
+      // completion inside <list> offers only <list-item>
+      const pos = new vscode.Position(2, 5);
+      const list = await vscode.commands.executeCommand<vscode.CompletionList>(
+        'vscode.executeCompletionItemProvider',
+        uri,
+        pos,
+        '<',
+      );
+      const labels = list.items.map((i) => (typeof i.label === 'string' ? i.label : i.label.label));
+      assert.ok(labels.includes('list-item'), `list-item missing: ${labels.join(',')}`);
+      assert.ok(!labels.includes('text'), 'text must not be offered inside <list>');
+    });
+
     it('ohjs.device.refresh lists targets from mock-hdc', async () => {
       await vscode.workspace
         .getConfiguration('ohjs.tools')
