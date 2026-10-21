@@ -124,7 +124,10 @@ describe('NodeProcessRunner.spawnStream', () => {
     await new Promise<void>((r) => s.onStdout(() => r()));
     await s.kill();
     const ex = await s.exited;
-    expect(ex.exitCode === null || ex.signal !== null).toBe(true);
+    // The script never exits on its own, so `exited` resolving means it was terminated.
+    // POSIX: killed by a signal (exitCode null); Windows: taskkill /T /F yields a numeric non-zero code, signal null.
+    expect(ex.error).toBeUndefined();
+    expect(ex.signal !== null || (ex.exitCode !== null && ex.exitCode !== 0)).toBe(true);
   });
 
   it('honours timeout and cancellation', async () => {

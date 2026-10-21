@@ -124,7 +124,7 @@ describe('generateSchema (synthetic sources)', () => {
 
   it('fails clearly when a required file is missing', () => {
     const set: SourceSet = { ohVersion: 'x', provisional: false, target: 'nope', ...mini };
-    expect(() => generateSchema(set)).toThrow(/missing source file .*targets\/nope\/acelite_config.h/);
+    expect(() => generateSchema(set)).toThrow(/missing source file .*targets[\\/]nope[\\/]acelite_config\.h/);
   });
 
   it('fails when component.cpp is absent', () => {
