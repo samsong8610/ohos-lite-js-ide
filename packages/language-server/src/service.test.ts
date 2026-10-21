@@ -212,19 +212,19 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
     expect(d.map((x) => [x.code, x.severity, x.range.start.line, x.message])).toEqual([
       [
         'js/es6-syntax',
-        DiagnosticSeverity.Error,
+        DiagnosticSeverity.Warning,
         1,
-        'Method shorthand (ES2015+) cannot be used: the engine runs ES5.1',
+        'Method shorthand (ES2015+) is not ES5.1: ace-loader transpiles page scripts to ES5 with babel at build time, so this is a reminder, not an error',
       ],
       [
         'js/es6-syntax',
-        DiagnosticSeverity.Error,
+        DiagnosticSeverity.Warning,
         2,
-        "'let' declarations (ES2015+) cannot be used: the engine runs ES5.1",
+        "'let' declarations (ES2015+) is not ES5.1: ace-loader transpiles page scripts to ES5 with babel at build time, so this is a reminder, not an error",
       ],
     ]);
-    svc.settings = { rules: { 'js/es6-syntax': 'warning' } };
-    expect(svc.validate(js)[0]!.severity).toBe(DiagnosticSeverity.Warning);
+    svc.settings = { rules: { 'js/es6-syntax': 'error' } };
+    expect(svc.validate(js)[0]!.severity).toBe(DiagnosticSeverity.Error);
     svc.settings = { rules: { 'js/es6-syntax': 'off' } };
     expect(svc.validate(js)).toEqual([]);
     svc.settings = {};

@@ -90,6 +90,8 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
         diags.map((d) => [String(typeof d.code === 'object' ? d.code.value : d.code), d.range.start.line]),
         [['js/es6-syntax', 1]],
       );
+      assert.strictEqual(diags[0]!.severity, vscode.DiagnosticSeverity.Warning);
+      assert.match(diags[0]!.message, /babel/);
     });
 
     it('language server: unknown @system module and this. completion (FR-LANG-007)', async () => {

@@ -23,7 +23,7 @@ export const RULES = {
   'css/unsupported-selector': 'error',
   'css/unsupported-pseudo': 'error',
   'hml/es6-in-expression': 'error',
-  'js/es6-syntax': 'error',
+  'js/es6-syntax': 'warning',
   'js/unknown-system-module': 'error',
   'prj/missing-app-module': 'error',
   'prj/device-type': 'error',

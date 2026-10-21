@@ -199,7 +199,7 @@ export class OhjsLanguageService {
           ...r.findings.map((f) => ({
             rule: 'js/es6-syntax' as const,
             range: f,
-            message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) cannot be used: the engine runs ES5.1`,
+            message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) is not ES5.1: ace-loader transpiles page scripts to ES5 with babel at build time, so this is a reminder, not an error`,
           })),
         ].sort((a, b) => a.range.start - b.range.start),
         r.comments.map((c) => ({ text: c.text, end: c.end })),
