@@ -544,7 +544,14 @@
               "line": 47
             }
           ],
-          "doc": "string | stretch flex-start | 否 | flex容器当前行的交叉轴对齐格式，可选值为： - stretch：弹性元素在交叉轴方向被拉伸到与容器相同的高度或宽度。 - flex-start：元素向交叉轴起点对齐。 - flex-end：元素向交叉轴终点对齐。 - center：元素沿交叉轴方向居中。"
+          "doc": "string | stretch flex-start | 否 | flex容器当前行的交叉轴对齐格式，可选值为： - stretch：弹性元素在交叉轴方向被拉伸到与容器相同的高度或宽度。 - flex-start：元素向交叉轴起点对齐。 - flex-end：元素向交叉轴终点对齐。 - center：元素沿交叉轴方向居中。",
+          "values": [
+            "stretch",
+            "flex-start",
+            "flex-end",
+            "center"
+          ],
+          "valuesSource": "doc"
         },
         "flex-direction": {
           "availability": "code",
@@ -560,7 +567,12 @@
               "line": 44
             }
           ],
-          "doc": "string | row | 否 | flex容器主轴方向。可选项有： - column：垂直方向从上到下 - row：水平方向从左到右"
+          "doc": "string | row | 否 | flex容器主轴方向。可选项有： - column：垂直方向从上到下 - row：水平方向从左到右",
+          "values": [
+            "column",
+            "row"
+          ],
+          "valuesSource": "doc"
         },
         "flex-wrap": {
           "availability": "code",
@@ -576,7 +588,12 @@
               "line": 45
             }
           ],
-          "doc": "string | nowrap | 否 | flex容器是单行还是多行显示，此属性暂不支持动态修改。可选项有： - nowrap：不换行，单行显示。 - wrap：换行，多行显示。"
+          "doc": "string | nowrap | 否 | flex容器是单行还是多行显示，此属性暂不支持动态修改。可选项有： - nowrap：不换行，单行显示。 - wrap：换行，多行显示。",
+          "values": [
+            "nowrap",
+            "wrap"
+          ],
+          "valuesSource": "doc"
         },
         "justify-content": {
           "availability": "code",
@@ -592,7 +609,15 @@
               "line": 46
             }
           ],
-          "doc": "string | flex-start | 否 | flex容器当前行的主轴对齐格式。可选项有： - flex-start：项目位于容器的开头。 - flex-end：项目位于容器的结尾。 - center：项目位于容器的中心。 - space-between：项目位于各行之间留有空白的容器内。 - space-around：项目位于各行之前、之间、之后都留有空白的容器内。"
+          "doc": "string | flex-start | 否 | flex容器当前行的主轴对齐格式。可选项有： - flex-start：项目位于容器的开头。 - flex-end：项目位于容器的结尾。 - center：项目位于容器的中心。 - space-between：项目位于各行之间留有空白的容器内。 - space-around：项目位于各行之前、之间、之后都留有空白的容器内。",
+          "values": [
+            "flex-start",
+            "flex-end",
+            "center",
+            "space-between",
+            "space-around"
+          ],
+          "valuesSource": "doc"
         }
       },
       "events": {},
@@ -783,7 +808,12 @@
             }
           ],
           "since": 5,
-          "doc": "string | forwards | 否 | 指定帧动画执行结束后的状态。可选项有： - none：恢复初始状态。 - forwards：保持帧动画结束时的状态（在最后一个关键帧中定义）。"
+          "doc": "string | forwards | 否 | 指定帧动画执行结束后的状态。可选项有： - none：恢复初始状态。 - forwards：保持帧动画结束时的状态（在最后一个关键帧中定义）。",
+          "values": [
+            "none",
+            "forwards"
+          ],
+          "valuesSource": "doc"
         },
         "fixedsize": {
           "availability": "code",
@@ -799,7 +829,12 @@
               "line": 28
             }
           ],
-          "doc": "boolean | true | 否 | 设置图片大小是否固定为组件大小。 true表示图片大小与组件大小一致，此时设置图片的width 、height 、top 和left属性是无效的。false表示每一张图片的 width 、height 、top和left属性都要单独设置。"
+          "doc": "boolean | true | 否 | 设置图片大小是否固定为组件大小。 true表示图片大小与组件大小一致，此时设置图片的width 、height 、top 和left属性是无效的。false表示每一张图片的 width 、height 、top和left属性都要单独设置。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         },
         "images": {
           "availability": "code",
@@ -847,7 +882,12 @@
               "line": 27
             }
           ],
-          "doc": "boolean | false | 否 | 设置播放顺序。false表示从第1张图片播放到最后1张图片； true表示从最后1张图片播放到第1张图片。"
+          "doc": "boolean | false | 否 | 设置播放顺序。false表示从第1张图片播放到最后1张图片； true表示从最后1张图片播放到第1张图片。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         }
       },
       "styles": {},
@@ -1037,7 +1077,12 @@
               "line": 44
             }
           ],
-          "doc": "boolean | false | 否 | 当前组件是否选中，true表示选中，false表示未选中。仅type为checkbox和radio生效。"
+          "doc": "boolean | false | 否 | 当前组件是否选中，true表示选中，false表示未选中。仅type为checkbox和radio生效。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         },
         "maxlength": {
           "availability": "code-doc-missing",
@@ -1092,7 +1137,15 @@
             }
           ],
           "feature": "FEATURE_COMPONENT_EDITTEXT",
-          "doc": "string | button | 否 | input组件类型，可选值为button，checkbox，radio，text。 button，checkbox，radio，text不支持动态修改。可选值定义如下： - button：定义可点击的按钮。 - checkbox：定义多选框。 - radio：定义单选按钮，允许在多个拥有相同name值的选项中选中其中一个。 - text：定义用于文字输入的文本框，仅在支持输入法功能的真机设备上，支持点击拉起文字输入界面，UI预览无效果。"
+          "doc": "string | button | 否 | input组件类型，可选值为button，checkbox，radio，text。 button，checkbox，radio，text不支持动态修改。可选值定义如下： - button：定义可点击的按钮。 - checkbox：定义多选框。 - radio：定义单选按钮，允许在多个拥有相同name值的选项中选中其中一个。 - text：定义用于文字输入的文本框，仅在支持输入法功能的真机设备上，支持点击拉起文字输入界面，UI预览无效果。",
+          "values": [
+            "checkbox",
+            "radio",
+            "text",
+            "password",
+            "button"
+          ],
+          "valuesSource": "code+doc"
         },
         "value": {
           "availability": "code",
@@ -1550,7 +1603,12 @@
               "line": 48
             }
           ],
-          "doc": "string | column | 否 | 设置flex容器主轴的方向，指定flex项如何放置在flex容器中，可选值为： - column：主轴为纵向。 - row：主轴为横向。 其他组件默认值为row，在list组件中默认值为column。轻量级智能穿戴设备不支持动态修改。"
+          "doc": "string | column | 否 | 设置flex容器主轴的方向，指定flex项如何放置在flex容器中，可选值为： - column：主轴为纵向。 - row：主轴为横向。 其他组件默认值为row，在list组件中默认值为column。轻量级智能穿戴设备不支持动态修改。",
+          "values": [
+            "column",
+            "row"
+          ],
+          "valuesSource": "doc"
         }
       },
       "events": {
@@ -2435,7 +2493,12 @@
               "line": 25
             }
           ],
-          "doc": "string | horizontal | 否 | 设置进度条的类型，该属性不支持动态修改，可选值为： - horizontal：线性进度条； - arc：弧形进度条。"
+          "doc": "string | horizontal | 否 | 设置进度条的类型，该属性不支持动态修改，可选值为： - horizontal：线性进度条； - arc：弧形进度条。",
+          "values": [
+            "arc",
+            "horizontal"
+          ],
+          "valuesSource": "code+doc"
         }
       },
       "styles": {
@@ -3037,7 +3100,12 @@
               "line": 26
             }
           ],
-          "doc": "boolean | true | 否 | 是否开启循环轮播。true为开启循环，false为不开启循环。"
+          "doc": "boolean | true | 否 | 是否开启循环轮播。true为开启循环，false为不开启循环。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         },
         "vertical": {
           "availability": "code",
@@ -3053,7 +3121,12 @@
               "line": 28
             }
           ],
-          "doc": "boolean | false | 否 | 是否为纵向滑动，纵向滑动时采用纵向的指示器。true为纵向滑动，false为水平滑动。 不支持动态修改。"
+          "doc": "boolean | false | 否 | 是否为纵向滑动，纵向滑动时采用纵向的指示器。true为纵向滑动，false为水平滑动。 不支持动态修改。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         }
       },
       "styles": {},
@@ -3153,7 +3226,12 @@
               "line": 25
             }
           ],
-          "doc": "boolean | false | 否 | 是否选中。true表示被选中，false表示不被选中。"
+          "doc": "boolean | false | 否 | 是否选中。true表示被选中，false表示不被选中。",
+          "values": [
+            "true",
+            "false"
+          ],
+          "valuesSource": "doc"
         }
       },
       "styles": {
@@ -3681,7 +3759,13 @@
               "line": 47
             }
           ],
-          "doc": "string | left | 否 | 设置文本的文本对齐方式，可选值为： - left：文本左对齐； - center：文本居中对齐； - right：文本右对齐；"
+          "doc": "string | left | 否 | 设置文本的文本对齐方式，可选值为： - left：文本左对齐； - center：文本居中对齐； - right：文本右对齐；",
+          "values": [
+            "left",
+            "center",
+            "right"
+          ],
+          "valuesSource": "doc"
         },
         "text-overflow": {
           "availability": "code",
@@ -3697,7 +3781,12 @@
               "line": 48
             }
           ],
-          "doc": "string | clip | 否 | 可选值为： - clip：将文本根据父容器大小进行裁剪显示； - ellipsis：根据父容器大小显示，显示不下的文本用省略号代替。"
+          "doc": "string | clip | 否 | 可选值为： - clip：将文本根据父容器大小进行裁剪显示； - ellipsis：根据父容器大小显示，显示不下的文本用省略号代替。",
+          "values": [
+            "clip",
+            "ellipsis"
+          ],
+          "valuesSource": "doc"
         }
       },
       "events": {},
@@ -4005,7 +4094,12 @@
             "line": 30
           }
         ],
-        "doc": "boolean | 根据设置的boolean值，显示或隐藏当前元素。"
+        "doc": "boolean | 根据设置的boolean值，显示或隐藏当前元素。",
+        "values": [
+          "true",
+          "false"
+        ],
+        "valuesSource": "doc"
       },
       "style": {
         "availability": "framework",
@@ -4066,7 +4160,12 @@
             "line": 21
           }
         ],
-        "doc": "string | none | 指定动画开始和结束的状态： - none：在动画执行之前和之后都不会应用任何样式到目标上。 - forwards：在动画结束后，目标将保留动画结束时的状态（在最后一个关键帧中定义）。"
+        "doc": "string | none | 指定动画开始和结束的状态： - none：在动画执行之前和之后都不会应用任何样式到目标上。 - forwards：在动画结束后，目标将保留动画结束时的状态（在最后一个关键帧中定义）。",
+        "values": [
+          "none",
+          "forwards"
+        ],
+        "valuesSource": "doc"
       },
       "animation-iteration-count": {
         "availability": "code",
@@ -4114,7 +4213,14 @@
             "line": 20
           }
         ],
-        "doc": "string | linear | 描述动画执行的速度曲线，用于使动画更为平滑。 可选项有： - linear：表示动画从头到尾的速度都是相同的。 - ease-in：表示动画以低速开始，cubic-bezier(0.42, 0.0, 1.0, 1.0)。 - ease-out：表示动画以低速结束，cubic-bezier(0.0, 0.0, 0.58, 1.0)。 - ease-in-out：表示动画以低速开始和结束，cubic-bezier(0.42, 0.0, 0.58, 1.0)。"
+        "doc": "string | linear | 描述动画执行的速度曲线，用于使动画更为平滑。 可选项有： - linear：表示动画从头到尾的速度都是相同的。 - ease-in：表示动画以低速开始，cubic-bezier(0.42, 0.0, 1.0, 1.0)。 - ease-out：表示动画以低速结束，cubic-bezier(0.0, 0.0, 0.58, 1.0)。 - ease-in-out：表示动画以低速开始和结束，cubic-bezier(0.42, 0.0, 0.58, 1.0)。",
+        "values": [
+          "linear",
+          "ease-in",
+          "ease-out",
+          "ease-in-out"
+        ],
+        "valuesSource": "doc"
       },
       "background-color": {
         "availability": "code",
@@ -4274,7 +4380,12 @@
             "line": 26
           }
         ],
-        "doc": "string | flex | 否 | 确定一个元素所产生的框的类型，可选值为： - flex：弹性布局。 - none：不渲染此元素。"
+        "doc": "string | flex | 否 | 确定一个元素所产生的框的类型，可选值为： - flex：弹性布局。 - none：不渲染此元素。",
+        "values": [
+          "flex",
+          "none"
+        ],
+        "valuesSource": "doc"
       },
       "height": {
         "availability": "code",

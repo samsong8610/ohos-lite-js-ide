@@ -2,6 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { annotateValues } from './values';
 import * as fs from 'fs';
 import * as path from 'path';
 import type {
@@ -175,6 +176,10 @@ function sourceInfo(repo: string, dir: string): SourceInfo {
 
 /** Runs the full extraction pipeline (ARCHITECTURE §7.4) for one source set. */
 export function generateSchema(set: SourceSet): ComponentsSchemaFile {
+  return annotateValues(buildSchema(set));
+}
+
+function buildSchema(set: SourceSet): ComponentsSchemaFile {
   const keysText = readRel(set.engine, PATHS.keysH);
   const keys = keysByEnum(parseKeysH(keysText));
   const features = featureSwitches(parseAceliteConfig(readRel(set.engine, PATHS.config(set.target))));

@@ -23,6 +23,8 @@ const field = {
     since: { type: 'integer' },
     feature: { type: 'string' },
     doc: { type: 'string' },
+    values: { type: 'array', items: { type: 'string' }, minItems: 1 },
+    valuesSource: { enum: ['code', 'doc', 'code+doc'] },
     evidence: { type: 'array', items: evidence },
   },
 } as const;

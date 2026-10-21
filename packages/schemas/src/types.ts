@@ -25,6 +25,9 @@ export interface FieldSchema {
   since?: number;
   feature?: string;
   doc?: string;
+  /** enumerated values for completion: `type` variants from component_factory (code) and/or doc value lists */
+  values?: string[];
+  valuesSource?: 'code' | 'doc' | 'code+doc';
   evidence: Evidence[];
 }
 
