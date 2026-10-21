@@ -4,5 +4,6 @@
   "config.device.profile": "Device profile id or path to a device profile JSON file.",
   "config.advanced.outputEncoding": "Encoding used to decode output of external tools (auto tries UTF-8 then GBK).",
   "config.device.profileOverrides": "Overrides for paths, ports and command templates of the active device profile.",
-  "config.device.display": "Override the display resolution of the active device profile."
+  "config.device.display": "Override the display resolution of the active device profile.",
+  "command.device.refresh": "Refresh Devices"
 }

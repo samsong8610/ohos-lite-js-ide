@@ -1,0 +1,4 @@
+#!/bin/sh
+# Copyright (c) 2026 ohos-lite-js-ide contributors
+# SPDX-License-Identifier: Apache-2.0
+exec node "$(dirname "$0")/../mock-hdc.cjs" "$@"

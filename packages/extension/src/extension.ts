@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import * as vscode from 'vscode';
-import { DeviceProfileRegistry, type DeviceProfile } from '@ohjs/core';
+import {
+  DeviceProfileRegistry,
+  NodeProcessRunner,
+  ToolLocator,
+  createHostPlatform,
+  type DeviceInfo,
+  type DeviceProfile,
+  type OutputEncoding,
+} from '@ohjs/core';
+import { HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
 import { detectFromConfigJson } from './project-detector';
 
@@ -11,6 +20,32 @@ export interface OhjsExtensionApi {
   readonly isProject: boolean;
   readonly reason: string;
   readonly deviceProfile?: DeviceProfile;
+}
+
+/** `ohjs.device.refresh`: lists hdc targets into the OHJS output channel (FR-DEP-001 groundwork). */
+function registerDeviceCommands(context: vscode.ExtensionContext, output: vscode.LogOutputChannel): void {
+  const platform = createHostPlatform();
+  const encoding = vscode.workspace
+    .getConfiguration('ohjs.advanced')
+    .get<OutputEncoding>('outputEncoding', 'auto');
+  const runner = new NodeProcessRunner(platform, { encoding });
+  context.subscriptions.push({ dispose: () => void runner.disposeAll() });
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ohjs.device.refresh', async (): Promise<DeviceInfo[]> => {
+      const user = vscode.workspace.getConfiguration('ohjs.tools').get<string>('hdcPath') || undefined;
+      try {
+        const hdc = new ToolLocator(platform).locate('hdc', { user, extensionDir: context.extensionPath });
+        const targets = await new HdcTransport({ hdcPath: hdc.path, runner }).listTargets();
+        output.info(`hdc (${hdc.source}) ${hdc.path}: ${targets.length} target(s)`);
+        for (const t of targets) output.info(`  ${t.key} ${t.connType} ${t.state} ${t.name ?? ''}`);
+        return targets;
+      } catch (e) {
+        output.error(`device refresh failed: ${(e as Error).message}`);
+        void vscode.window.showErrorMessage((e as Error).message);
+        return [];
+      }
+    }),
+  );
 }
 
 /**
@@ -32,6 +67,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   await vscode.commands.executeCommand('setContext', 'ohjs.isProject', result.isProject);
   output.info(`project detection: ${result.isProject} (${result.reason})`);
   if (!result.isProject) return result;
+  registerDeviceCommands(context, output);
 
   let deviceProfile: DeviceProfile | undefined;
   try {

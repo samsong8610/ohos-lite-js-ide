@@ -11,5 +11,8 @@
   ],
   "dependencies": {
     "@ohjs/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@ohjs/test-kit": "workspace:*"
   }
 }

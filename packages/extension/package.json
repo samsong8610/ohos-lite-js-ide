@@ -95,6 +95,14 @@
         ],
         "url": "./dist/schemas/device-profile.schema.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "ohjs.device.refresh",
+        "title": "%command.device.refresh%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      }
     ]
   },
   "scripts": {
@@ -105,7 +113,8 @@
     "package": "vsce package --no-dependencies"
   },
   "dependencies": {
-    "@ohjs/core": "workspace:*"
+    "@ohjs/core": "workspace:*",
+    "@ohjs/transport-hdc": "workspace:*"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -113,6 +122,7 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.2",
     "esbuild": "^0.25.11",
-    "mocha": "^11.7.4"
+    "mocha": "^11.7.4",
+    "@ohjs/test-kit": "workspace:*"
   }
 }
