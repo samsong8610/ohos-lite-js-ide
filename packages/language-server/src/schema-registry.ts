@@ -6,8 +6,10 @@ import {
   DEFAULT_DATA_DIR,
   listSchemaVersions,
   loadComponentsSchema,
+  loadSystemModules,
   versionDirName,
   type ComponentsSchemaFile,
+  type SystemModulesFile,
 } from '@ohjs/schemas';
 
 export const DEFAULT_SDK_VERSION = '5.0.3';
@@ -18,6 +20,7 @@ export const DEFAULT_SDK_VERSION = '5.0.3';
  */
 export class SchemaRegistry {
   private readonly cache = new Map<string, ComponentsSchemaFile>();
+  private readonly moduleCache = new Map<string, SystemModulesFile | undefined>();
   private activeVersion: string;
 
   constructor(
@@ -46,6 +49,13 @@ export class SchemaRegistry {
 
   get active(): ComponentsSchemaFile {
     return this.load(this.activeVersion);
+  }
+
+  /** `@system.*` / `@ohos.*` modules of the active version (undefined when the pack has no system-modules.json) */
+  get modules(): SystemModulesFile | undefined {
+    const v = this.activeVersion;
+    if (!this.moduleCache.has(v)) this.moduleCache.set(v, loadSystemModules(v, this.dataDir));
+    return this.moduleCache.get(v);
   }
 
   private load(v: string): ComponentsSchemaFile {

@@ -133,6 +133,7 @@
               "css/unsupported-pseudo",
               "hml/es6-in-expression",
               "js/es6-syntax",
+              "js/unknown-system-module",
               "prj/missing-app-module",
               "prj/device-type",
               "prj/missing-pages",

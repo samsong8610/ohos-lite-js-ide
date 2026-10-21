@@ -92,6 +92,55 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       );
     });
 
+    it('language server: unknown @system module and this. completion (FR-LANG-007)', async () => {
+      const code = (d: vscode.Diagnostic) => String(typeof d.code === 'object' ? d.code.value : d.code);
+      const [mods] = await vscode.workspace.findFiles('**/default/common/modules.js');
+      assert.ok(mods, 'fixture modules.js not found');
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(mods));
+      assert.ok(
+        await waitFor(() => vscode.languages.getDiagnostics(mods).some((d) => d.source === 'ohjs'), 15000),
+        'no ohjs module diagnostics',
+      );
+      assert.deepStrictEqual(
+        vscode.languages
+          .getDiagnostics(mods)
+          .filter((d) => d.source === 'ohjs')
+          .map((d) => [code(d), d.range.start.line]),
+        [['js/unknown-system-module', 1]],
+      );
+      const [page] = await vscode.workspace.findFiles('**/pages/index/index.js');
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(page!));
+      const list = await vscode.commands.executeCommand<vscode.CompletionList>(
+        'vscode.executeCompletionItemProvider',
+        page!,
+        new vscode.Position(5, 9),
+        '.',
+      );
+      const labels = list.items.map((i) => (typeof i.label === 'string' ? i.label : i.label.label));
+      for (const l of ['title', 'tap', 'onInit', '$refs', '$t'])
+        assert.ok(labels.includes(l), `${l} missing: ${labels.join(',')}`);
+    });
+
+    it('generates .ohjs jsconfig + @system d.ts for the SDK and creates jsconfig.json', async () => {
+      const ext = vscode.extensions.getExtension<{ jsTypes?: Promise<string | undefined> }>(EXT_ID)!;
+      const outcome = await ext.exports.jsTypes;
+      assert.ok(outcome === 'created' || outcome === 'unchanged', `outcome ${outcome}`);
+      const root = vscode.workspace.workspaceFolders![0]!.uri;
+      const read = async (...p: string[]) =>
+        new TextDecoder('utf-8').decode(await vscode.workspace.fs.readFile(vscode.Uri.joinPath(root, ...p)));
+      assert.deepStrictEqual(JSON.parse(await read('jsconfig.json')), {
+        extends: './.ohjs/jsconfig.base.json',
+      });
+      assert.deepStrictEqual(JSON.parse(await read('.ohjs', 'jsconfig.base.json')).compilerOptions.lib, [
+        'es5',
+      ]);
+      const dts = await read('.ohjs', 'types', 'system-modules.d.ts');
+      assert.ok(dts.includes('OpenHarmony 6.1-LTS'), 'd.ts not for the project SDK');
+      assert.ok(dts.includes("declare module '@system.router'"));
+      assert.ok(!dts.includes("'@system.fetch'"));
+      assert.ok((await read('.ohjs', 'types', 'ohjs-env.d.ts')).includes('interface OhjsViewModel'));
+    });
+
     it('language server: config.json deviceType edit is diagnosed', async () => {
       const [uri] = await vscode.workspace.findFiles('**/src/main/config.json');
       const doc = await vscode.workspace.openTextDocument(uri!);

@@ -281,3 +281,49 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
     expect(plain.validate(page).map((x) => x.code)).toEqual(['prj/page-not-registered']);
   });
 });
+
+describe('OhjsLanguageService: @system modules and this. completion (FR-LANG-007)', () => {
+  const svc = new OhjsLanguageService(new SchemaRegistry());
+  const js = (text: string, name = 'pages/index/index.js') =>
+    TextDocument.create(`file:///w/entry/src/main/js/default/${name}`, 'javascript', 1, text);
+  it('js/unknown-system-module merged with ES5.1 findings in source order; switchable', () => {
+    const d = svc.validate(js("let a = 1;\nimport f from '@system.fetch';\nimport r from '@system.router';"));
+    expect(d.map((x) => [x.code, x.range.start.line])).toEqual([
+      ['js/es6-syntax', 0],
+      ['js/unknown-system-module', 1],
+    ]);
+    svc.settings = { rules: { 'js/unknown-system-module': 'off' } };
+    expect(svc.validate(js("import f from '@system.fetch';"))).toEqual([]);
+    svc.settings = {};
+    expect(svc.registry.modules).toBe(svc.registry.modules);
+  });
+  it('this. completion through the service (page and app.js)', () => {
+    const page = js('export default { data: { msg: 1 }, onInit: function () { this. } };');
+    const items = svc.complete(page, { line: 0, character: 62 });
+    expect(items.slice(0, 2).map((i) => [i.label, i.kind])).toEqual([
+      ['msg', CompletionItemKind.Variable],
+      ['onInit', CompletionItemKind.Method],
+    ]);
+    expect(items.find((i) => i.label === '$refs')!.kind).toBe(CompletionItemKind.Property);
+    expect(items.find((i) => i.label === '$t')).toMatchObject({
+      kind: CompletionItemKind.Function,
+      documentation: { kind: 'markdown' },
+    });
+    const app = svc.complete(js('export default { onCreate: function () { this. } };', 'app.js'), {
+      line: 0,
+      character: 46,
+    });
+    expect(app.some((i) => i.label === 'onCreate')).toBe(true);
+    expect(app.some((i) => i.label === 'onShow')).toBe(false);
+    expect(svc.complete(page, { line: 0, character: 3 })).toEqual([]);
+  });
+  it('registry without system-modules.json: no module checks', () => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-nomod-'));
+    fs.mkdirSync(path.join(d, 'v9.9'));
+    fs.writeFileSync(path.join(d, 'v9.9', 'components.json'), JSON.stringify(fixtureSchema()));
+    const s = new OhjsLanguageService(new SchemaRegistry(d, '9.9'));
+    expect(s.registry.modules).toBeUndefined();
+    expect(s.validate(js("import f from '@system.nope';"))).toEqual([]);
+    fs.rmSync(d, { recursive: true, force: true });
+  });
+});

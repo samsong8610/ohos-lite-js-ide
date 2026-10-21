@@ -32,3 +32,12 @@ export { checkEs5, checkExpressionEs5, findEs6, type Es6Finding } from './js/es5
 export { validateConfig, readConfig, REQUIRED_DEVICE_TYPE, HOME_PAGE } from './project/config';
 export { i18nKeys, interpolations, translationRefs } from './project/i18n';
 export { moduleLayout, type ModuleLayout } from './project/layout';
+export { checkSystemModules } from './js/system-modules';
+export {
+  completeThis,
+  PAGE_LIFECYCLE,
+  APP_LIFECYCLE,
+  FRAMEWORK_MEMBERS,
+  type ThisCompletion,
+} from './js/this-completion';
+export * from './types-gen/index';

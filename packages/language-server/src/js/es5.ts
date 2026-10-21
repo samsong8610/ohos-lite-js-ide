@@ -119,8 +119,41 @@ export function findEs6(ast: Node): Es6Finding[] {
   return out.sort((a, b) => a.start - b.start);
 }
 
+/** a module specifier: `import x from '…'`, `require('…')` or `requireNative('…')` */
+export interface ModuleRef {
+  specifier: string;
+  /** range of the string literal including its quotes */
+  start: number;
+  end: number;
+}
+
+/** Module specifiers referenced by an ESTree AST. */
+export function moduleRefs(ast: Node): ModuleRef[] {
+  const out: ModuleRef[] = [];
+  const lit = (n: unknown): void => {
+    if (isNode(n) && n.type === 'Literal' && typeof n.value === 'string')
+      out.push({ specifier: n.value, start: n.start, end: n.end });
+  };
+  visit(ast as AnyNode, undefined, (n) => {
+    if (
+      n.type === 'ImportDeclaration' ||
+      n.type === 'ExportNamedDeclaration' ||
+      n.type === 'ExportAllDeclaration'
+    )
+      lit(n.source);
+    else if (n.type === 'CallExpression') {
+      const callee = n.callee as AnyNode;
+      const args = n.arguments as unknown[];
+      if (callee.type === 'Identifier' && (callee.name === 'require' || callee.name === 'requireNative'))
+        lit(args[0]);
+    }
+  });
+  return out;
+}
+
 export interface Es5CheckResult {
   findings: Es6Finding[];
+  modules: ModuleRef[];
   comments: Array<{ text: string; start: number; end: number }>;
   /** the file does not parse even as ES2022+ (the TS server already reports syntax errors) */
   syntaxError?: string;
@@ -144,10 +177,10 @@ export function checkEs5(code: string): Es5CheckResult {
     try {
       ast = parse(code, { ...base, sourceType: 'script' });
     } catch (e) {
-      return { findings: [], comments, syntaxError: (e as Error).message };
+      return { findings: [], modules: [], comments, syntaxError: (e as Error).message };
     }
   }
-  return { findings: findEs6(ast), comments };
+  return { findings: findEs6(ast), modules: moduleRefs(ast), comments };
 }
 
 /** Checks one `{{ }}` expression body; offsets are relative to `expr`. Unparseable (half-typed) text yields []. */

@@ -24,6 +24,8 @@ export interface OhjsExtensionApi {
   readonly deviceProfile?: DeviceProfile;
   /** first ohjs/sdkStatus from the language server (undefined when it failed to start) */
   readonly languageServer?: Promise<{ version: string; ok: boolean }>;
+  /** outcome of generating `.ohjs/` jsconfig + d.ts for the start-up SDK (FR-LANG-007) */
+  readonly jsTypes?: Promise<string | undefined>;
   /** wall-clock time spent in activate(), ms (NFR-PERF-001) */
   readonly activationMs: number;
 }
@@ -32,14 +34,18 @@ export interface OhjsExtensionApi {
 function startLanguageServer(
   context: vscode.ExtensionContext,
   output: vscode.LogOutputChannel,
-): Promise<{ version: string; ok: boolean }> {
+): { status: Promise<{ version: string; ok: boolean }>; types: Promise<string | undefined> } {
   const started = performance.now();
   // eslint-disable-next-line no-restricted-globals, @typescript-eslint/no-require-imports -- runtime require of the separate client bundle (lazy load)
   const mod = require(context.asAbsolutePath('dist/client.js')) as typeof LanguageClientModule;
-  return mod.startLanguageClient(context, output).then((h) => {
-    output.info(`language client ready in ${Math.round(performance.now() - started)} ms`);
-    return h.firstStatus;
-  });
+  const handle = mod.startLanguageClient(context, output);
+  return {
+    status: handle.then((h) => {
+      output.info(`language client ready in ${Math.round(performance.now() - started)} ms`);
+      return h.firstStatus;
+    }),
+    types: handle.then((h) => h.typesReady),
+  };
 }
 
 /** `ohjs.device.refresh`: lists hdc targets into the OHJS output channel (FR-DEP-001 groundwork). */
@@ -91,8 +97,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   registerDeviceCommands(context, output);
 
   let languageServer: OhjsExtensionApi['languageServer'];
+  let jsTypes: OhjsExtensionApi['jsTypes'];
   try {
-    languageServer = startLanguageServer(context, output);
+    const ls = startLanguageServer(context, output);
+    languageServer = ls.status;
+    jsTypes = ls.types;
+    jsTypes.catch(() => undefined);
     languageServer.catch((e: Error) => output.error(`language server failed to start: ${e.message}`));
   } catch (e) {
     output.error(`language client failed to load: ${(e as Error).message}`);
@@ -123,7 +133,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   }
   const activationMs = performance.now() - t0;
   output.info(`activated in ${Math.round(activationMs)} ms`);
-  return { ...result, deviceProfile, activationMs, ...(languageServer ? { languageServer } : {}) };
+  return {
+    ...result,
+    deviceProfile,
+    activationMs,
+    ...(languageServer ? { languageServer } : {}),
+    ...(jsTypes ? { jsTypes } : {}),
+  };
 }
 
 export function deactivate(): void {

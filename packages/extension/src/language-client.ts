@@ -22,6 +22,72 @@ import {
   sdkTooltip,
   type SdkVersionChoice,
 } from './language-settings';
+import { loadSystemModules } from '@ohjs/schemas';
+import { writeWorkspaceTypes, type JsconfigOutcome, type TypesIo } from './workspace-types';
+
+const NEVER_MERGE_KEY = 'ohjs.jsconfig.neverMerge';
+
+/** Root of the Lite project: the workspace folder holding .ohjs/project.json, else the first one. */
+async function projectRoot(): Promise<vscode.Uri | undefined> {
+  const folders = vscode.workspace.workspaceFolders ?? [];
+  for (const f of folders) {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(f.uri, '.ohjs', 'project.json'));
+      return f.uri;
+    } catch {
+      // not this one
+    }
+  }
+  return folders[0]?.uri;
+}
+
+/** Regenerates `.ohjs/` types for `version` (ARCHITECTURE §7.1); failures are logged, never thrown. */
+export async function syncWorkspaceTypes(
+  context: vscode.ExtensionContext,
+  output: vscode.LogOutputChannel,
+  version: string,
+): Promise<JsconfigOutcome | undefined> {
+  const root = await projectRoot();
+  if (!root) return undefined;
+  const uri = (rel: string): vscode.Uri => vscode.Uri.joinPath(root, ...rel.split('/'));
+  const io: TypesIo = {
+    read: async (rel) => {
+      try {
+        return new TextDecoder('utf-8').decode(await vscode.workspace.fs.readFile(uri(rel)));
+      } catch {
+        return undefined;
+      }
+    },
+    write: (rel, content) =>
+      Promise.resolve(vscode.workspace.fs.writeFile(uri(rel), new TextEncoder().encode(content))),
+    askMerge: async (changes) => {
+      const merge = vscode.l10n.t('Merge');
+      const never = vscode.l10n.t('Never');
+      const pick = await vscode.window.showInformationMessage(
+        vscode.l10n.t(
+          'OHJS wants to make jsconfig.json extend the generated ES5 config and @system.* types ({0}). Comments in the file are not kept.',
+          changes.join('; '),
+        ),
+        merge,
+        vscode.l10n.t('Not now'),
+        never,
+      );
+      return pick === merge ? 'merge' : pick === never ? 'never' : 'later';
+    },
+    neverMerge: context.workspaceState.get<boolean>(NEVER_MERGE_KEY, false),
+    setNeverMerge: () => Promise.resolve(context.workspaceState.update(NEVER_MERGE_KEY, true)),
+    log: (m) => output.info(m),
+  };
+  try {
+    const pack = loadSystemModules(version, context.asAbsolutePath('dist/schemas/components'));
+    const outcome = await writeWorkspaceTypes(io, pack);
+    output.info(`jsconfig: .ohjs types for SDK ${version} (${outcome})`);
+    return outcome;
+  } catch (e) {
+    output.error(`jsconfig: generating .ohjs types failed: ${(e as Error).message}`);
+    return undefined;
+  }
+}
 
 export interface LanguageClientHandle {
   client: LanguageClient;
@@ -29,6 +95,8 @@ export interface LanguageClientHandle {
   sdk: SdkVersionChoice;
   /** resolves with the first ohjs/sdkStatus after start-up */
   firstStatus: Promise<SdkStatusParams>;
+  /** resolves once `.ohjs/` types were generated for the start-up SDK */
+  typesReady: Promise<JsconfigOutcome | undefined>;
 }
 
 async function readProjectJson(): Promise<string | undefined> {
@@ -100,6 +168,12 @@ export async function startLanguageClient(
   context.subscriptions.push(status);
   let resolveFirst!: (p: SdkStatusParams) => void;
   const firstStatus = new Promise<SdkStatusParams>((r) => (resolveFirst = r));
+  let typesVersion: string | undefined;
+  let resolveTypes!: (p: Promise<JsconfigOutcome | undefined>) => void;
+  const typesReady = new Promise<JsconfigOutcome | undefined>((r) => (resolveTypes = r));
+  void firstStatus.then((p) => {
+    if (!p.ok) resolveTypes(Promise.resolve(undefined));
+  });
   client.onNotification(SDK_STATUS_NOTIFICATION, (p: SdkStatusParams) => {
     status.text = sdkStatusText(p);
     lastStatus = p;
@@ -107,6 +181,11 @@ export async function startLanguageClient(
     status.show();
     if (p.ok) output.info(`language server: SDK ${p.version}${p.provisional ? ' (provisional schema)' : ''}`);
     else output.error(`language server: ${p.error ?? 'SDK switch failed'}`);
+    if (p.ok && p.version !== typesVersion) {
+      typesVersion = p.version;
+      const done = syncWorkspaceTypes(context, output, p.version);
+      resolveTypes(done);
+    }
     resolveFirst(p);
   });
   let lastVersion = sdk.version;
@@ -131,5 +210,5 @@ export async function startLanguageClient(
   );
   context.subscriptions.push({ dispose: () => void client.stop() });
   await client.start();
-  return { client, sdk, firstStatus };
+  return { client, sdk, firstStatus, typesReady };
 }

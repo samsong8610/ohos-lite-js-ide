@@ -17,6 +17,8 @@ import { validateHml, type HmlDiagnostic, type HmlProjectContext } from './hml/d
 import { parseHml, type HmlDocument } from './hml/parser';
 import { SchemaView } from './hml/schema-view';
 import { checkEs5 } from './js/es5';
+import { checkSystemModules } from './js/system-modules';
+import { completeThis } from './js/this-completion';
 import { extractViewModel, type ViewModelSymbols } from './js/viewmodel';
 import { readConfig, validateConfig } from './project/config';
 import { i18nKeys } from './project/i18n';
@@ -162,13 +164,17 @@ export class OhjsLanguageService {
     }
     if (kind === 'js') {
       const r = checkEs5(doc.getText());
+      const pack = this.registry.modules;
       return this.filtered(
         doc,
-        r.findings.map((f) => ({
-          rule: 'js/es6-syntax' as const,
-          range: f,
-          message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) cannot be used: the engine runs ES5.1`,
-        })),
+        [
+          ...(pack ? checkSystemModules(r.modules, pack) : []),
+          ...r.findings.map((f) => ({
+            rule: 'js/es6-syntax' as const,
+            range: f,
+            message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) cannot be used: the engine runs ES5.1`,
+          })),
+        ].sort((a, b) => a.range.start - b.range.start),
         r.comments.map((c) => ({ text: c.text, end: c.end })),
       );
     }
@@ -249,6 +255,25 @@ export class OhjsLanguageService {
         textEdit: {
           range: { start: doc.positionAt(c.replace.start), end: doc.positionAt(c.replace.end) },
           newText: `${c.label}: `,
+        },
+      }));
+    }
+    if (kind === 'js') {
+      const text = doc.getText();
+      return completeThis(text, offset, extractViewModel(text), /(^|\/)app\.js$/i.test(doc.uri)).map((c) => ({
+        label: c.label,
+        kind: {
+          variable: CompletionItemKind.Variable,
+          method: CompletionItemKind.Method,
+          property: CompletionItemKind.Property,
+          function: CompletionItemKind.Function,
+        }[c.kind],
+        detail: c.detail,
+        sortText: c.sortText,
+        ...(c.documentation ? { documentation: { kind: 'markdown' as const, value: c.documentation } } : {}),
+        textEdit: {
+          range: { start: doc.positionAt(c.replace.start), end: doc.positionAt(c.replace.end) },
+          newText: c.label,
         },
       }));
     }

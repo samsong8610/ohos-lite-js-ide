@@ -144,7 +144,7 @@ export function startServer(connection: Connection): void {
       capabilities: {
         textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental },
         completionProvider: {
-          triggerCharacters: ['<', ' ', '/', '@', ':', '{', '"', "'"],
+          triggerCharacters: ['<', ' ', '/', '@', ':', '{', '"', "'", '.'],
           resolveProvider: false,
         },
       },

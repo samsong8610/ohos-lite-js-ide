@@ -13,6 +13,7 @@ export default defineConfig({
       '@ohjs/core': r('./packages/core/src/index.ts'),
       '@ohjs/transport-hdc': r('./packages/transport-hdc/src/index.ts'),
       '@ohjs/schemas': r('./packages/schemas/src/index.ts'),
+      '@ohjs/language-server/out': r('./packages/language-server/src'),
       '@ohjs/language-server': r('./packages/language-server/src/index.ts'),
       '@ohjs/test-kit': r('./packages/test-kit/src/index.ts'),
       '@ohjs/schema-extractor': r('./tools/schema-extractor/src/index.ts'),

@@ -15,7 +15,9 @@ export default {
   get total() { return 1; },
   tap: function (e) { var self = this; router.replace({ uri: 'pages/b/b' }); return /x/gi.test('' + 0x1F); }
 };`);
-    expect(r).toEqual({ findings: [], comments: [] });
+    expect(r.findings).toEqual([]);
+    expect(r.comments).toEqual([]);
+    expect(r.modules.map((m) => m.specifier)).toEqual(['@system.router']);
   });
   it('reports each ES2015+ construct with its range', () => {
     const code = 'let a = 1;\nconst f = (x) => `v${x}`;';
@@ -93,5 +95,21 @@ describe('checkExpressionEs5 ({{ }} bodies)', () => {
     expect(checkExpressionEs5('a +')).toEqual([]);
     expect(checkExpressionEs5('  ')).toEqual([]);
     expect(checkExpressionEs5('v in ')).toEqual([]);
+  });
+});
+
+describe('moduleRefs', () => {
+  it('import/export-from, require and requireNative literals with quote-inclusive ranges', () => {
+    const code =
+      "import a from '@system.app';\nexport { x } from './x';\nexport * from './y';\nvar r = require('@system.router');\nvar n = requireNative('system.prompt');\nrequire(dyn); foo('@system.no');";
+    const r = checkEs5(code);
+    expect(r.modules.map((m) => [m.specifier, code.slice(m.start, m.end)])).toEqual([
+      ['@system.app', "'@system.app'"],
+      ['./x', "'./x'"],
+      ['./y', "'./y'"],
+      ['@system.router', "'@system.router'"],
+      ['system.prompt', "'system.prompt'"],
+    ]);
+    expect(checkEs5('var = ;').modules).toEqual([]);
   });
 });

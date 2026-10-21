@@ -35,6 +35,8 @@ for (const d of readdirSync(schemasRoot)) {
   if (/^v\d/.test(d) && existsSync(src)) {
     mkdirSync(join('dist/schemas/components', d), { recursive: true });
     cpSync(src, join('dist/schemas/components', d, 'components.json'));
+    const mods = join(schemasRoot, d, 'system-modules.json');
+    if (existsSync(mods)) cpSync(mods, join('dist/schemas/components', d, 'system-modules.json'));
   }
 }
 
@@ -47,6 +49,8 @@ const clientCtx = await esbuild.context({
   platform: 'node',
   target: 'node20',
   outfile: 'dist/client.js',
+  // jsonc-parser (via types-gen) ships a UMD main whose relative requires break when bundled
+  mainFields: ['module', 'main'],
   external: ['vscode'],
   sourcemap: !production,
   minify: production,

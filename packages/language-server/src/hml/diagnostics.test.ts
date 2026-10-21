@@ -112,7 +112,7 @@ describe('rule switches and suppression comments', () => {
     expect(resolveSeverity('hml/for-with-if', undefined)).toBe('warning');
     expect(isRuleId('hml/syntax')).toBe(true);
     expect(isRuleId('toString')).toBe(false);
-    expect(Object.keys(HML_RULES)).toHaveLength(25);
+    expect(Object.keys(HML_RULES)).toHaveLength(26);
   });
   it('file-level and next-line comments', () => {
     expect(rules('<!-- ohjs-disable hml/unknown-component -->\n<foo></foo>')).toEqual([]);
