@@ -36,6 +36,21 @@ for (const d of readdirSync(schemasRoot)) {
   }
 }
 
+// the language client is its own bundle, required on demand after project detection (keeps
+// dist/extension.js — parsed on every activation — small)
+const clientCtx = await esbuild.context({
+  entryPoints: ['src/language-client.ts'],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/client.js',
+  external: ['vscode'],
+  sourcemap: !production,
+  minify: production,
+  logLevel: 'info',
+});
+
 const ctx = await esbuild.context({
   entryPoints: ['src/extension.ts'],
   bundle: true,
@@ -57,8 +72,8 @@ writeFileSync(
 );
 
 if (watch) {
-  await Promise.all([ctx.watch(), serverCtx.watch()]);
+  await Promise.all([ctx.watch(), clientCtx.watch(), serverCtx.watch()]);
 } else {
-  await Promise.all([ctx.rebuild(), serverCtx.rebuild()]);
-  await Promise.all([ctx.dispose(), serverCtx.dispose()]);
+  await Promise.all([ctx.rebuild(), clientCtx.rebuild(), serverCtx.rebuild()]);
+  await Promise.all([ctx.dispose(), clientCtx.dispose(), serverCtx.dispose()]);
 }

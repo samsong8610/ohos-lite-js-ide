@@ -14,7 +14,8 @@ import {
 } from '@ohjs/core';
 import { HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
-import { startLanguageClient } from './language-client';
+// type-only: the client (vscode-languageclient, ~440 KB) lives in dist/client.js and is required on demand
+import type * as LanguageClientModule from './language-client';
 import { detectFromConfigJson } from './project-detector';
 
 export interface OhjsExtensionApi {
@@ -23,6 +24,22 @@ export interface OhjsExtensionApi {
   readonly deviceProfile?: DeviceProfile;
   /** first ohjs/sdkStatus from the language server (undefined when it failed to start) */
   readonly languageServer?: Promise<{ version: string; ok: boolean }>;
+  /** wall-clock time spent in activate(), ms (NFR-PERF-001) */
+  readonly activationMs: number;
+}
+
+/** Starts the language client from its separate bundle without blocking activation. */
+function startLanguageServer(
+  context: vscode.ExtensionContext,
+  output: vscode.LogOutputChannel,
+): Promise<{ version: string; ok: boolean }> {
+  const started = performance.now();
+  // eslint-disable-next-line no-restricted-globals, @typescript-eslint/no-require-imports -- runtime require of the separate client bundle (lazy load)
+  const mod = require(context.asAbsolutePath('dist/client.js')) as typeof LanguageClientModule;
+  return mod.startLanguageClient(context, output).then((h) => {
+    output.info(`language client ready in ${Math.round(performance.now() - started)} ms`);
+    return h.firstStatus;
+  });
 }
 
 /** `ohjs.device.refresh`: lists hdc targets into the OHJS output channel (FR-DEP-001 groundwork). */
@@ -56,6 +73,7 @@ function registerDeviceCommands(context: vscode.ExtensionContext, output: vscode
  * everything else is lazily created after the check passes (ARCHITECTURE §4).
  */
 export async function activate(context: vscode.ExtensionContext): Promise<OhjsExtensionApi> {
+  const t0 = performance.now();
   const output = vscode.window.createOutputChannel('OHJS', { log: true });
   context.subscriptions.push(output);
 
@@ -69,14 +87,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   }
   await vscode.commands.executeCommand('setContext', 'ohjs.isProject', result.isProject);
   output.info(`project detection: ${result.isProject} (${result.reason})`);
-  if (!result.isProject) return result;
+  if (!result.isProject) return { ...result, activationMs: performance.now() - t0 };
   registerDeviceCommands(context, output);
 
   let languageServer: OhjsExtensionApi['languageServer'];
   try {
-    languageServer = (await startLanguageClient(context, output)).firstStatus;
+    languageServer = startLanguageServer(context, output);
+    languageServer.catch((e: Error) => output.error(`language server failed to start: ${e.message}`));
   } catch (e) {
-    output.error(`language server failed to start: ${(e as Error).message}`);
+    output.error(`language client failed to load: ${(e as Error).message}`);
   }
 
   let deviceProfile: DeviceProfile | undefined;
@@ -102,7 +121,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   } catch (e) {
     output.error(`device profile error: ${(e as Error).message}`);
   }
-  return { ...result, deviceProfile, ...(languageServer ? { languageServer } : {}) };
+  const activationMs = performance.now() - t0;
+  output.info(`activated in ${Math.round(activationMs)} ms`);
+  return { ...result, deviceProfile, activationMs, ...(languageServer ? { languageServer } : {}) };
 }
 
 export function deactivate(): void {

@@ -30,15 +30,18 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
         .deviceProfile;
       assert.strictEqual(profile?.id, '2k0300-1024x768');
       assert.strictEqual(profile?.display.width, 1024);
+      const ms = (ext.exports as unknown as { activationMs: number }).activationMs;
+      console.log(`      activate() took ${ms.toFixed(1)} ms`);
+      assert.ok(ms < 500, `activation took ${ms} ms (NFR-PERF-001 ≤ 500 ms)`);
     });
 
-    it('language server: HML diagnostics and completion from the 5.0.3 schema', async () => {
+    it('language server: SDK from .ohjs/project.json, HML diagnostics and completion', async () => {
       const ext = vscode.extensions.getExtension<{
         languageServer?: Promise<{ version: string; ok: boolean }>;
       }>(EXT_ID)!;
       assert.ok(await waitFor(() => ext.isActive, 15000));
       const st = await ext.exports.languageServer;
-      assert.deepStrictEqual({ version: st?.version, ok: st?.ok }, { version: '5.0.3', ok: true });
+      assert.deepStrictEqual({ version: st?.version, ok: st?.ok }, { version: '6.1-lts', ok: true });
       const [uri] = await vscode.workspace.findFiles('**/pages/index/index.hml');
       assert.ok(uri, 'fixture index.hml not found');
       const doc = await vscode.workspace.openTextDocument(uri);
@@ -64,6 +67,29 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       const labels = list.items.map((i) => (typeof i.label === 'string' ? i.label : i.label.label));
       assert.ok(labels.includes('list-item'), `list-item missing: ${labels.join(',')}`);
       assert.ok(!labels.includes('text'), 'text must not be offered inside <list>');
+      // event handler value: methods of the same-name index.js
+      const ev = await vscode.commands.executeCommand<vscode.CompletionList>(
+        'vscode.executeCompletionItemProvider',
+        uri,
+        new vscode.Position(0, 33),
+      );
+      const evLabels = ev.items.map((i) => (typeof i.label === 'string' ? i.label : i.label.label));
+      assert.ok(evLabels.includes('tap'), `tap missing: ${evLabels.join(',')}`);
+    });
+
+    it('language server: CSS pseudo-class validation', async () => {
+      const [uri] = await vscode.workspace.findFiles('**/pages/index/index.css');
+      assert.ok(uri, 'fixture index.css not found');
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
+      assert.ok(
+        await waitFor(() => vscode.languages.getDiagnostics(uri).some((d) => d.source === 'ohjs'), 15000),
+        'no ohjs CSS diagnostics',
+      );
+      const diags = vscode.languages.getDiagnostics(uri).filter((d) => d.source === 'ohjs');
+      assert.deepStrictEqual(
+        diags.map((d) => [String(typeof d.code === 'object' ? d.code.value : d.code), d.range.start.line]),
+        [['css/unsupported-pseudo', 3]],
+      );
     });
 
     it('ohjs.device.refresh lists targets from mock-hdc', async () => {

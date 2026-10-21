@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { listSchemaVersions } from '@ohjs/schemas';
-import { languageDocumentSelector, sdkStatusText } from './language-settings';
+import { languageDocumentSelector, sdkStatusText, resolveSdkVersion } from './language-settings';
 
 describe('language client settings', () => {
   it('syncs all HML and OH-tree CSS/LESS/JS documents over file:', () => {
@@ -33,5 +33,23 @@ describe('language client settings', () => {
     expect(pkg.activationEvents).toContain('onLanguage:hml');
     const lc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', hml.configuration), 'utf8'));
     expect(lc.comments.blockComment).toEqual(['<!--', '-->']);
+  });
+});
+
+describe('resolveSdkVersion', () => {
+  it('prefers .ohjs/project.json sdkVersion, falls back to the setting', () => {
+    expect(resolveSdkVersion('{"sdkVersion":" 6.1-lts "}', '5.0.3')).toEqual({
+      version: '6.1-lts',
+      source: 'project',
+    });
+    expect(resolveSdkVersion(undefined, '5.0.3')).toEqual({ version: '5.0.3', source: 'setting' });
+    expect(resolveSdkVersion('{"module":"entry"}', '6.1-lts')).toEqual({
+      version: '6.1-lts',
+      source: 'setting',
+    });
+    expect(resolveSdkVersion('{"sdkVersion": 5}', '5.0.3').source).toBe('setting');
+    expect(resolveSdkVersion('{"sdkVersion": ""}', '5.0.3').source).toBe('setting');
+    expect(resolveSdkVersion('{ "sdkVersion": "6.1', '5.0.3').source).toBe('setting');
+    expect(resolveSdkVersion('null', '5.0.3').source).toBe('setting');
   });
 });

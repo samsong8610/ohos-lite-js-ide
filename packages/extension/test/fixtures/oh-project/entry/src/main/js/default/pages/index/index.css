@@ -1,0 +1,6 @@
+.container {
+  flex-direction: column;
+}
+.container:hover {
+  width: 100px;
+}

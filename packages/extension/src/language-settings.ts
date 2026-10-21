@@ -26,3 +26,24 @@ export function languageDocumentSelector(): DocumentFilter[] {
 export function sdkStatusText(p: { version: string; ok: boolean; provisional: boolean }): string {
   return `$(${p.ok ? 'versions' : 'warning'}) OH ${p.version}${p.provisional ? ' (provisional)' : ''}`;
 }
+
+export interface SdkVersionChoice {
+  version: string;
+  source: 'project' | 'setting';
+}
+
+/**
+ * SDK version priority (ARCHITECTURE §7.1): `.ohjs/project.json` `sdkVersion` first, the
+ * `ohjs.sdkVersion` setting as fallback. Unreadable/invalid project files fall back silently.
+ */
+export function resolveSdkVersion(projectJson: string | undefined, setting: string): SdkVersionChoice {
+  if (projectJson !== undefined) {
+    try {
+      const v = (JSON.parse(projectJson) as { sdkVersion?: unknown } | null)?.sdkVersion;
+      if (typeof v === 'string' && v.trim()) return { version: v.trim(), source: 'project' };
+    } catch {
+      // half-edited JSON: keep using the setting
+    }
+  }
+  return { version: setting, source: 'setting' };
+}
