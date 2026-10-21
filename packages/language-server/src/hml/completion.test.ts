@@ -201,3 +201,20 @@ describe('ViewModel-aware completion ({{ }} and event handlers)', () => {
     expect(completeHml(doc, offset, view)).toEqual([]);
   });
 });
+
+describe('i18n key completion inside $t(', () => {
+  const keys = ['strings.hello', 'strings.bye', 'title'];
+  const items = (marked: string) => {
+    const { doc, offset } = at(marked);
+    return completeHml(doc, offset, view, undefined, keys);
+  };
+  it('offers sorted keys replacing the typed key', () => {
+    const r = items("<text>{{ $t('str|ings.x') }}</text>");
+    expect(r.map((i) => i.label)).toEqual(['strings.bye', 'strings.hello', 'title']);
+    expect(r[0]).toMatchObject({ kind: 'i18nKey', detail: 'i18n key', replace: { start: 13, end: 22 } });
+    expect(items('<text>{{ $t("|") }}</text>')[0]!.replace).toEqual({ start: 13, end: 13 });
+    expect(items('<text>{{ $t(|) }}</text>').every((i) => i.kind !== 'i18nKey')).toBe(true);
+    const { doc, offset } = at("<text>{{ $t('|') }}</text>");
+    expect(completeHml(doc, offset, view)).toEqual([]);
+  });
+});

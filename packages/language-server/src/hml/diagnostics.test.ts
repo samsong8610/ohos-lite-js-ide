@@ -112,7 +112,7 @@ describe('rule switches and suppression comments', () => {
     expect(resolveSeverity('hml/for-with-if', undefined)).toBe('warning');
     expect(isRuleId('hml/syntax')).toBe(true);
     expect(isRuleId('toString')).toBe(false);
-    expect(Object.keys(HML_RULES)).toHaveLength(15);
+    expect(Object.keys(HML_RULES)).toHaveLength(25);
   });
   it('file-level and next-line comments', () => {
     expect(rules('<!-- ohjs-disable hml/unknown-component -->\n<foo></foo>')).toEqual([]);
@@ -158,4 +158,58 @@ describe('against the real generated data packs', () => {
       ]);
     });
   }
+});
+
+describe('ES6 in expressions and cross-file project rules', () => {
+  const v = new SchemaView(loadComponentsSchema('5.0.3'));
+  const run = (text: string, opts: Parameters<typeof validateHml>[2] = {}) =>
+    validateHml(parseHml(text), v, opts);
+  it('hml/es6-in-expression (error) with the construct range; switchable', () => {
+    const t =
+      '<div><text>{{ items.map(x => x.n) }}</text><text value="{{`a`}}"></text><text>{{ a + 1 }}</text></div>';
+    const d = run(t).filter((x) => x.rule === 'hml/es6-in-expression');
+    expect(d.map((x) => [x.severity, t.slice(x.range.start, x.range.end)])).toEqual([
+      ['error', 'x => x.n'],
+      ['error', '`a`'],
+    ]);
+    expect(d[0]!.message).toBe(
+      'Arrow functions (ES2015+) cannot be used in expressions: the engine runs ES5.1',
+    );
+    expect(
+      run(t, { rules: { 'hml/es6-in-expression': 'off' } }).filter((x) => x.rule === 'hml/es6-in-expression'),
+    ).toEqual([]);
+  });
+  it('prj/page-not-registered', () => {
+    const t = '<div></div>';
+    expect(
+      run(t, { project: { page: 'pages/a/a', registeredPages: ['pages/index/index'] } }).map((x) => [
+        x.rule,
+        x.severity,
+        x.range,
+      ]),
+    ).toEqual([['prj/page-not-registered', 'warning', { start: 1, end: 4 }]]);
+    expect(run('', { project: { page: 'pages/a/a', registeredPages: [] } })[0]!.range).toEqual({
+      start: 0,
+      end: 0,
+    });
+    expect(run(t, { project: { page: 'pages/a/a', registeredPages: ['pages/a/a'] } })).toEqual([]);
+    expect(run(t, { project: { page: 'pages/a/a' } })).toEqual([]);
+    expect(run(t, { project: { registeredPages: [] } })).toEqual([]);
+  });
+  it('i18n/missing-key and i18n/missing-translation', () => {
+    const t = `<div><text>{{ $t('s.hello') }}</text><text>{{ $t('s.bye') }}</text><text>{{ $t('s.only') }}</text></div>`;
+    const i18n = new Map([
+      ['en-US.json', new Set(['s.hello', 's.only'])],
+      ['zh-CN.json', new Set(['s.hello'])],
+    ]);
+    const d = run(t, { project: { i18n } });
+    expect(d.map((x) => [x.rule, x.severity, x.message])).toEqual([
+      ['i18n/missing-key', 'error', "$t('s.bye'): key not defined in i18n/en-US.json, i18n/zh-CN.json"],
+      ['i18n/missing-translation', 'warning', "$t('s.only'): missing in i18n/zh-CN.json"],
+    ]);
+    expect(t.slice(d[0]!.range.start, d[0]!.range.end)).toBe('s.bye');
+    expect(run(t, { project: { i18n: new Map() } }).map((x) => x.message)[0]).toBe(
+      "$t('s.hello'): no i18n/*.json file found",
+    );
+  });
 });

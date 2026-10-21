@@ -22,6 +22,16 @@ export const RULES = {
   'hml/conditional-component': 'information',
   'css/unsupported-selector': 'error',
   'css/unsupported-pseudo': 'error',
+  'hml/es6-in-expression': 'error',
+  'js/es6-syntax': 'error',
+  'prj/missing-app-module': 'error',
+  'prj/device-type': 'error',
+  'prj/missing-pages': 'error',
+  'prj/first-page-not-index': 'error',
+  'prj/page-file-missing': 'error',
+  'prj/page-not-registered': 'warning',
+  'i18n/missing-key': 'error',
+  'i18n/missing-translation': 'warning',
 } as const satisfies Record<string, RuleSeverity>;
 
 export type RuleId = keyof typeof RULES;

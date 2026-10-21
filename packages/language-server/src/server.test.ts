@@ -211,6 +211,48 @@ describe('language server over LSP', () => {
     ).toEqual([expect.objectContaining({ label: '$t' })]);
   });
 
+  it('cross-file: config.json and i18n edits re-validate open pages; disk listing and watched files', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-prj-'));
+    const main = path.join(root, 'entry', 'src', 'main');
+    const js = path.join(main, 'js', 'default');
+    fs.mkdirSync(path.join(js, 'pages', 'index'), { recursive: true });
+    fs.mkdirSync(path.join(js, 'i18n'), { recursive: true });
+    fs.writeFileSync(path.join(js, 'pages', 'index', 'index.hml'), '<div></div>');
+    fs.writeFileSync(path.join(js, 'i18n', 'en-US.json'), '{ "a": "A" }');
+    const cfgText = (pages: string) =>
+      `{ "app": {}, "module": { "deviceType": ["smartVision"], "js": [{ "name": "default", "pages": [${pages}] }] } }`;
+    fs.writeFileSync(path.join(main, 'config.json'), cfgText('"pages/index/index"'));
+    const pageUri = pathToFileURL(path.join(js, 'pages', 'b', 'b.hml')).href;
+    const cfgUri = pathToFileURL(path.join(main, 'config.json')).href;
+    const zhUri = pathToFileURL(path.join(js, 'i18n', 'zh-CN.json')).href;
+    const h = await start();
+    open(h, "<div><text>{{ $t('a') }}{{ $t('b') }}</text></div>", pageUri);
+    const codes = (d: Diagnostic[]) => d.map((x) => String(x.code));
+    expect(codes(await h.waitDiagnostics(pageUri))).toEqual(['prj/page-not-registered', 'i18n/missing-key']);
+    // open (unsaved, not on disk) i18n buffer joins the locale list
+    h.client.sendNotification('textDocument/didOpen', {
+      textDocument: { uri: zhUri, languageId: 'json', version: 1, text: '{ "a": "甲", "b": "乙" }' },
+    });
+    await h.waitDiagnostics(zhUri);
+    h.client.sendNotification('textDocument/didOpen', {
+      textDocument: { uri: cfgUri, languageId: 'json', version: 1, text: cfgText('"pages/index/index"') },
+    });
+    expect(codes(await h.waitDiagnostics(cfgUri))).toEqual([]);
+    h.client.sendNotification('textDocument/didChange', {
+      textDocument: { uri: cfgUri, version: 2 },
+      contentChanges: [{ text: cfgText('"pages/index/index", "pages/b/b", "pages/c/c"') }],
+    });
+    expect(codes(await h.waitDiagnostics(cfgUri, 2))).toEqual(['prj/page-file-missing']);
+    expect(codes(await h.waitDiagnostics(pageUri, 2))).toEqual(['i18n/missing-translation']);
+    // the page file appears on disk: a watched-file event re-validates everything
+    fs.mkdirSync(path.join(js, 'pages', 'c'));
+    fs.writeFileSync(path.join(js, 'pages', 'c', 'c.hml'), '<div></div>');
+    const cUri = pathToFileURL(path.join(js, 'pages', 'c', 'c.hml')).href;
+    h.client.sendNotification('workspace/didChangeWatchedFiles', { changes: [{ uri: cUri, type: 1 }] });
+    expect(codes(await h.waitDiagnostics(cfgUri, 3))).toEqual([]);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
   it('switches SDK via ohjs/sdkChanged and re-validates open documents', async () => {
     const h = await start({ sdkVersion: '5.0.3' });
     await h.waitStatus(1);

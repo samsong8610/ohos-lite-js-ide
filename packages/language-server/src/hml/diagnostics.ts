@@ -2,6 +2,8 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { checkExpressionEs5 } from '../js/es5';
+import { interpolations, translationRefs } from '../project/i18n';
 import { LineIndex } from '../text';
 import { classifyAttribute, EVENT_MODIFIERS } from './attribute-names';
 import { walk, type HmlDocument, type Range } from './parser';
@@ -15,10 +17,23 @@ export interface HmlDiagnostic {
   range: Range;
 }
 
+export interface HmlProjectContext {
+  /** this page's path, e.g. `pages/index/index` (undefined for non-page HML such as components) */
+  page?: string;
+  /** pages registered for this js module in config.json; undefined when config.json is unavailable */
+  registeredPages?: readonly string[];
+  /** locale file name (e.g. `en-US.json`) → leaf keys; undefined when not checked */
+  i18n?: ReadonlyMap<string, ReadonlySet<string>>;
+}
+
 export interface HmlDiagnosticOptions {
   /** `ohjs.lang.rules` overrides: rule ID → severity or 'off' */
   rules?: Readonly<Record<string, unknown>>;
+  /** cross-file facts (config.json, i18n) — FR-LANG-008 */
+  project?: HmlProjectContext;
 }
+
+const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Components that exist only in the full (rich-device) JS UI framework; better message than "unknown". */
 export const FULL_ONLY_COMPONENTS = new Set([
@@ -173,6 +188,44 @@ export function validateHml(
         );
       } else
         report('hml/unknown-attribute', attr.nameRange, `Unknown attribute "${attr.name}" for <${el.tag}>`);
+    }
+  }
+
+  for (const ip of interpolations(doc)) {
+    for (const f of checkExpressionEs5(ip.expr))
+      report(
+        'hml/es6-in-expression',
+        { start: ip.start + f.start, end: ip.start + f.end },
+        `${capitalize(f.feature)} (ES2015+) cannot be used in expressions: the engine runs ES5.1`,
+      );
+  }
+
+  const p = options.project;
+  if (p?.page && p.registeredPages && !p.registeredPages.includes(p.page)) {
+    report(
+      'prj/page-not-registered',
+      doc.roots[0]?.nameRange ?? { start: 0, end: 0 },
+      `Page "${p.page}" is not listed in config.json module.js[].pages, so it can never be shown`,
+    );
+  }
+  if (p?.i18n) {
+    const locales = [...p.i18n.keys()];
+    for (const ref of translationRefs(doc)) {
+      const missing = locales.filter((l) => !p.i18n!.get(l)!.has(ref.key));
+      if (!locales.length)
+        report('i18n/missing-key', ref.range, `$t('${ref.key}'): no i18n/*.json file found`);
+      else if (missing.length === locales.length)
+        report(
+          'i18n/missing-key',
+          ref.range,
+          `$t('${ref.key}'): key not defined in ${locales.map((l) => `i18n/${l}`).join(', ')}`,
+        );
+      else if (missing.length)
+        report(
+          'i18n/missing-translation',
+          ref.range,
+          `$t('${ref.key}'): missing in ${missing.map((l) => `i18n/${l}`).join(', ')}`,
+        );
     }
   }
   return out;

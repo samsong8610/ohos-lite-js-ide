@@ -9,7 +9,15 @@ import type { SchemaView } from './schema-view';
 import type { ViewModelSymbols } from '../js/viewmodel';
 
 export type HmlCompletionKind =
-  'component' | 'closeTag' | 'attribute' | 'directive' | 'event' | 'variable' | 'method' | 'function';
+  | 'component'
+  | 'closeTag'
+  | 'attribute'
+  | 'directive'
+  | 'event'
+  | 'variable'
+  | 'method'
+  | 'function'
+  | 'i18nKey';
 
 export interface HmlCompletion {
   label: string;
@@ -30,6 +38,7 @@ export type CompletionContext =
   | { kind: 'attributeName'; prefix: string; range: Range; element: HmlElement }
   | { kind: 'attributeValue'; element: HmlElement; attribute: string; prefix: string; range: Range }
   | { kind: 'expression'; element?: HmlElement; prefix: string; range: Range; member: boolean }
+  | { kind: 'i18nKey'; prefix: string; range: Range }
   | { kind: 'none' };
 
 const TAG_CHAR = /[A-Za-z0-9_-]/;
@@ -43,6 +52,13 @@ export function completionContext(doc: HmlDocument, offset: number): CompletionC
   if (open >= 0 && open + 2 <= offset) {
     const between = t.slice(open + 2, offset);
     if (!between.includes('}}') && !between.includes('<')) {
+      const tm = /\$t\(\s*(['"])([^'"\n]*)$/.exec(between);
+      if (tm) {
+        const ks = offset - tm[2]!.length;
+        let ke = offset;
+        while (ke < t.length && !/['"\n)}]/.test(t[ke]!)) ke++;
+        return { kind: 'i18nKey', prefix: tm[2]!, range: { start: ks, end: ke } };
+      }
       let ws = offset;
       while (ws > open + 2 && /[\w$]/.test(t[ws - 1]!)) ws--;
       let we = offset;
@@ -136,9 +152,19 @@ export function completeHml(
   offset: number,
   view: SchemaView,
   vm?: ViewModelSymbols,
+  i18nKeys?: Iterable<string>,
 ): HmlCompletion[] {
   const ctx = completionContext(doc, offset);
   switch (ctx.kind) {
+    case 'i18nKey':
+      return [...new Set(i18nKeys ?? [])].sort().map((k) => ({
+        label: k,
+        kind: 'i18nKey' as const,
+        insertText: k,
+        snippet: false,
+        replace: ctx.range,
+        detail: 'i18n key',
+      }));
     case 'expression': {
       if (ctx.member) return [];
       const items: HmlCompletion[] = [];

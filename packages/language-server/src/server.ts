@@ -20,7 +20,7 @@ import {
   type SdkStatusParams,
 } from './protocol';
 import { DEFAULT_SDK_VERSION, SchemaRegistry } from './schema-registry';
-import { OhjsLanguageService } from './service';
+import { documentKind, OhjsLanguageService } from './service';
 
 export const SERVER_NAME = 'ohjs-language-server';
 
@@ -45,6 +45,26 @@ export function startServer(connection: Connection): void {
     } catch {
       return undefined;
     }
+  };
+  /** disk entries plus open (possibly unsaved, never saved) buffers in that directory */
+  const listDir = (dirUri: string): string[] | undefined => {
+    const names = new Set<string>();
+    let found = false;
+    if (dirUri.startsWith('file:')) {
+      try {
+        for (const n of fs.readdirSync(fileURLToPath(dirUri))) names.add(n);
+        found = true;
+      } catch {
+        // missing directory
+      }
+    }
+    for (const d of documents.all()) {
+      if (d.uri.startsWith(dirUri) && !d.uri.slice(dirUri.length).includes('/')) {
+        names.add(decodeURIComponent(d.uri.slice(dirUri.length)));
+        found = true;
+      }
+    }
+    return found ? [...names] : undefined;
   };
   const validateNow = (doc: TextDocument): void => {
     if (!service) return;
@@ -73,6 +93,22 @@ export function startServer(connection: Connection): void {
   const revalidateAll = (): void => {
     for (const d of documents.all()) validateNow(d);
   };
+  /** config.json, i18n, page .js and .hml feed other documents' diagnostics (page registration, $t keys, page files) */
+  let crossTimer: NodeJS.Timeout | undefined;
+  const scheduleDependents = (changed: TextDocument): void => {
+    const kind = documentKind(changed);
+    if (kind !== 'config' && kind !== 'i18n' && kind !== 'hml') return;
+    const run = (): void => {
+      crossTimer = undefined;
+      for (const d of documents.all()) {
+        const k = documentKind(d);
+        if (d.uri !== changed.uri && (k === 'hml' || k === 'config')) validateNow(d);
+      }
+    };
+    if (crossTimer) clearTimeout(crossTimer);
+    if (debounceMs <= 0) run();
+    else crossTimer = setTimeout(run, debounceMs);
+  };
   const status = (ok: boolean, error?: string): void => {
     if (!service) return;
     const params: SdkStatusParams = {
@@ -93,7 +129,7 @@ export function startServer(connection: Connection): void {
     service = new OhjsLanguageService(
       registry,
       { ...(opts.rules ? { rules: opts.rules } : {}) },
-      { read: readFile },
+      { read: readFile, list: listDir },
     );
     let startError: string | undefined;
     if (opts.sdkVersion) {
@@ -151,9 +187,15 @@ export function startServer(connection: Connection): void {
   });
 
   // TextDocuments fires onDidChangeContent for didOpen as well: validate a fresh document immediately
-  documents.onDidChangeContent((e) =>
-    e.document.version <= 1 && !timers.has(e.document.uri) ? validateNow(e.document) : schedule(e.document),
-  );
+  documents.onDidChangeContent((e) => {
+    if (e.document.version <= 1 && !timers.has(e.document.uri)) validateNow(e.document);
+    else {
+      schedule(e.document);
+      scheduleDependents(e.document);
+    }
+  });
+  // files changed on disk (created/deleted pages, i18n files, config.json edited outside the editor)
+  connection.onDidChangeWatchedFiles(() => revalidateAll());
   documents.onDidClose((e) => {
     const t = timers.get(e.document.uri);
     if (t) clearTimeout(t);
@@ -163,6 +205,7 @@ export function startServer(connection: Connection): void {
   });
   connection.onShutdown(() => {
     for (const t of timers.values()) clearTimeout(t);
+    if (crossTimer) clearTimeout(crossTimer);
     timers.clear();
   });
 

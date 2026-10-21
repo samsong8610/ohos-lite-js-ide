@@ -13,15 +13,23 @@ import type { TextDocument } from 'vscode-languageserver-textdocument';
 import { completeCss, validateCss } from './css/css-features';
 import { parseCss, type CssDocument } from './css/parser';
 import { completeHml, type HmlCompletion } from './hml/completion';
-import { validateHml, type HmlDiagnostic } from './hml/diagnostics';
+import { validateHml, type HmlDiagnostic, type HmlProjectContext } from './hml/diagnostics';
 import { parseHml, type HmlDocument } from './hml/parser';
 import { SchemaView } from './hml/schema-view';
+import { checkEs5 } from './js/es5';
 import { extractViewModel, type ViewModelSymbols } from './js/viewmodel';
+import { readConfig, validateConfig } from './project/config';
+import { i18nKeys } from './project/i18n';
+import { mainUriOfConfig, moduleLayout } from './project/layout';
+import { isSuppressed, parseSuppressions, resolveSeverity, type RuleId } from './hml/rules';
+import { LineIndex } from './text';
 import type { SchemaRegistry } from './schema-registry';
 
 /** Reads sibling files (open editor buffer first, then disk). Returns undefined when absent. */
 export interface FileReader {
   read(uri: string): string | undefined;
+  /** file names (not paths) directly inside a directory URI ending in '/'; undefined when absent */
+  list?(dirUri: string): string[] | undefined;
 }
 
 /** index.hml → index.js / index.css: the page's "three-piece set" (ARCHITECTURE §7.1 ProjectIndex). */
@@ -38,7 +46,9 @@ export interface ServiceSettings {
 /** Which language service handles a document: by languageId first, then by extension. */
 export function documentKind(
   doc: Pick<TextDocument, 'languageId' | 'uri'>,
-): 'hml' | 'css' | 'js' | undefined {
+): 'hml' | 'css' | 'js' | 'config' | 'i18n' | undefined {
+  if (/\/src\/main\/config\.json$/i.test(doc.uri)) return 'config';
+  if (/\/src\/main\/js\/[^/]+\/i18n\/[^/]+\.json$/i.test(doc.uri)) return 'i18n';
   if (doc.languageId === 'hml' || /\.hml$/i.test(doc.uri)) return 'hml';
   if (doc.languageId === 'css' || doc.languageId === 'less' || /\.(css|less)$/i.test(doc.uri)) return 'css';
   if (doc.languageId === 'javascript' || /\.js$/i.test(doc.uri)) return 'js';
@@ -61,7 +71,14 @@ const KIND: Record<HmlCompletion['kind'], CompletionItemKind> = {
   variable: CompletionItemKind.Variable,
   method: CompletionItemKind.Method,
   function: CompletionItemKind.Function,
+  i18nKey: CompletionItemKind.Constant,
 };
+
+interface RuleFinding {
+  rule: RuleId;
+  message: string;
+  range: { start: number; end: number };
+}
 
 /**
  * Editor-independent language service: LSP types in, LSP types out. The LSP server is a thin wrapper
@@ -124,16 +141,80 @@ export class OhjsLanguageService {
     this.cssParsed.delete(uri);
   }
 
+  /** locale file → leaf keys for the module of `hmlUri`; undefined outside an FA js tree */
+  i18n(hmlUri: string): Map<string, Set<string>> | undefined {
+    const layout = moduleLayout(hmlUri);
+    if (!layout || !this.files.list) return undefined;
+    const map = new Map<string, Set<string>>();
+    for (const name of (this.files.list(layout.i18nDirUri) ?? []).filter((n) => /\.json$/i.test(n)).sort()) {
+      const text = this.files.read(layout.i18nDirUri + name);
+      if (text !== undefined) map.set(name, i18nKeys(text));
+    }
+    return map;
+  }
+
   validate(doc: TextDocument): Diagnostic[] {
     const kind = documentKind(doc);
+    const rules = this.settings.rules;
     // selector rules apply to plain CSS; LESS/SCSS nesting (`&:active`, nested rules) is compiled away later
     if (kind === 'css' && doc.languageId !== 'less' && !/\.less$/i.test(doc.uri)) {
-      return validateCss(this.css(doc), { rules: this.settings.rules }).map((d) => this.toDiagnostic(doc, d));
+      return validateCss(this.css(doc), { rules }).map((d) => this.toDiagnostic(doc, d));
+    }
+    if (kind === 'js') {
+      const r = checkEs5(doc.getText());
+      return this.filtered(
+        doc,
+        r.findings.map((f) => ({
+          rule: 'js/es6-syntax' as const,
+          range: f,
+          message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) cannot be used: the engine runs ES5.1`,
+        })),
+        r.comments.map((c) => ({ text: c.text, end: c.end })),
+      );
+    }
+    if (kind === 'config') {
+      const main = mainUriOfConfig(doc.uri)!;
+      const findings = validateConfig(
+        doc.getText(),
+        (jsName, page) => this.files.read(`${main}js/${jsName}/${page}.hml`) !== undefined,
+      );
+      return this.filtered(doc, findings, []);
     }
     if (kind !== 'hml') return [];
-    return validateHml(this.hml(doc), this.view, { rules: this.settings.rules }).map((d) =>
+    const layout = moduleLayout(doc.uri);
+    let project: HmlProjectContext | undefined;
+    if (layout) {
+      const configText = this.files.read(layout.configUri);
+      const config = configText === undefined ? undefined : readConfig(configText);
+      const registered = config?.pages.get(layout.jsName);
+      const i18n = this.i18n(doc.uri);
+      project = {
+        ...(layout.page ? { page: layout.page } : {}),
+        ...(registered ? { registeredPages: registered } : {}),
+        ...(i18n ? { i18n } : {}),
+      };
+    }
+    return validateHml(this.hml(doc), this.view, { rules, ...(project ? { project } : {}) }).map((d) =>
       this.toDiagnostic(doc, d),
     );
+  }
+
+  /** severity overrides and `ohjs-disable` comments for the non-HML rule families */
+  private filtered(
+    doc: TextDocument,
+    findings: RuleFinding[],
+    comments: Array<{ text: string; end: number }>,
+  ): Diagnostic[] {
+    const text = doc.getText();
+    const lines = new LineIndex(text);
+    const sup = parseSuppressions(comments.map((c) => ({ text: c.text, endLine: lines.lineOf(c.end) })));
+    const out: Diagnostic[] = [];
+    for (const f of findings) {
+      const severity = resolveSeverity(f.rule, this.settings.rules);
+      if (severity === 'off' || isSuppressed(sup, f.rule, lines.lineOf(f.range.start))) continue;
+      out.push(this.toDiagnostic(doc, { ...f, severity }));
+    }
+    return out;
   }
 
   private toDiagnostic(
@@ -172,7 +253,9 @@ export class OhjsLanguageService {
       }));
     }
     if (kind !== 'hml') return [];
-    return completeHml(this.hml(doc), offset, this.view, this.viewModel(doc.uri)).map((c) => ({
+    const keys = new Set<string>();
+    for (const set of this.i18n(doc.uri)?.values() ?? []) for (const k of set) keys.add(k);
+    return completeHml(this.hml(doc), offset, this.view, this.viewModel(doc.uri), keys).map((c) => ({
       label: c.label,
       kind: KIND[c.kind],
       ...(c.detail ? { detail: c.detail } : {}),

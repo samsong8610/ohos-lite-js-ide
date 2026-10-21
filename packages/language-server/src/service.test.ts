@@ -182,3 +182,102 @@ describe('OhjsLanguageService: page companions (.js ViewModel, .hml for CSS)', (
     expect(InsertTextFormat.PlainText).toBe(1);
   });
 });
+
+describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', () => {
+  const M = 'file:///w/entry/src/main/';
+  const files = new Map<string, string>();
+  const reader = {
+    read: (u: string) => files.get(u),
+    list: (dir: string) => {
+      const names = [...files.keys()]
+        .filter((k) => k.startsWith(dir) && !k.slice(dir.length).includes('/'))
+        .map((k) => k.slice(dir.length));
+      return names.length ? names : undefined;
+    },
+  };
+  const svc = new OhjsLanguageService(new SchemaRegistry(), {}, reader);
+  const doc = (rel: string, lang: string, text: string) => TextDocument.create(M + rel, lang, 1, text);
+  it('documentKind recognises config.json and i18n files', () => {
+    expect(documentKind({ languageId: 'json', uri: `${M}config.json` })).toBe('config');
+    expect(documentKind({ languageId: 'json', uri: `${M}js/default/i18n/en-US.json` })).toBe('i18n');
+    expect(documentKind({ languageId: 'json', uri: `${M}js/default/data.json` })).toBeUndefined();
+  });
+  it('js/es6-syntax on page scripts, with suppression comments and settings', () => {
+    const js = doc(
+      'js/default/pages/index/index.js',
+      'javascript',
+      'export default {\n  onInit() {\n    let a = 1;\n  }\n};\n// ohjs-disable-next-line js/es6-syntax\nconst b = 2;',
+    );
+    const d = svc.validate(js);
+    expect(d.map((x) => [x.code, x.severity, x.range.start.line, x.message])).toEqual([
+      [
+        'js/es6-syntax',
+        DiagnosticSeverity.Error,
+        1,
+        'Method shorthand (ES2015+) cannot be used: the engine runs ES5.1',
+      ],
+      [
+        'js/es6-syntax',
+        DiagnosticSeverity.Error,
+        2,
+        "'let' declarations (ES2015+) cannot be used: the engine runs ES5.1",
+      ],
+    ]);
+    svc.settings = { rules: { 'js/es6-syntax': 'warning' } };
+    expect(svc.validate(js)[0]!.severity).toBe(DiagnosticSeverity.Warning);
+    svc.settings = { rules: { 'js/es6-syntax': 'off' } };
+    expect(svc.validate(js)).toEqual([]);
+    svc.settings = {};
+    expect(svc.validate(doc('js/default/i18n/en-US.json', 'json', '{}'))).toEqual([]);
+  });
+  it('config.json: deviceType and page files resolved through the reader', () => {
+    files.set(`${M}js/default/pages/index/index.hml`, '<div></div>');
+    const cfg = doc(
+      'config.json',
+      'json',
+      '{ "app": {}, "module": { "deviceType": ["SmartVision"], "js": [{ "pages": ["pages/index/index", "pages/b/b"] }] } }',
+    );
+    expect(svc.validate(cfg).map((x) => [x.code, x.range.start.character])).toEqual([
+      ['prj/device-type', 40],
+      ['prj/page-file-missing', 96],
+    ]);
+    svc.settings = { rules: { 'prj/device-type': 'off' } };
+    expect(svc.validate(cfg).map((x) => x.code)).toEqual(['prj/page-file-missing']);
+    svc.settings = {};
+  });
+  it('HML: page registration and $t keys from config.json and i18n/*.json', () => {
+    files.set(
+      `${M}config.json`,
+      '{ "app": {}, "module": { "deviceType": ["smartVision"], "js": [{ "name": "default", "pages": ["pages/index/index"] }] } }',
+    );
+    files.set(`${M}js/default/i18n/en-US.json`, '{ "strings": { "hello": "Hi", "bye": "Bye" } }');
+    files.set(`${M}js/default/i18n/zh-CN.json`, '{ "strings": { "hello": "你好" } }');
+    const page = doc(
+      'js/default/pages/other/other.hml',
+      'hml',
+      `<div><text>{{ $t('strings.hello') }}{{ $t('strings.bye') }}{{ $t('nope') }}</text></div>`,
+    );
+    expect(svc.validate(page).map((x) => x.code)).toEqual([
+      'prj/page-not-registered',
+      'i18n/missing-translation',
+      'i18n/missing-key',
+    ]);
+    expect(svc.i18n(page.uri)!.get('zh-CN.json')).toEqual(new Set(['strings.hello']));
+    expect(svc.i18n('file:///tmp/x.hml')).toBeUndefined();
+    const keys = svc.complete(doc('js/default/pages/index/index.hml', 'hml', "<text>{{ $t('') }}</text>"), {
+      line: 0,
+      character: 13,
+    });
+    expect(keys.map((k) => [k.label, k.kind])).toEqual([
+      ['strings.bye', CompletionItemKind.Constant],
+      ['strings.hello', CompletionItemKind.Constant],
+    ]);
+    // outside an FA tree: no project rules
+    expect(
+      svc.validate(TextDocument.create('file:///tmp/x.hml', 'hml', 1, "<text>{{ $t('nope') }}</text>")),
+    ).toEqual([]);
+    // a reader without list(): no i18n checks
+    const plain = new OhjsLanguageService(new SchemaRegistry(), {}, { read: reader.read });
+    expect(plain.validate(page).map((x) => x.code)).toEqual(['prj/page-not-registered']);
+  });
+});
