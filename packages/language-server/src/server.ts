@@ -1,0 +1,151 @@
+/*
+ * Copyright (c) 2026 ohos-lite-js-ide contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import {
+  TextDocuments,
+  TextDocumentSyncKind,
+  type Connection,
+  type InitializeResult,
+} from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import {
+  SDK_CHANGED_NOTIFICATION,
+  SDK_STATUS_NOTIFICATION,
+  SETTINGS_SECTION,
+  type InitializationOptions,
+  type SdkChangedParams,
+  type SdkStatusParams,
+} from './protocol';
+import { DEFAULT_SDK_VERSION, SchemaRegistry } from './schema-registry';
+import { OhjsLanguageService } from './service';
+
+export const SERVER_NAME = 'ohjs-language-server';
+
+/**
+ * Wires the language service to an LSP connection: incremental document sync, completion,
+ * debounced diagnostics, SDK hot switch and rule settings.
+ */
+export function startServer(connection: Connection): void {
+  const documents = new TextDocuments(TextDocument);
+  let service: OhjsLanguageService | undefined;
+  let debounceMs = 200;
+  let hasConfigurationCapability = false;
+  const timers = new Map<string, NodeJS.Timeout>();
+
+  const validateNow = (doc: TextDocument): void => {
+    if (!service) return;
+    void connection.sendDiagnostics({
+      uri: doc.uri,
+      version: doc.version,
+      diagnostics: service.validate(doc),
+    });
+  };
+  const schedule = (doc: TextDocument): void => {
+    const t = timers.get(doc.uri);
+    if (t) clearTimeout(t);
+    if (debounceMs <= 0) {
+      validateNow(doc);
+      return;
+    }
+    timers.set(
+      doc.uri,
+      setTimeout(() => {
+        timers.delete(doc.uri);
+        const current = documents.get(doc.uri);
+        if (current) validateNow(current);
+      }, debounceMs),
+    );
+  };
+  const revalidateAll = (): void => {
+    for (const d of documents.all()) validateNow(d);
+  };
+  const status = (ok: boolean, error?: string): void => {
+    if (!service) return;
+    const params: SdkStatusParams = {
+      version: service.sdkVersion,
+      ok,
+      provisional: service.registry.active.provisional,
+      available: service.registry.versions(),
+      ...(error ? { error } : {}),
+    };
+    void connection.sendNotification(SDK_STATUS_NOTIFICATION, params);
+  };
+
+  connection.onInitialize((params): InitializeResult => {
+    const opts = (params.initializationOptions ?? {}) as InitializationOptions;
+    hasConfigurationCapability = !!params.capabilities.workspace?.configuration;
+    if (typeof opts.debounceMs === 'number') debounceMs = opts.debounceMs;
+    const registry = new SchemaRegistry(opts.schemaDir, DEFAULT_SDK_VERSION);
+    service = new OhjsLanguageService(registry, { ...(opts.rules ? { rules: opts.rules } : {}) });
+    let startError: string | undefined;
+    if (opts.sdkVersion) {
+      try {
+        service.setSdkVersion(opts.sdkVersion);
+      } catch (e) {
+        startError = (e as Error).message;
+      }
+    }
+    connection.onInitialized(() => status(!startError, startError));
+    return {
+      capabilities: {
+        textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental },
+        completionProvider: { triggerCharacters: ['<', ' ', '/', '@', ':'], resolveProvider: false },
+      },
+      serverInfo: { name: SERVER_NAME, version: '0.1.0' },
+    };
+  });
+
+  const pullSettings = async (): Promise<void> => {
+    if (!hasConfigurationCapability || !service) return;
+    const cfg = (await connection.workspace.getConfiguration(SETTINGS_SECTION)) as {
+      rules?: Record<string, unknown>;
+    } | null;
+    service.settings = { ...(cfg?.rules ? { rules: cfg.rules } : {}) };
+  };
+  connection.onDidChangeConfiguration(async (change) => {
+    if (!service) return;
+    if (hasConfigurationCapability) await pullSettings();
+    else {
+      const s = (change.settings as { ohjs?: { lang?: { rules?: Record<string, unknown> } } } | undefined)
+        ?.ohjs?.lang;
+      service.settings = { ...(s?.rules ? { rules: s.rules } : {}) };
+    }
+    revalidateAll();
+  });
+
+  connection.onNotification(SDK_CHANGED_NOTIFICATION, (p: SdkChangedParams) => {
+    if (!service) return;
+    try {
+      service.setSdkVersion(p.version);
+      status(true);
+      revalidateAll();
+    } catch (e) {
+      status(false, (e as Error).message);
+    }
+  });
+
+  connection.onCompletion((p) => {
+    const doc = documents.get(p.textDocument.uri);
+    return doc && service ? service.complete(doc, p.position) : [];
+  });
+
+  // TextDocuments fires onDidChangeContent for didOpen as well: validate a fresh document immediately
+  documents.onDidChangeContent((e) =>
+    e.document.version <= 1 && !timers.has(e.document.uri) ? validateNow(e.document) : schedule(e.document),
+  );
+  documents.onDidClose((e) => {
+    const t = timers.get(e.document.uri);
+    if (t) clearTimeout(t);
+    timers.delete(e.document.uri);
+    service?.forget(e.document.uri);
+    void connection.sendDiagnostics({ uri: e.document.uri, diagnostics: [] });
+  });
+  connection.onShutdown(() => {
+    for (const t of timers.values()) clearTimeout(t);
+    timers.clear();
+  });
+
+  documents.listen(connection);
+  connection.listen();
+}

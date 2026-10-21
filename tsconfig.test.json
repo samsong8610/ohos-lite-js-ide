@@ -13,9 +13,16 @@
       "@ohjs/core": ["packages/core/src/index.ts"],
       "@ohjs/transport-hdc": ["packages/transport-hdc/src/index.ts"],
       "@ohjs/schemas": ["packages/schemas/src/index.ts"],
+      "@ohjs/language-server": ["packages/language-server/src/index.ts"],
       "@ohjs/test-kit": ["packages/test-kit/src/index.ts"],
       "@ohjs/schema-extractor": ["tools/schema-extractor/src/index.ts"]
     }
   },
-  "include": ["packages/*/src/**/*.ts", "tools/*/src/**/*.ts", "tools/*/test/**/*.ts", "vitest.config.ts"]
+  "include": [
+    "packages/*/src/**/*.ts",
+    "tools/*/src/**/*.ts",
+    "tools/*/test/**/*.ts",
+    "packages/*/test/*.ts",
+    "vitest.config.ts"
+  ]
 }

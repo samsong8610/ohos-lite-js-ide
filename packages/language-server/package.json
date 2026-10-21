@@ -2,7 +2,7 @@
   "name": "@ohjs/language-server",
   "version": "0.1.0",
   "private": true,
-  "description": "HML/CSS/JSON language server (M1-7)",
+  "description": "HML/CSS/JS language server (LSP) for ArkUI.Lite (M1-7)",
   "license": "Apache-2.0",
   "main": "out/index.js",
   "types": "out/index.d.ts",
@@ -11,6 +11,11 @@
   ],
   "dependencies": {
     "@ohjs/core": "workspace:*",
-    "@ohjs/schemas": "workspace:*"
+    "@ohjs/schemas": "workspace:*",
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15"
+  },
+  "bin": {
+    "ohjs-language-server": "out/main.js"
   }
 }

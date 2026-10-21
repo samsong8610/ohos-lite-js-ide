@@ -2,8 +2,19 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/**
- * Placeholder: HML/CSS/JSON language server (M1-7)
- * Not implemented in M1 batch 1. See ARCHITECTURE.md §3 for the planned scope.
- */
-export const PLACEHOLDER = true;
+export * from './protocol';
+export { startServer, SERVER_NAME } from './server';
+export { OhjsLanguageService, documentKind, DIAGNOSTIC_SOURCE, type ServiceSettings } from './service';
+export { SchemaRegistry, normalizeSdkVersion, DEFAULT_SDK_VERSION } from './schema-registry';
+export {
+  parseHml,
+  walk,
+  elementAt,
+  type HmlDocument,
+  type HmlElement,
+  type HmlAttribute,
+} from './hml/parser';
+export { validateHml, FULL_ONLY_COMPONENTS, type HmlDiagnostic } from './hml/diagnostics';
+export { completeHml, completionContext, type HmlCompletion } from './hml/completion';
+export { SchemaView } from './hml/schema-view';
+export { HML_RULES, type HmlRuleId } from './hml/rules';

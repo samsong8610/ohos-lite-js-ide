@@ -1,0 +1,131 @@
+/*
+ * Copyright (c) 2026 ohos-lite-js-ide contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { describe, expect, it } from 'vitest';
+import { CompletionItemKind, DiagnosticSeverity, InsertTextFormat } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { SchemaLoadError } from '@ohjs/schemas';
+import { fixtureSchema } from '../test/fixture-schema';
+import { normalizeSdkVersion, SchemaRegistry } from './schema-registry';
+import { documentKind, OhjsLanguageService } from './service';
+
+const hml = (text: string, version = 1) =>
+  TextDocument.create('file:///p/pages/index/index.hml', 'hml', version, text);
+
+describe('SchemaRegistry', () => {
+  it('normalizes versions and lists the bundled packs', () => {
+    expect(normalizeSdkVersion(' 6.1-LTS ')).toBe('6.1-lts');
+    expect(normalizeSdkVersion('v5.0.3')).toBe('5.0.3');
+    const r = new SchemaRegistry();
+    expect(r.versions()).toEqual(['5.0.3', '6.1-lts']);
+    expect(r.version).toBe('5.0.3');
+    expect(r.active.ohVersion).toBe('5.0.3');
+    expect(r.setVersion('6.1-LTS').provisional).toBe(true);
+    expect(r.version).toBe('6.1-lts');
+    expect(r.active).toBe(r.setVersion('6.1-lts')); // cached
+  });
+  it('keeps the previous version when a pack is missing', () => {
+    const r = new SchemaRegistry(undefined, '5.0.3');
+    expect(() => r.setVersion('9.9')).toThrow(SchemaLoadError);
+    expect(r.version).toBe('5.0.3');
+  });
+  it('reads packs from a custom directory', () => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ls-'));
+    fs.mkdirSync(path.join(d, 'v9.9'));
+    fs.writeFileSync(path.join(d, 'v9.9', 'components.json'), JSON.stringify(fixtureSchema()));
+    const r = new SchemaRegistry(d, '9.9');
+    expect(r.versions()).toEqual(['9.9']);
+    expect(Object.keys(r.active.components)).toContain('free');
+    fs.rmSync(d, { recursive: true, force: true });
+  });
+});
+
+describe('documentKind', () => {
+  it('uses languageId, then the extension', () => {
+    expect(documentKind({ languageId: 'hml', uri: 'file:///a.txt' })).toBe('hml');
+    expect(documentKind({ languageId: 'plaintext', uri: 'file:///A.HML' })).toBe('hml');
+    expect(documentKind({ languageId: 'css', uri: 'x' })).toBe('css');
+    expect(documentKind({ languageId: 'x', uri: 'file:///a.less' })).toBe('css');
+    expect(documentKind({ languageId: 'javascript', uri: 'x' })).toBe('js');
+    expect(documentKind({ languageId: 'x', uri: 'file:///a.js' })).toBe('js');
+    expect(documentKind({ languageId: 'json', uri: 'file:///a.json' })).toBeUndefined();
+  });
+});
+
+describe('OhjsLanguageService', () => {
+  it('validates HML into LSP diagnostics with positions, code and source', () => {
+    const s = new OhjsLanguageService(new SchemaRegistry());
+    const [d] = s.validate(hml('<div>\r\n  <button></button>\r\n</div>'));
+    expect(d).toEqual({
+      range: { start: { line: 1, character: 3 }, end: { line: 1, character: 9 } },
+      severity: DiagnosticSeverity.Error,
+      source: 'ohjs',
+      code: 'hml/unknown-component',
+      message: expect.stringContaining('<button>'),
+    });
+    expect(s.validate(TextDocument.create('file:///a.css', 'css', 1, '.a{}'))).toEqual([]);
+  });
+  it('maps every severity and honours rule settings', () => {
+    const s = new OhjsLanguageService(new SchemaRegistry(), {
+      rules: { 'hml/unknown-component': 'hint', 'hml/syntax': 'information' },
+    });
+    expect(s.validate(hml('<foo></foo><div>')).map((d) => d.severity)).toEqual([
+      DiagnosticSeverity.Information,
+      DiagnosticSeverity.Hint,
+    ]);
+    s.settings = { rules: { 'hml/for-with-if': 'error' } };
+    expect(s.validate(hml('<div for="{{a}}" if="{{b}}"></div>', 2))[0]!.severity).toBe(
+      DiagnosticSeverity.Error,
+    );
+    expect(
+      s.validate(hml('<div for="{{a}}" if="{{b}}" onclick=""></div>', 3)).map((d) => d.severity),
+    ).toEqual([DiagnosticSeverity.Error, DiagnosticSeverity.Warning]);
+  });
+  it('completes with text edits, snippet format and markdown docs', () => {
+    const s = new OhjsLanguageService(new SchemaRegistry());
+    const doc = hml('<list>\n  <\n</list>');
+    const items = s.complete(doc, { line: 1, character: 3 });
+    expect(items.map((i) => i.label)).toEqual(['list-item']);
+    expect(items[0]).toMatchObject({
+      kind: CompletionItemKind.Class,
+      insertTextFormat: InsertTextFormat.Snippet,
+      textEdit: {
+        range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } },
+        newText: 'list-item$1>$0</list-item>',
+      },
+    });
+    const attrs = s.complete(hml('<text ', 2), { line: 0, character: 6 });
+    expect(attrs.find((i) => i.label === 'onclick')!.kind).toBe(CompletionItemKind.Event);
+    expect(attrs.find((i) => i.label === 'for')!.kind).toBe(CompletionItemKind.Keyword);
+    expect(attrs.find((i) => i.label === 'id')!.kind).toBe(CompletionItemKind.Property);
+    const close = s.complete(hml('<div></', 3), { line: 0, character: 7 });
+    expect(close[0]).toMatchObject({
+      kind: CompletionItemKind.Property,
+      insertTextFormat: InsertTextFormat.PlainText,
+    });
+    const withDoc = s.complete(hml('<image s', 4), { line: 0, character: 8 }).find((i) => i.label === 'src');
+    expect(withDoc?.documentation).toMatchObject({ kind: 'markdown' });
+    expect(
+      s.complete(TextDocument.create('file:///a.js', 'javascript', 1, ''), { line: 0, character: 0 }),
+    ).toEqual([]);
+  });
+  it('switches SDK version and re-parses only on new document versions', () => {
+    const s = new OhjsLanguageService(new SchemaRegistry());
+    expect(s.sdkVersion).toBe('5.0.3');
+    s.setSdkVersion('6.1-LTS');
+    expect(s.sdkVersion).toBe('6.1-lts');
+    expect(() => s.setSdkVersion('0.0')).toThrow();
+    expect(s.sdkVersion).toBe('6.1-lts');
+    const d1 = hml('<foo></foo>', 1);
+    expect(s.validate(d1)).toHaveLength(1);
+    // same uri + version → cached parse (content ignored)
+    expect(s.validate(TextDocument.create(d1.uri, 'hml', 1, '<div></div>'))).toHaveLength(1);
+    expect(s.validate(TextDocument.create(d1.uri, 'hml', 2, '<div></div>'))).toHaveLength(0);
+    s.forget(d1.uri);
+    expect(s.validate(TextDocument.create(d1.uri, 'hml', 2, '<foo></foo>'))).toHaveLength(1);
+  });
+});

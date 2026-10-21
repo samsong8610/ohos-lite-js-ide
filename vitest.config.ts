@@ -13,6 +13,7 @@ export default defineConfig({
       '@ohjs/core': r('./packages/core/src/index.ts'),
       '@ohjs/transport-hdc': r('./packages/transport-hdc/src/index.ts'),
       '@ohjs/schemas': r('./packages/schemas/src/index.ts'),
+      '@ohjs/language-server': r('./packages/language-server/src/index.ts'),
       '@ohjs/test-kit': r('./packages/test-kit/src/index.ts'),
       '@ohjs/schema-extractor': r('./tools/schema-extractor/src/index.ts'),
     },
@@ -42,6 +43,9 @@ export default defineConfig({
         'packages/core/src/ports/**',
         // CLI wrapper (argv parsing + process exit), logic lives in testable modules
         'tools/schema-extractor/src/cli.ts',
+        // language server process entry (createConnection on stdio/ipc); covered by the extension smoke test
+        'packages/language-server/src/main.ts',
+        'packages/extension/src/language-client.ts',
       ],
       thresholds: {
         lines: 80,
@@ -52,6 +56,8 @@ export default defineConfig({
         'packages/transport-hdc/src/parser/**': { lines: 90, statements: 90, functions: 90, branches: 85 },
         'tools/schema-extractor/src/**': { lines: 90, statements: 90, functions: 90 },
         'packages/schemas/src/**': { lines: 90, statements: 90, functions: 90 },
+        // HML parsing / LSP protocol handling (M1-7)
+        'packages/language-server/src/**': { lines: 90, statements: 90, functions: 90, branches: 85 },
       },
     },
   },
