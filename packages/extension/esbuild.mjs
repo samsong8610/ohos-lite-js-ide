@@ -21,6 +21,8 @@ const serverCtx = await esbuild.context({
   platform: 'node',
   target: 'node20',
   outfile: 'dist/server.js',
+  // jsonc-parser's "main" is a UMD build with runtime require('./impl/…') that esbuild cannot follow
+  mainFields: ['module', 'main'],
   sourcemap: !production,
   minify: production,
   logLevel: 'info',

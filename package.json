@@ -21,7 +21,8 @@
     "schema:check": "pnpm --filter @ohjs/schema-extractor run check",
     "ci:build": "pnpm run build",
     "ci:test": "pnpm run lint && pnpm run test:coverage",
-    "ci:package": "pnpm --filter ohos-lite-js-ide run package"
+    "ci:package": "pnpm --filter ohos-lite-js-ide run package",
+    "test:grammar": "pnpm --filter ohos-lite-js-ide run test:grammar"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

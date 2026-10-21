@@ -28,6 +28,8 @@ jobs:
       - name: schema --check (skips with a warning when OpenHarmony sources are absent)
         run: pnpm run schema:check
       - run: pnpm run test:coverage
+      - name: TextMate grammar tests (vscode-tmgrammar-test)
+        run: pnpm run test:grammar
       - name: integration smoke (xvfb on linux)
         if: matrix.os == 'ubuntu-latest'
         run: xvfb-run -a pnpm run test:integration

@@ -77,6 +77,40 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.ok(evLabels.includes('tap'), `tap missing: ${evLabels.join(',')}`);
     });
 
+    it('language server: ES5.1 check for page scripts', async () => {
+      const [uri] = await vscode.workspace.findFiles('**/default/common/util.js');
+      assert.ok(uri, 'fixture util.js not found');
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
+      assert.ok(
+        await waitFor(() => vscode.languages.getDiagnostics(uri).some((d) => d.source === 'ohjs'), 15000),
+        'no ohjs JS diagnostics',
+      );
+      const diags = vscode.languages.getDiagnostics(uri).filter((d) => d.source === 'ohjs');
+      assert.deepStrictEqual(
+        diags.map((d) => [String(typeof d.code === 'object' ? d.code.value : d.code), d.range.start.line]),
+        [['js/es6-syntax', 1]],
+      );
+    });
+
+    it('language server: config.json deviceType edit is diagnosed', async () => {
+      const [uri] = await vscode.workspace.findFiles('**/src/main/config.json');
+      const doc = await vscode.workspace.openTextDocument(uri!);
+      await vscode.window.showTextDocument(doc);
+      const at = doc.getText().indexOf('"smartVision"');
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(uri!, new vscode.Range(doc.positionAt(at + 1), doc.positionAt(at + 2)), 'S');
+      assert.ok(await vscode.workspace.applyEdit(edit));
+      const code = (d: vscode.Diagnostic) => String(typeof d.code === 'object' ? d.code.value : d.code);
+      assert.ok(
+        await waitFor(
+          () => vscode.languages.getDiagnostics(uri!).some((d) => code(d) === 'prj/device-type'),
+          15000,
+        ),
+        'no prj/device-type diagnostic',
+      );
+      await vscode.commands.executeCommand('workbench.action.files.revert');
+    });
+
     it('language server: CSS pseudo-class validation', async () => {
       const [uri] = await vscode.workspace.findFiles('**/pages/index/index.css');
       assert.ok(uri, 'fixture index.css not found');

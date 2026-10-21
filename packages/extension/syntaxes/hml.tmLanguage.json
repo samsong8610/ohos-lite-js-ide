@@ -1,0 +1,162 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "HML",
+  "scopeName": "text.html.hml",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#tag"
+    },
+    {
+      "include": "#interpolation"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.block.hml",
+      "begin": "<!--",
+      "end": "-->",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.hml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.hml"
+        }
+      }
+    },
+    "tag": {
+      "name": "meta.tag.hml",
+      "begin": "(</?)([A-Za-z][A-Za-z0-9_-]*)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.hml"
+        },
+        "2": {
+          "name": "entity.name.tag.hml"
+        }
+      },
+      "end": "(/?>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.hml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#directive"
+        },
+        {
+          "include": "#event"
+        },
+        {
+          "include": "#attribute"
+        },
+        {
+          "include": "#equals"
+        },
+        {
+          "include": "#string-double"
+        },
+        {
+          "include": "#string-single"
+        }
+      ]
+    },
+    "directive": {
+      "match": "(?<![^\\s])(for|if|elif|else|show|tid)(?=\\s*=|\\s|/?>|$)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name.directive.hml keyword.control.directive.hml"
+        }
+      }
+    },
+    "event": {
+      "match": "(?<![^\\s])(on:|grab:|on|@)([A-Za-z][A-Za-z0-9_-]*?)((?:\\.[A-Za-z]+)*)(?=\\s*=|\\s|/?>|$)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name.event.prefix.hml storage.modifier.event-prefix.hml"
+        },
+        "2": {
+          "name": "entity.other.attribute-name.event.hml"
+        },
+        "3": {
+          "name": "storage.modifier.event-modifier.hml"
+        }
+      }
+    },
+    "attribute": {
+      "match": "[^\\s\\\"'<>/=]+",
+      "name": "entity.other.attribute-name.hml"
+    },
+    "equals": {
+      "match": "=",
+      "name": "punctuation.separator.key-value.hml"
+    },
+    "string-double": {
+      "name": "string.quoted.double.hml",
+      "begin": "\"",
+      "end": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.hml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.hml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#interpolation"
+        }
+      ]
+    },
+    "string-single": {
+      "name": "string.quoted.single.hml",
+      "begin": "'",
+      "end": "'",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.hml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.hml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#interpolation"
+        }
+      ]
+    },
+    "interpolation": {
+      "name": "meta.embedded.expression.hml",
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.begin.hml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.end.hml"
+        }
+      },
+      "contentName": "source.js.embedded.hml",
+      "patterns": [
+        {
+          "include": "source.js#expression"
+        }
+      ]
+    }
+  }
+}

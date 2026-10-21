@@ -113,7 +113,36 @@
               "off"
             ]
           },
-          "markdownDescription": "%config.lang.rules%"
+          "markdownDescription": "%config.lang.rules%",
+          "propertyNames": {
+            "enum": [
+              "hml/syntax",
+              "hml/unknown-component",
+              "hml/component-disabled-by-feature",
+              "hml/unknown-attribute",
+              "hml/attribute-disabled-by-feature",
+              "hml/doc-only-attribute",
+              "hml/unknown-event",
+              "hml/doc-only-event",
+              "hml/unknown-event-modifier",
+              "hml/invalid-child",
+              "hml/for-with-if",
+              "hml/empty-event-handler",
+              "hml/conditional-component",
+              "css/unsupported-selector",
+              "css/unsupported-pseudo",
+              "hml/es6-in-expression",
+              "js/es6-syntax",
+              "prj/missing-app-module",
+              "prj/device-type",
+              "prj/missing-pages",
+              "prj/first-page-not-index",
+              "prj/page-file-missing",
+              "prj/page-not-registered",
+              "i18n/missing-key",
+              "i18n/missing-translation"
+            ]
+          }
         }
       }
     },
@@ -146,6 +175,17 @@
         ],
         "configuration": "./language-configuration.hml.json"
       }
+    ],
+    "grammars": [
+      {
+        "language": "hml",
+        "scopeName": "text.html.hml",
+        "path": "./syntaxes/hml.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.expression.hml": "javascript",
+          "source.js.embedded.hml": "javascript"
+        }
+      }
     ]
   },
   "scripts": {
@@ -153,7 +193,8 @@
     "watch": "node esbuild.mjs --watch",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "test:integration": "pnpm run bundle && tsc -p test/integration/tsconfig.json && node out-test/runTest.js",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "test:grammar": "vscode-tmgrammar-test -g syntaxes/hml.tmLanguage.json -g test/grammar/source.js.stub.tmLanguage.json \"test/grammar/*.test.hml\""
   },
   "dependencies": {
     "@ohjs/core": "workspace:*",
@@ -169,6 +210,7 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.2",
     "esbuild": "^0.25.11",
-    "mocha": "^11.7.4"
+    "mocha": "^11.7.4",
+    "vscode-tmgrammar-test": "^0.1.3"
   }
 }

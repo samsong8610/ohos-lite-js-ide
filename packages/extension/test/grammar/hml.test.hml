@@ -1,0 +1,44 @@
+<!-- SYNTAX TEST "text.html.hml" "HML grammar (FR-LANG-001)"
+    <div class="container" onclick="tap">
+<!--^ punctuation.definition.tag.begin.hml
+<!-- ^^^ entity.name.tag.hml
+<!--     ^^^^^ entity.other.attribute-name.hml
+<!--          ^ punctuation.separator.key-value.hml
+<!--           ^^^^^^^^^^^ string.quoted.double.hml
+<!--                       ^^ entity.other.attribute-name.event.prefix.hml
+<!--                         ^^^^^ entity.other.attribute-name.event.hml
+<!--                                    ^ punctuation.definition.tag.end.hml
+      <text for="{{(i, v) in list}}" if="{{show}}">{{ v.name }}</text>
+<!--        ^^^ keyword.control.directive.hml
+<!--             ^^ punctuation.section.embedded.begin.hml
+<!--               ^^^^^^^^^^^^^^ meta.embedded.expression.hml
+<!--                             ^^ punctuation.section.embedded.end.hml
+<!--                                 ^^ keyword.control.directive.hml
+<!--                                               ^^ punctuation.section.embedded.begin.hml
+<!--                                                 ^^^^^^^^ meta.embedded.expression.hml
+<!--                                                  ^ source.js.embedded.hml variable.other.readwrite.js
+<!--                                                             ^^^^ entity.name.tag.hml
+<!--                                                           ^^ punctuation.definition.tag.begin.hml
+      <div @swipe="onSwipe" on:touchstart.bubble="t" grab:click="g" elif="{{a}}" else show tid="id"></div>
+<!--       ^ entity.other.attribute-name.event.prefix.hml
+<!--        ^^^^^ entity.other.attribute-name.event.hml
+<!--              ^^^^^^^^^ string.quoted.double.hml
+<!--                        ^^^ entity.other.attribute-name.event.prefix.hml
+<!--                           ^^^^^^^^^^ entity.other.attribute-name.event.hml
+<!--                                     ^^^^^^^ storage.modifier.event-modifier.hml
+<!--                                                 ^^^^^ entity.other.attribute-name.event.prefix.hml
+<!--                                                      ^^^^^ entity.other.attribute-name.event.hml
+<!--                                                                ^^^^ keyword.control.directive.hml
+<!--                                                                             ^^^^ keyword.control.directive.hml
+<!--                                                                                  ^^^^ keyword.control.directive.hml
+<!--                                                                                       ^^^ keyword.control.directive.hml
+      <image src='{{img}}' show-x="1" />
+<!--             ^ string.quoted.single.hml
+<!--              ^^ punctuation.section.embedded.begin.hml
+<!--                       ^^^^^^ entity.other.attribute-name.hml - keyword.control.directive.hml
+<!--                                  ^^ punctuation.definition.tag.end.hml
+      <!-- {{ not.an.expression }} -->
+<!--  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.hml - meta.embedded.expression.hml
+    </div>
+<!--^^ punctuation.definition.tag.begin.hml
+<!--  ^^^ entity.name.tag.hml

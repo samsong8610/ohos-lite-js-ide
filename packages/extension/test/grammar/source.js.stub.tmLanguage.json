@@ -1,0 +1,13 @@
+{
+  "comment": "Test-only stand-in for VS Code's built-in JavaScript grammar (source.js), which HML interpolations embed via source.js#expression.",
+  "scopeName": "source.js",
+  "patterns": [{ "include": "#expression" }],
+  "repository": {
+    "expression": {
+      "patterns": [
+        { "match": "\\b(in)\\b", "name": "keyword.operator.expression.in.js" },
+        { "match": "[A-Za-z_$][\\w$]*", "name": "variable.other.readwrite.js" }
+      ]
+    }
+  }
+}

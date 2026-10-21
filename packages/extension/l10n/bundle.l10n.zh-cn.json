@@ -1,0 +1,7 @@
+{
+  "SDK switch failed": "SDK 切换失败",
+  "OpenHarmony SDK {0} (from .ohjs/project.json)": "OpenHarmony SDK {0}（来自 .ohjs/project.json）",
+  "OpenHarmony SDK {0} (from setting ohjs.sdkVersion)": "OpenHarmony SDK {0}（来自设置 ohjs.sdkVersion）",
+  "Setting value {0} is overridden by project.json": "设置值 {0} 被 project.json 覆盖",
+  "Available: {0}": "可用版本：{0}"
+}

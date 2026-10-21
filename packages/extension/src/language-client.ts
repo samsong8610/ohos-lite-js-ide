@@ -19,6 +19,7 @@ import {
   languageDocumentSelector,
   resolveSdkVersion,
   sdkStatusText,
+  sdkTooltip,
   type SdkVersionChoice,
 } from './language-settings';
 
@@ -65,6 +66,10 @@ export async function startLanguageClient(
   };
   const cfg = vscode.workspace.getConfiguration('ohjs');
   const sdk = await currentSdk();
+  let choice = sdk;
+  const settingValue = (): string =>
+    vscode.workspace.getConfiguration('ohjs').get<string>('sdkVersion', '5.0.3');
+  let lastStatus: SdkStatusParams | undefined;
   output.info(
     `language server: SDK ${sdk.version} from ${sdk.source === 'project' ? '.ohjs/project.json' : 'ohjs.sdkVersion setting'}`,
   );
@@ -77,7 +82,11 @@ export async function startLanguageClient(
     documentSelector: languageDocumentSelector(),
     initializationOptions,
     outputChannel: output,
-    synchronize: { configurationSection: 'ohjs' },
+    synchronize: {
+      configurationSection: 'ohjs',
+      // config.json, i18n files, pages created/deleted outside the editor feed cross-file diagnostics
+      fileEvents: vscode.workspace.createFileSystemWatcher('**/src/main/**/*.{json,hml,js}'),
+    },
   };
   const client = new LanguageClient(
     'ohjs',
@@ -93,7 +102,8 @@ export async function startLanguageClient(
   const firstStatus = new Promise<SdkStatusParams>((r) => (resolveFirst = r));
   client.onNotification(SDK_STATUS_NOTIFICATION, (p: SdkStatusParams) => {
     status.text = sdkStatusText(p);
-    status.tooltip = p.error ?? `available: ${p.available.join(', ')}`;
+    lastStatus = p;
+    status.tooltip = sdkTooltip(p, choice, settingValue(), vscode.l10n.t);
     status.show();
     if (p.ok) output.info(`language server: SDK ${p.version}${p.provisional ? ' (provisional schema)' : ''}`);
     else output.error(`language server: ${p.error ?? 'SDK switch failed'}`);
@@ -102,6 +112,8 @@ export async function startLanguageClient(
   let lastVersion = sdk.version;
   const resync = async (): Promise<void> => {
     const next = await currentSdk();
+    choice = next;
+    if (lastStatus) status.tooltip = sdkTooltip(lastStatus, choice, settingValue(), vscode.l10n.t);
     if (next.version === lastVersion) return;
     lastVersion = next.version;
     output.info(`language server: SDK -> ${next.version} (${next.source})`);

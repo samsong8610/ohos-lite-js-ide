@@ -12,7 +12,7 @@ export interface DocumentFilter {
 
 /**
  * Documents synchronized to the language server: every HML file, plus CSS/LESS/JS under an
- * OpenHarmony `js/` source tree (CSS/JS features arrive in later batches).
+ * OpenHarmony `js/` source tree, config.json and i18n files.
  */
 export function languageDocumentSelector(): DocumentFilter[] {
   return [
@@ -20,6 +20,8 @@ export function languageDocumentSelector(): DocumentFilter[] {
     { scheme: 'file', language: 'css', pattern: '**/src/main/js/**/*.css' },
     { scheme: 'file', language: 'less', pattern: '**/src/main/js/**/*.less' },
     { scheme: 'file', language: 'javascript', pattern: '**/src/main/js/**/*.js' },
+    { scheme: 'file', language: 'json', pattern: '**/src/main/config.json' },
+    { scheme: 'file', language: 'json', pattern: '**/src/main/js/*/i18n/*.json' },
   ];
 }
 
@@ -46,4 +48,30 @@ export function resolveSdkVersion(projectJson: string | undefined, setting: stri
     }
   }
   return { version: setting, source: 'setting' };
+}
+
+export type Translate = (message: string, ...args: Array<string | number | boolean>) => string;
+const identity: Translate = (m, ...args) =>
+  m.replace(/\{(\d+)\}/g, (_, i: string) => String(args[Number(i)]));
+
+/**
+ * Status bar tooltip: active version, where it came from, and, when `.ohjs/project.json` wins over a
+ * different `ohjs.sdkVersion`, a note that the setting is overridden (no pop-up).
+ */
+export function sdkTooltip(
+  p: { version: string; ok: boolean; available: readonly string[]; error?: string },
+  choice: SdkVersionChoice,
+  setting: string,
+  t: Translate = identity,
+): string {
+  if (!p.ok) return p.error ?? t('SDK switch failed');
+  const lines = [
+    choice.source === 'project'
+      ? t('OpenHarmony SDK {0} (from .ohjs/project.json)', p.version)
+      : t('OpenHarmony SDK {0} (from setting ohjs.sdkVersion)', p.version),
+  ];
+  if (choice.source === 'project' && setting !== choice.version)
+    lines.push(t('Setting value {0} is overridden by project.json', setting));
+  lines.push(t('Available: {0}', p.available.join(', ')));
+  return lines.join('\n');
 }
