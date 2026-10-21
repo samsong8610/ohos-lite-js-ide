@@ -9,6 +9,8 @@ import {
   type InitializeResult,
 } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import * as fs from 'fs';
+import { fileURLToPath } from 'url';
 import {
   SDK_CHANGED_NOTIFICATION,
   SDK_STATUS_NOTIFICATION,
@@ -33,6 +35,17 @@ export function startServer(connection: Connection): void {
   let hasConfigurationCapability = false;
   const timers = new Map<string, NodeJS.Timeout>();
 
+  /** open buffer first (unsaved edits), then disk; only file: URIs are read from disk */
+  const readFile = (uri: string): string | undefined => {
+    const open = documents.get(uri);
+    if (open) return open.getText();
+    if (!uri.startsWith('file:')) return undefined;
+    try {
+      return fs.readFileSync(fileURLToPath(uri), 'utf8');
+    } catch {
+      return undefined;
+    }
+  };
   const validateNow = (doc: TextDocument): void => {
     if (!service) return;
     void connection.sendDiagnostics({
@@ -77,7 +90,11 @@ export function startServer(connection: Connection): void {
     hasConfigurationCapability = !!params.capabilities.workspace?.configuration;
     if (typeof opts.debounceMs === 'number') debounceMs = opts.debounceMs;
     const registry = new SchemaRegistry(opts.schemaDir, DEFAULT_SDK_VERSION);
-    service = new OhjsLanguageService(registry, { ...(opts.rules ? { rules: opts.rules } : {}) });
+    service = new OhjsLanguageService(
+      registry,
+      { ...(opts.rules ? { rules: opts.rules } : {}) },
+      { read: readFile },
+    );
     let startError: string | undefined;
     if (opts.sdkVersion) {
       try {
@@ -90,7 +107,10 @@ export function startServer(connection: Connection): void {
     return {
       capabilities: {
         textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental },
-        completionProvider: { triggerCharacters: ['<', ' ', '/', '@', ':'], resolveProvider: false },
+        completionProvider: {
+          triggerCharacters: ['<', ' ', '/', '@', ':', '{', '"', "'"],
+          resolveProvider: false,
+        },
       },
       serverInfo: { name: SERVER_NAME, version: '0.1.0' },
     };

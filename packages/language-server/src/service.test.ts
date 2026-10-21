@@ -129,3 +129,56 @@ describe('OhjsLanguageService', () => {
     expect(s.validate(TextDocument.create(d1.uri, 'hml', 2, '<foo></foo>'))).toHaveLength(1);
   });
 });
+
+describe('OhjsLanguageService: page companions (.js ViewModel, .hml for CSS)', () => {
+  const files = new Map<string, string>();
+  const svc = new OhjsLanguageService(new SchemaRegistry(), {}, { read: (u) => files.get(u) });
+  it('companionUri', async () => {
+    const { companionUri } = await import('./service');
+    expect(companionUri('file:///a/b/index.hml', 'js')).toBe('file:///a/b/index.js');
+    expect(companionUri('file:///a/b.c/index.css', 'hml')).toBe('file:///a/b.c/index.hml');
+  });
+  it('completes {{ }} from the same-name .js and caches by text', () => {
+    files.set('file:///p/pages/index/index.js', 'export default { data: { msg: 1 }, tap: function () {} };');
+    const items = svc.complete(hml('<text>{{}}</text>'), { line: 0, character: 8 });
+    expect(items.map((i) => [i.label, i.kind])).toEqual([
+      ['msg', CompletionItemKind.Variable],
+      ['tap', CompletionItemKind.Method],
+      ['$t', CompletionItemKind.Function],
+    ]);
+    const vm = svc.viewModel('file:///p/pages/index/index.hml');
+    expect(svc.viewModel('file:///p/pages/index/index.hml')).toBe(vm);
+    files.set('file:///p/pages/index/index.js', 'export default { data: { other: 1 } };');
+    expect(svc.viewModel('file:///p/pages/index/index.hml')!.data).toEqual(['other']);
+    expect(svc.viewModel('file:///q/none.hml')).toBeUndefined();
+  });
+  it('CSS: diagnostics (not for LESS) and property completion using the hml', () => {
+    const css = TextDocument.create('file:///p/pages/index/index.css', 'css', 1, '.l:hover { }');
+    const d = svc.validate(css);
+    expect(d).toEqual([
+      expect.objectContaining({
+        code: 'css/unsupported-pseudo',
+        severity: DiagnosticSeverity.Error,
+        source: 'ohjs',
+      }),
+    ]);
+    expect(svc.validate(TextDocument.create('file:///p/a.less', 'less', 1, '.a { &:hover {} }'))).toEqual([]);
+    expect(svc.validate(TextDocument.create('file:///p/a.js', 'javascript', 1, 'x'))).toEqual([]);
+    files.set('file:///p/pages/index/index.hml', '<list class="l"></list>');
+    const items = svc.complete(css, { line: 0, character: 11 });
+    const fd = items.find((i) => i.label === 'flex-direction')!;
+    expect(fd).toMatchObject({
+      kind: CompletionItemKind.Property,
+      detail: '<list>',
+      textEdit: { newText: 'flex-direction: ' },
+    });
+    expect(items.some((i) => i.label === 'text-overflow')).toBe(false);
+    files.delete('file:///p/pages/index/index.hml');
+    expect(svc.complete(css, { line: 0, character: 11 }).some((i) => i.label === 'text-overflow')).toBe(true);
+    svc.forget(css.uri);
+    expect(
+      svc.complete(TextDocument.create('file:///p/a.js', 'javascript', 1, 'x'), { line: 0, character: 0 }),
+    ).toEqual([]);
+    expect(InsertTextFormat.PlainText).toBe(1);
+  });
+});

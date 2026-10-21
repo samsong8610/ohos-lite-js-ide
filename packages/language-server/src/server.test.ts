@@ -2,6 +2,10 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { pathToFileURL } from 'url';
 import { PassThrough } from 'stream';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
@@ -162,6 +166,49 @@ describe('language server over LSP', () => {
       position: { line: 0, character: 0 },
     });
     expect(none).toEqual([]);
+  });
+
+  it('reads the page .js from disk, then from the open buffer; validates CSS', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-srv-'));
+    fs.writeFileSync(path.join(dir, 'index.js'), 'export default { data: { fromDisk: 1 } };');
+    const hmlUri = pathToFileURL(path.join(dir, 'index.hml')).href;
+    const jsUri = pathToFileURL(path.join(dir, 'index.js')).href;
+    const cssUri = pathToFileURL(path.join(dir, 'index.css')).href;
+    const h = await start();
+    open(h, '<text>{{}}</text>', hmlUri);
+    await h.waitDiagnostics(hmlUri);
+    const labels = async () =>
+      (
+        (await h.client.sendRequest('textDocument/completion', {
+          textDocument: { uri: hmlUri },
+          position: { line: 0, character: 8 },
+        })) as Array<{ label: string }>
+      ).map((i) => i.label);
+    expect(await labels()).toContain('fromDisk');
+    h.client.sendNotification('textDocument/didOpen', {
+      textDocument: {
+        uri: jsUri,
+        languageId: 'javascript',
+        version: 1,
+        text: 'export default { data: { fromBuffer: 1 } };',
+      },
+    });
+    expect(await labels()).toEqual(expect.arrayContaining(['fromBuffer']));
+    h.client.sendNotification('textDocument/didOpen', {
+      textDocument: { uri: cssUri, languageId: 'css', version: 1, text: 'text { color: red; }' },
+    });
+    const d = await h.waitDiagnostics(cssUri);
+    expect(d.map((x) => x.code)).toEqual(['css/unsupported-selector']);
+    fs.rmSync(dir, { recursive: true, force: true });
+    // non-file URIs and missing files are simply absent
+    open(h, '<text>{{}}</text>', 'untitled:x.hml');
+    await h.waitDiagnostics('untitled:x.hml');
+    expect(
+      await h.client.sendRequest('textDocument/completion', {
+        textDocument: { uri: 'untitled:x.hml' },
+        position: { line: 0, character: 8 },
+      }),
+    ).toEqual([expect.objectContaining({ label: '$t' })]);
   });
 
   it('switches SDK via ohjs/sdkChanged and re-validates open documents', async () => {

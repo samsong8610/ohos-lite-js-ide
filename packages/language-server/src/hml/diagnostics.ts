@@ -87,6 +87,14 @@ export function validateHml(
         el.nameRange,
         `Unknown component <${el.tag}> for OpenHarmony ${view.schema.ohVersion}${extra}`,
       );
+    } else if (comp.availability === 'conditional' || comp.availability === 'code-doc-missing') {
+      report(
+        'hml/conditional-component',
+        el.nameRange,
+        comp.availability === 'conditional'
+          ? `<${el.tag}> is only available when the firmware is built with ${comp.feature ?? 'an optional build flag'}; check the device's build`
+          : `<${el.tag}> is registered by the engine but not documented for OpenHarmony ${view.schema.ohVersion}; behaviour may change`,
+      );
     } else if (comp.availability === 'disabled-by-feature') {
       report(
         'hml/component-disabled-by-feature',

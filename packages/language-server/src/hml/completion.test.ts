@@ -141,3 +141,63 @@ describe('completeHml', () => {
     expect(labels('<|', v)).not.toContain('tabs');
   });
 });
+
+describe('ViewModel-aware completion ({{ }} and event handlers)', () => {
+  const vm = {
+    data: ['title', 'items'],
+    computed: ['total'],
+    props: ['size'],
+    methods: ['tap', 'swiped'],
+    lifecycle: ['onInit'],
+  };
+  const items = (marked: string) => {
+    const { doc, offset } = at(marked);
+    return completeHml(doc, offset, view, vm);
+  };
+  it('{{ in text and attribute values offers data, props, computed, methods and $t', () => {
+    const t = items('<text>{{ ti| }}</text>');
+    expect(t.map((i) => i.label)).toEqual(['title', 'items', 'size', 'total', 'tap', 'swiped', '$t']);
+    expect(t[0]).toMatchObject({
+      kind: 'variable',
+      detail: 'data',
+      replace: { start: 9, end: 11 },
+      insertText: 'title',
+    });
+    expect(t.find((i) => i.label === 'tap')!.kind).toBe('method');
+    expect(t.find((i) => i.label === '$t')!.kind).toBe('function');
+    expect(items('<text value="{{|}}"></text>').map((i) => i.label)).toContain('title');
+    expect(items('<text>{{a.|}}</text>')).toEqual([]);
+    expect(items('<text>{{a}} |</text>')).toEqual([]);
+  });
+  it('loop variables from for on the element and its ancestors', () => {
+    const l = (m: string) =>
+      items(m)
+        .filter((i) => i.detail === 'for loop variable')
+        .map((i) => i.label);
+    expect(l('<list><list-item for="{{items}}"><text>{{|}}</text></list-item></list>')).toEqual([
+      '$item',
+      '$idx',
+    ]);
+    expect(l('<div for="{{v in items}}"><text>{{|}}</text></div>')).toEqual(['v', '$idx']);
+    expect(l('<div for="{{(i, v) in items}}"><div for="{{rows}}"><text>{{|}}</text></div></div>')).toEqual([
+      '$item',
+      '$idx',
+      'i',
+      'v',
+    ]);
+    expect(l('<div for><text>{{|}}</text></div>')).toEqual([]);
+  });
+  it('event attribute values offer methods (not lifecycle hooks)', () => {
+    const e = items('<div onclick="t|"></div>');
+    expect(e.map((i) => i.label)).toEqual(['tap', 'swiped']);
+    expect(e[0]).toMatchObject({
+      kind: 'method',
+      detail: 'handler for "click"',
+      replace: { start: 14, end: 15 },
+    });
+    expect(items('<div @swipe="|"></div>').map((i) => i.label)).toEqual(['tap', 'swiped']);
+    expect(items('<div class="|"></div>')).toEqual([]);
+    const { doc, offset } = at('<div onclick="|"></div>');
+    expect(completeHml(doc, offset, view)).toEqual([]);
+  });
+});

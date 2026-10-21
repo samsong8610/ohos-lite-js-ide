@@ -5,8 +5,8 @@
 
 export type RuleSeverity = 'error' | 'warning' | 'information' | 'hint' | 'off';
 
-/** HML rule IDs implemented in this batch (ARCHITECTURE §7.2 rule table; FR-LANG-006). */
-export const HML_RULES = {
+/** Rule IDs and default severities (ARCHITECTURE §7.2 rule table; FR-LANG-006). */
+export const RULES = {
   'hml/syntax': 'error',
   'hml/unknown-component': 'error',
   'hml/component-disabled-by-feature': 'error',
@@ -19,12 +19,18 @@ export const HML_RULES = {
   'hml/invalid-child': 'error',
   'hml/for-with-if': 'warning',
   'hml/empty-event-handler': 'warning',
+  'hml/conditional-component': 'information',
+  'css/unsupported-selector': 'error',
+  'css/unsupported-pseudo': 'error',
 } as const satisfies Record<string, RuleSeverity>;
 
-export type HmlRuleId = keyof typeof HML_RULES;
+export type RuleId = keyof typeof RULES;
+/** @deprecated kept for batch-1 imports; use RULES / RuleId */
+export const HML_RULES = RULES;
+export type HmlRuleId = RuleId;
 
-export function isRuleId(id: string): id is HmlRuleId {
-  return Object.prototype.hasOwnProperty.call(HML_RULES, id);
+export function isRuleId(id: string): id is RuleId {
+  return Object.prototype.hasOwnProperty.call(RULES, id);
 }
 
 /** User settings (`ohjs.lang.rules`) override defaults; unknown IDs and bad values are ignored. */
@@ -34,7 +40,7 @@ export function resolveSeverity(
 ): RuleSeverity {
   const o = overrides?.[id];
   if (o === 'error' || o === 'warning' || o === 'information' || o === 'hint' || o === 'off') return o;
-  return HML_RULES[id];
+  return RULES[id];
 }
 
 export interface Suppressions {

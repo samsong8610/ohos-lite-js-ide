@@ -108,6 +108,12 @@ importers:
       '@ohjs/schemas':
         specifier: workspace:*
         version: link:../schemas
+      acorn:
+        specifier: ^8.19.0
+        version: 8.19.0
+      acorn-loose:
+        specifier: ^8.5.2
+        version: 8.5.2
       vscode-languageserver:
         specifier: ^10.1.2
         version: 10.1.2
@@ -1052,6 +1058,10 @@ packages:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
+
+  acorn-loose@8.5.2:
+    resolution: {integrity: sha512-PPvV6g8UGMGgjrMu+n/f9E/tCSkNQ2Y97eFvuVdJfG11+xdIeDcLyNdC8SHcrHbRqkfwLASdplyR6B6sKM1U4A==}
+    engines: {node: '>=0.4.0'}
 
   acorn@8.19.0:
     resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
@@ -3509,6 +3519,10 @@ snapshots:
       - supports-color
 
   acorn-jsx@5.3.2(acorn@8.19.0):
+    dependencies:
+      acorn: 8.19.0
+
+  acorn-loose@8.5.2:
     dependencies:
       acorn: 8.19.0
 

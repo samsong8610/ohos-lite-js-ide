@@ -6,8 +6,10 @@ import type { FieldSchema } from '@ohjs/schemas';
 import { classifyAttribute } from './attribute-names';
 import { elementAt, type HmlDocument, type HmlElement, type Range } from './parser';
 import type { SchemaView } from './schema-view';
+import type { ViewModelSymbols } from '../js/viewmodel';
 
-export type HmlCompletionKind = 'component' | 'closeTag' | 'attribute' | 'directive' | 'event';
+export type HmlCompletionKind =
+  'component' | 'closeTag' | 'attribute' | 'directive' | 'event' | 'variable' | 'method' | 'function';
 
 export interface HmlCompletion {
   label: string;
@@ -26,7 +28,8 @@ export type CompletionContext =
   | { kind: 'tagName'; prefix: string; range: Range; parent?: HmlElement }
   | { kind: 'closeTag'; prefix: string; range: Range; open?: HmlElement }
   | { kind: 'attributeName'; prefix: string; range: Range; element: HmlElement }
-  | { kind: 'attributeValue'; element: HmlElement; attribute: string }
+  | { kind: 'attributeValue'; element: HmlElement; attribute: string; prefix: string; range: Range }
+  | { kind: 'expression'; element?: HmlElement; prefix: string; range: Range; member: boolean }
   | { kind: 'none' };
 
 const TAG_CHAR = /[A-Za-z0-9_-]/;
@@ -36,6 +39,24 @@ const ATTR_CHAR = /[^\s"'<>/=]/;
 export function completionContext(doc: HmlDocument, offset: number): CompletionContext {
   const t = doc.text;
   if (doc.comments.some((c) => c.range.start < offset && offset < c.range.end)) return { kind: 'none' };
+  const open = t.lastIndexOf('{{', offset - 2 >= 0 ? offset - 2 : 0);
+  if (open >= 0 && open + 2 <= offset) {
+    const between = t.slice(open + 2, offset);
+    if (!between.includes('}}') && !between.includes('<')) {
+      let ws = offset;
+      while (ws > open + 2 && /[\w$]/.test(t[ws - 1]!)) ws--;
+      let we = offset;
+      while (we < t.length && /[\w$]/.test(t[we]!)) we++;
+      const el = elementAt(doc, offset);
+      return {
+        kind: 'expression',
+        prefix: t.slice(ws, offset),
+        range: { start: ws, end: we },
+        member: t[ws - 1] === '.',
+        ...(el ? { element: el } : {}),
+      };
+    }
+  }
   let s = offset;
   while (s > 0 && TAG_CHAR.test(t[s - 1]!)) s--;
   let e = offset;
@@ -68,8 +89,19 @@ export function completionContext(doc: HmlDocument, offset: number): CompletionC
   )
     return { kind: 'none' };
   for (const a of el.attributes) {
-    if (a.valueRange && offset >= a.valueRange.start && offset <= a.valueRange.end)
-      return { kind: 'attributeValue', element: el, attribute: a.name };
+    if (a.valueRange && offset >= a.valueRange.start && offset <= a.valueRange.end) {
+      let ws = offset;
+      while (ws > a.valueRange.start && /[\w$]/.test(t[ws - 1]!)) ws--;
+      let we = offset;
+      while (we < a.valueRange.end && /[\w$]/.test(t[we]!)) we++;
+      return {
+        kind: 'attributeValue',
+        element: el,
+        attribute: a.name,
+        prefix: t.slice(ws, offset),
+        range: { start: ws, end: we },
+      };
+    }
   }
   let as = offset;
   while (as > 0 && ATTR_CHAR.test(t[as - 1]!)) as--;
@@ -99,9 +131,49 @@ function docOf(f: FieldSchema): { detail?: string; documentation?: string } {
 }
 
 /** HML completion (FR-LANG-004 subset): tags constrained by the parent, attributes, directives and events. */
-export function completeHml(doc: HmlDocument, offset: number, view: SchemaView): HmlCompletion[] {
+export function completeHml(
+  doc: HmlDocument,
+  offset: number,
+  view: SchemaView,
+  vm?: ViewModelSymbols,
+): HmlCompletion[] {
   const ctx = completionContext(doc, offset);
   switch (ctx.kind) {
+    case 'expression': {
+      if (ctx.member) return [];
+      const items: HmlCompletion[] = [];
+      const add = (label: string, kind: HmlCompletionKind, detail: string, sort: string): void => {
+        if (!items.some((i) => i.label === label))
+          items.push({
+            label,
+            kind,
+            insertText: label,
+            snippet: false,
+            replace: ctx.range,
+            detail,
+            sortText: `${sort}${label}`,
+          });
+      };
+      for (const v of loopVariables(ctx.element)) add(v, 'variable', 'for loop variable', '0');
+      for (const d of vm?.data ?? []) add(d, 'variable', 'data', '1');
+      for (const d of vm?.props ?? []) add(d, 'variable', 'props', '1');
+      for (const d of vm?.computed ?? []) add(d, 'variable', 'computed', '1');
+      for (const m of vm?.methods ?? []) add(m, 'method', 'method', '2');
+      add('$t', 'function', 'i18n: $t(key)', '3');
+      return items;
+    }
+    case 'attributeValue': {
+      const k = classifyAttribute(ctx.attribute);
+      if (k.kind !== 'event' || view.attribute(ctx.element.tag, ctx.attribute)) return [];
+      return (vm?.methods ?? []).map((m) => ({
+        label: m,
+        kind: 'method' as const,
+        insertText: m,
+        snippet: false,
+        replace: ctx.range,
+        detail: `handler for "${k.event}"`,
+      }));
+    }
     case 'tagName': {
       const parent = ctx.parent && view.component(ctx.parent.tag) ? ctx.parent.tag : undefined;
       return view
@@ -174,4 +246,23 @@ export function completeHml(doc: HmlDocument, offset: number, view: SchemaView):
     default:
       return [];
   }
+}
+
+/**
+ * Loop variables visible at an element: `for="{{list}}"` → $item, $idx; `for="{{v in list}}"` → v, $idx;
+ * `for="{{(i, v) in list}}"` → i, v. Collected from the element and its ancestors.
+ */
+export function loopVariables(el: HmlElement | undefined): string[] {
+  const out: string[] = [];
+  for (let e = el; e; e = e.parent) {
+    const f = e.attributes.find((a) => a.name === 'for');
+    if (!f || f.value === undefined) continue;
+    const inner = f.value.replace(/^\s*\{\{|\}\}\s*$/g, '').trim();
+    const pair = /^\(\s*([A-Za-z_$][\w$]*)\s*,\s*([A-Za-z_$][\w$]*)\s*\)\s+in\s+/.exec(inner);
+    const single = /^([A-Za-z_$][\w$]*)\s+in\s+/.exec(inner);
+    if (pair) out.push(pair[1]!, pair[2]!);
+    else if (single) out.push(single[1]!, '$idx');
+    else out.push('$item', '$idx');
+  }
+  return [...new Set(out)];
 }

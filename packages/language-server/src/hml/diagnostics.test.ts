@@ -37,7 +37,15 @@ describe('HML rules: each with a positive and a negative case (FR-LANG-006)', ()
     ]);
     expect(d[0]!.message).toBe('<tabs> is compiled out for target linux (FEATURE_COMPONENT_TABS is off)');
     expect(d[1]!.message).toBe('<tabs2> is compiled out for target linux');
-    expect(rules('<video></video><camera></camera>')).toEqual([]);
+    // allowed (Q9), but flagged with an information-level hint
+    const c = run('<video></video><camera></camera>');
+    expect(c.map((x) => [x.rule, x.severity])).toEqual([
+      ['hml/conditional-component', 'information'],
+      ['hml/conditional-component', 'information'],
+    ]);
+    expect(c[0]!.message).toContain('an optional build flag');
+    expect(c[1]!.message).toContain('not documented for OpenHarmony 9.9');
+    expect(rules('<free></free>')).toEqual([]);
   });
   it('hml/invalid-child: allow-list, none, except', () => {
     expect(run('<list><text></text></list>')[0]!.message).toBe(
@@ -104,7 +112,7 @@ describe('rule switches and suppression comments', () => {
     expect(resolveSeverity('hml/for-with-if', undefined)).toBe('warning');
     expect(isRuleId('hml/syntax')).toBe(true);
     expect(isRuleId('toString')).toBe(false);
-    expect(Object.keys(HML_RULES)).toHaveLength(12);
+    expect(Object.keys(HML_RULES)).toHaveLength(15);
   });
   it('file-level and next-line comments', () => {
     expect(rules('<!-- ohjs-disable hml/unknown-component -->\n<foo></foo>')).toEqual([]);
@@ -138,7 +146,9 @@ describe('against the real generated data packs', () => {
   <video src="a.mp4"></video>
   <stack><text>hello</text></stack>
 </div>`;
-      expect(validateHml(parseHml(ok), v)).toEqual([]);
+      const okDiags = validateHml(parseHml(ok), v);
+      expect(okDiags.map((d) => d.rule)).toEqual(['hml/conditional-component']);
+      expect(okDiags[0]!.message).toContain('FEATURE_COMPONENT_VIDEO');
       const bad = '<div><button></button><tabs></tabs><list><text></text></list><text foo="1"></text></div>';
       expect(validateHml(parseHml(bad), v).map((d) => d.rule)).toEqual([
         'hml/unknown-component',
