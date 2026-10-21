@@ -3093,9 +3093,11 @@
         }
       ],
       "since": 4,
-      "children": [
-        "list"
-      ]
+      "children": {
+        "except": [
+          "list"
+        ]
+      }
     },
     "switch": {
       "tag": "switch",

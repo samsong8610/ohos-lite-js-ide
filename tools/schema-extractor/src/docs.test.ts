@@ -88,6 +88,9 @@ paragraph
     expect(parseDocPage('## 子组件\n\n不支持。\n', 'f', 't', 'basic').children).toBe('none');
     expect(parseDocPage('## 子组件\n\n支持。\n', 'f', 't', 'basic').children).toBe('any');
     expect(parseDocPage('# x\n', 'f', 't', 'basic').children).toBeUndefined();
+    expect(parseDocPage('## 子组件\n\n支持除&lt;list&gt;之外的子组件。\n', 'f', 't', 'c').children).toEqual({
+      except: ['list'],
+    });
     const p = parseDocPage('| 名称 | x |\n| -- | -- |\n| click | - |\n', 'f', '*', 'common', 'events');
     expect(p.sections.events!.map((e) => e.name)).toEqual(['click']);
   });

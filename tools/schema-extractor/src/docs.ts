@@ -19,8 +19,8 @@ export interface DocPage {
   tag: string;
   category: string;
   file: string;
-  /** 'any' | 'none' | list of allowed child tags */
-  children?: 'any' | 'none' | string[];
+  /** 'any' | 'none' | list of allowed child tags | tags excluded from an otherwise open set */
+  children?: 'any' | 'none' | string[] | { except: string[] };
   sections: Partial<Record<DocSection, DocEntry[]>>;
   /** API version the component appeared in ("从API version 4 开始支持") */
   since?: number;
@@ -103,6 +103,8 @@ function parseChildren(text: string): DocPage['children'] {
   const tags = [...t.matchAll(/&lt;\[?([a-z][a-z-]*)\]?/g), ...t.matchAll(/<\[([a-z][a-z-]*)\]/g)].map(
     (m) => m[1]!,
   );
+  // 支持除<list>之外的子组件 / all children except <list>
+  if (tags.length && /除.*之外|except/i.test(t)) return { except: [...new Set(tags)] };
   if (tags.length) return [...new Set(tags)];
   return 'any';
 }

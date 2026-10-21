@@ -104,7 +104,18 @@ export const COMPONENTS_FILE_JSON_SCHEMA = {
           availability,
           feature: { type: 'string' },
           since: { type: 'integer' },
-          children: { oneOf: [{ enum: ['any', 'none'] }, names] },
+          children: {
+            oneOf: [
+              { enum: ['any', 'none'] },
+              names,
+              {
+                type: 'object',
+                required: ['except'],
+                additionalProperties: false,
+                properties: { except: names },
+              },
+            ],
+          },
           implClasses: names,
           variants: {
             type: 'array',

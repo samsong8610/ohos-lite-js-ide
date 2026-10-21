@@ -42,8 +42,8 @@ export interface ComponentSchema {
   availability: Availability;
   feature?: string;
   since?: number;
-  /** allowed children: 'any', 'none' or explicit tags (from docs) */
-  children?: 'any' | 'none' | string[];
+  /** allowed children (from docs): 'any', 'none', an allow-list, or `{ except }` deny-list */
+  children?: 'any' | 'none' | string[] | { except: string[] };
   implClasses: string[];
   variants: VariantSchema[];
   attributes: Record<string, FieldSchema>;
