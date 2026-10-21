@@ -1,0 +1,274 @@
+{
+  "schemaFormat": 1,
+  "ohVersion": "6.1-LTS",
+  "target": "linux",
+  "generator": "@ohjs/schema-extractor 0.1.0",
+  "categories": [
+    "system",
+    "ohos"
+  ],
+  "modules": [
+    {
+      "name": "app",
+      "availability": "available",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "name": "audio",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_AUDIO",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 106
+        }
+      ]
+    },
+    {
+      "name": "battery",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_BATTERY",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "name": "brightness",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_BRIGHTNESS",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "name": "capability",
+      "availability": "available",
+      "feature": "FEATURE_ACELITE_SYSTEM_CAPABILITY",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 144
+        }
+      ]
+    },
+    {
+      "name": "cipher",
+      "availability": "available",
+      "feature": "ENABLE_MODULE_CIPHER",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "name": "configuration",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_CONFIGURATION",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 141
+        }
+      ]
+    },
+    {
+      "name": "device",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_DEVICE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 124
+        }
+      ]
+    },
+    {
+      "name": "deviceAttest",
+      "availability": "available",
+      "feature": "FEATURE_COMPONENT_DEVICE_ATTEST",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 153
+        }
+      ]
+    },
+    {
+      "name": "deviceInfo",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_DEVICE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "name": "devicemanager",
+      "availability": "disabled-by-feature",
+      "feature": "ENABLE_MODULE_DM_LITE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 147
+        }
+      ]
+    },
+    {
+      "name": "dfx",
+      "availability": "available",
+      "feature": "FEATURE_ACELITE_DFX_MODULE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 109
+        }
+      ]
+    },
+    {
+      "name": "fetch",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_SUPPORT_HTTP",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 103
+        }
+      ]
+    },
+    {
+      "name": "file",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_STORAGE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 120
+        }
+      ]
+    },
+    {
+      "name": "geolocation",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_GEO",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "name": "hilog",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_OHOS_HILOG",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 150
+        }
+      ]
+    },
+    {
+      "name": "prompt",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_DIALOG",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 116
+        }
+      ]
+    },
+    {
+      "name": "router",
+      "availability": "available",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "name": "security.huks",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_ACELITE_HUKS",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 156
+        }
+      ]
+    },
+    {
+      "name": "sensor",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_SENSOR",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 132
+        }
+      ]
+    },
+    {
+      "name": "storage",
+      "availability": "available",
+      "feature": "FEATURE_MODULE_STORAGE",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "name": "vibrator",
+      "availability": "disabled-by-feature",
+      "feature": "FEATURE_MODULE_SENSOR",
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/module_manager/ohos_module_config.h",
+          "line": 131
+        }
+      ]
+    }
+  ]
+}

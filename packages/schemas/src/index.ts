@@ -6,7 +6,7 @@ import Ajv from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { COMPONENTS_FILE_JSON_SCHEMA } from './file-schema';
-import type { ComponentSchema, ComponentsSchemaFile, FieldSchema } from './types';
+import type { ComponentSchema, ComponentsSchemaFile, FieldSchema, SystemModulesFile } from './types';
 
 export * from './types';
 export { COMPONENTS_FILE_JSON_SCHEMA } from './file-schema';
@@ -77,4 +77,42 @@ export function fieldsOf(
   if (!c) return {};
   const common = kind === 'methods' ? {} : file.common[kind];
   return { ...common, ...c[kind] };
+}
+
+/** Structural check for `system-modules.json` (small format; no JSON Schema needed). */
+export function validateSystemModulesFile(data: unknown): ValidationResult {
+  const errors: string[] = [];
+  const d = data as Partial<SystemModulesFile> | null;
+  if (!d || typeof d !== 'object') return { valid: false, errors: ['/ must be an object'] };
+  if (d.schemaFormat !== 1) errors.push('/schemaFormat must be 1');
+  for (const k of ['ohVersion', 'target', 'generator'] as const)
+    if (typeof d[k] !== 'string') errors.push(`/${k} must be a string`);
+  if (!Array.isArray(d.categories) || !d.categories.every((c) => typeof c === 'string'))
+    errors.push('/categories must be a string array');
+  if (!Array.isArray(d.modules)) errors.push('/modules must be an array');
+  else
+    d.modules.forEach((m, i) => {
+      if (!m || typeof m.name !== 'string') errors.push(`/modules/${i}/name must be a string`);
+      if (!m || !['available', 'disabled-by-feature', 'conditional'].includes(m.availability))
+        errors.push(`/modules/${i}/availability is invalid`);
+    });
+  return { valid: !errors.length, errors };
+}
+
+/** Loads `<dir>/<version>/system-modules.json`; undefined when the pack has none. */
+export function loadSystemModules(
+  ohVersion: string,
+  dataDir = DEFAULT_DATA_DIR,
+): SystemModulesFile | undefined {
+  const file = path.join(dataDir, versionDirName(ohVersion), 'system-modules.json');
+  if (!fs.existsSync(file)) return undefined;
+  let data: unknown;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (e) {
+    throw new SchemaLoadError(`${file}: invalid JSON (${(e as Error).message})`);
+  }
+  const v = validateSystemModulesFile(data);
+  if (!v.valid) throw new SchemaLoadError(`${file}: ${v.errors.join('; ')}`);
+  return data as SystemModulesFile;
 }

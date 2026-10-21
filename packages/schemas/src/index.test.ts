@@ -10,6 +10,8 @@ import {
   fieldsOf,
   listSchemaVersions,
   loadComponentsSchema,
+  loadSystemModules,
+  validateSystemModulesFile,
   SchemaLoadError,
   validateComponentsFile,
   versionDirName,
@@ -57,6 +59,48 @@ describe('@ohjs/schemas', () => {
     fs.writeFileSync(path.join(d, 'v1/components.json'), '{}');
     expect(() => loadComponentsSchema('1', d)).toThrow(/must have required property/);
     expect(listSchemaVersions(d)).toEqual(['v1']);
+    fs.rmSync(d, { recursive: true, force: true });
+  });
+});
+
+describe('system-modules.json', () => {
+  it('loads the committed packs for both versions', () => {
+    for (const v of ['5.0.3', '6.1-lts']) {
+      const m = loadSystemModules(v)!;
+      expect(m.categories).toEqual(['system', 'ohos']);
+      expect(m.modules.find((x) => x.name === 'router')!.availability).toBe('available');
+    }
+  });
+  it('validation and load errors', () => {
+    expect(validateSystemModulesFile(null).valid).toBe(false);
+    expect(
+      validateSystemModulesFile({ schemaFormat: 2, categories: [1], modules: [{ availability: 'x' }] })
+        .errors,
+    ).toEqual([
+      '/schemaFormat must be 1',
+      '/ohVersion must be a string',
+      '/target must be a string',
+      '/generator must be a string',
+      '/categories must be a string array',
+      '/modules/0/name must be a string',
+      '/modules/0/availability is invalid',
+    ]);
+    expect(
+      validateSystemModulesFile({
+        schemaFormat: 1,
+        ohVersion: 'a',
+        target: 't',
+        generator: 'g',
+        categories: [],
+      }).errors,
+    ).toEqual(['/modules must be an array']);
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-sm-'));
+    expect(loadSystemModules('9.9', d)).toBeUndefined();
+    fs.mkdirSync(path.join(d, 'v9.9'));
+    fs.writeFileSync(path.join(d, 'v9.9', 'system-modules.json'), '{');
+    expect(() => loadSystemModules('9.9', d)).toThrow(/invalid JSON/);
+    fs.writeFileSync(path.join(d, 'v9.9', 'system-modules.json'), '{}');
+    expect(() => loadSystemModules('9.9', d)).toThrow(SchemaLoadError);
     fs.rmSync(d, { recursive: true, force: true });
   });
 });

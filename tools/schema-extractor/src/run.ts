@@ -4,10 +4,15 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { validateComponentsFile, versionDirName, type ComponentsSchemaFile } from '@ohjs/schemas';
+import {
+  validateComponentsFile,
+  validateSystemModulesFile,
+  versionDirName,
+  type ComponentsSchemaFile,
+} from '@ohjs/schemas';
 import { missingSources, type SourcesConfig } from './config';
 import { diffSchemas, renderDiffMarkdown } from './diff';
-import { generateSchema } from './generate';
+import { generateSchema, generateSystemModules } from './generate';
 
 export interface RunResult {
   /** files written (generate) or found stale (check) */
@@ -42,6 +47,11 @@ export function buildOutputs(
     );
     schemas.set(set.ohVersion, schema);
     outputs.set(`${versionDirName(set.ohVersion)}/components.json`, serialize(schema));
+    const modules = generateSystemModules(set);
+    const mv = validateSystemModulesFile(modules);
+    if (!mv.valid)
+      throw new Error(`generated system modules for ${set.ohVersion} are invalid: ${mv.errors.join('; ')}`);
+    outputs.set(`${versionDirName(set.ohVersion)}/system-modules.json`, serialize(modules));
   }
   for (const d of cfg.diff) {
     const a = schemas.get(d.from);

@@ -57,6 +57,18 @@ export function writeMiniSources(variant: 'a' | 'b' = 'a'): {
     ].join('\n'),
   );
   w(
+    path.join(engine, 'frameworks/module_manager/ohos_module_config.h'),
+    [
+      'const Module OHOS_MODULES[] = {',
+      '    {"app", InitAppModule},',
+      '    {"router", InitRouterModule},',
+      '#if (FEATURE_SUPPORT_HTTP == 1)',
+      '    {"fetch", InitFetchModule},',
+      '#endif',
+      '};',
+    ].join('\n'),
+  );
+  w(
     path.join(engine, 'frameworks/targets/linux/acelite_config.h'),
     [
       '#ifndef ACELITE_CONFIG_H',

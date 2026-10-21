@@ -21,6 +21,8 @@ import { baseClassOf, classToFileStem, parseComponentFactory } from './factory';
 import { featureSwitches, parseAceliteConfig, type FeatureValue } from './feature-macros';
 import { readGitInfo } from './git-info';
 import { keysByEnum, parseKeysH, type KeywordEntry } from './keys-h';
+import { buildSystemModules, MODULE_CONFIG, parseModuleConfig } from './system-modules';
+import type { SystemModulesFile } from '@ohjs/schemas';
 
 export const GENERATOR = '@ohjs/schema-extractor 0.1.0';
 
@@ -422,4 +424,14 @@ export function generateSchema(set: SourceSet): ComponentsSchemaFile {
     },
     warnings: [...new Set(ctx.warnings)].sort(),
   };
+}
+
+/** `<version>/system-modules.json` from module_manager/ohos_module_config.h + targets/<target>/acelite_config.h. */
+export function generateSystemModules(set: SourceSet): SystemModulesFile {
+  const features = featureSwitches(parseAceliteConfig(readRel(set.engine, PATHS.config(set.target))));
+  return buildSystemModules(parseModuleConfig(readRel(set.engine, MODULE_CONFIG)), features, {
+    ohVersion: set.ohVersion,
+    target: set.target,
+    generator: GENERATOR,
+  });
 }

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { loadComponentsSchema } from '@ohjs/schemas';
+import { loadComponentsSchema, loadSystemModules } from '@ohjs/schemas';
 import { expandVars, missingSources, parseSourcesConfig, type SourcesConfig } from './config';
 import { diffSchemas, renderDiffMarkdown } from './diff';
 import { generateSchema } from './generate';
@@ -177,7 +177,14 @@ describe('generate / check', () => {
       'diff-5.0.3-6.1-lts.md',
       'sources.lock.json',
       'v5.0.3/components.json',
+      'v5.0.3/system-modules.json',
       'v6.1-lts/components.json',
+      'v6.1-lts/system-modules.json',
+    ]);
+    expect(loadSystemModules('5.0.3', out)!.modules.map((m) => `${m.name}:${m.availability}`)).toEqual([
+      'app:available',
+      'fetch:disabled-by-feature',
+      'router:available',
     ]);
     expect(logs[0]).toMatch(/^5\.0\.3: 4 components, \d+ warnings$/);
     expect(loadComponentsSchema('6.1-LTS', out).provisional).toBe(true);
@@ -199,7 +206,7 @@ describe('generate / check', () => {
     const c = cfg();
     c.versions[1]!.engine = '/nonexistent/engine';
     const { outputs, skipped } = buildOutputs(c);
-    expect([...outputs.keys()]).toEqual(['v5.0.3/components.json']);
+    expect([...outputs.keys()]).toEqual(['v5.0.3/components.json', 'v5.0.3/system-modules.json']);
     expect(skipped).toEqual([
       '6.1-LTS: missing /nonexistent/engine',
       'diff 5.0.3 → 6.1-LTS: a side was skipped',

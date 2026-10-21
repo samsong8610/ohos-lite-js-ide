@@ -86,3 +86,26 @@ export interface ComponentsSchemaFile {
   };
   warnings: string[];
 }
+
+/** availability of a `@system.*` / `@ohos.*` native module for the target */
+export type ModuleAvailability = 'available' | 'disabled-by-feature' | 'conditional';
+
+export interface SystemModuleSchema {
+  /** name after the category prefix: `router` for `@system.router` */
+  name: string;
+  availability: ModuleAvailability;
+  /** FEATURE_* / ENABLE_* macro guarding the registration */
+  feature?: string;
+  evidence: Evidence[];
+}
+
+/** `<version>/system-modules.json`: native JS modules registered in OHOS_MODULES (module_manager/ohos_module_config.h). */
+export interface SystemModulesFile {
+  schemaFormat: 1;
+  ohVersion: string;
+  target: string;
+  generator: string;
+  /** accepted import prefixes: `@system.` and `@ohos.` (ModuleManager CATEGORY_SYSTEM / CATEGORY_OHOS) */
+  categories: string[];
+  modules: SystemModuleSchema[];
+}

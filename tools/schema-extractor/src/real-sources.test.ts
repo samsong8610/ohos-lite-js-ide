@@ -7,7 +7,7 @@ import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { loadComponentsSchema } from '@ohjs/schemas';
 import { missingSources, parseSourcesConfig } from './config';
-import { generateSchema } from './generate';
+import { generateSchema, generateSystemModules } from './generate';
 
 // Integration test against the real OpenHarmony checkouts; skipped (not failed) when they are absent.
 const cfg = parseSourcesConfig(fs.readFileSync(path.join(__dirname, '../sources.json'), 'utf8'), process.env);
@@ -16,6 +16,29 @@ const have = missingSources(v503).length === 0;
 
 describe.skipIf(!have)('real OpenHarmony 5.0.3 sources', () => {
   const s = have ? generateSchema(v503) : undefined!;
+  it('linux target native modules (ohos_module_config.h + acelite_config.h)', () => {
+    const m = generateSystemModules(v503);
+    const avail = m.modules.filter((x) => x.availability === 'available').map((x) => x.name);
+    expect(avail).toEqual([
+      'app',
+      'audio',
+      'capability',
+      'cipher',
+      'device',
+      'deviceAttest',
+      'deviceInfo',
+      'dfx',
+      'file',
+      'hilog',
+      'prompt',
+      'router',
+      'storage',
+    ]);
+    expect(m.modules.find((x) => x.name === 'fetch')).toMatchObject({
+      availability: 'disabled-by-feature',
+      feature: 'FEATURE_SUPPORT_HTTP',
+    });
+  });
   it('extracts the 24 factory components', () => {
     expect(Object.keys(s.components)).toHaveLength(24);
     for (const t of [
