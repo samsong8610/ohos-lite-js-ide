@@ -1,0 +1,42 @@
+# GitHub mirror CI (ARCHITECTURE §15.1): Windows is the tier-1 platform; AtomGit has no Windows runner.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ci:build
+      - name: lint (windows + ubuntu only)
+        if: matrix.os != 'macos-latest'
+        run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test:coverage
+      - name: integration smoke (xvfb on linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: xvfb-run -a pnpm run test:integration
+      - name: integration smoke
+        if: matrix.os == 'windows-latest'
+        run: pnpm run test:integration
+      - run: pnpm run ci:package
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: coverage-and-vsix
+          path: |
+            coverage/
+            packages/extension/*.vsix

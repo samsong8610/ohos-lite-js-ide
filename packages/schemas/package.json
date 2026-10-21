@@ -1,0 +1,13 @@
+{
+  "name": "@ohjs/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Versioned ArkUI.Lite component schema data packs and loader",
+  "license": "Apache-2.0",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "dependencies": {}
+}

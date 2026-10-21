@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/transport-hdc" },
+    { "path": "packages/transport-ssh" },
+    { "path": "packages/transport-serial" },
+    { "path": "packages/build" },
+    { "path": "packages/schemas" },
+    { "path": "packages/language-server" },
+    { "path": "packages/ts-plugin" },
+    { "path": "packages/debug-adapter" },
+    { "path": "packages/test-kit" },
+    { "path": "packages/extension" },
+    { "path": "tools/schema-extractor" }
+  ]
+}

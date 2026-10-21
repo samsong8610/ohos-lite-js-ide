@@ -1,0 +1,15 @@
+{
+  "name": "@ohjs/transport-hdc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HdcTransport, hdc output parsers and fport management",
+  "license": "Apache-2.0",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "dependencies": {
+    "@ohjs/core": "workspace:*"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "types": ["node", "vscode"],
+    "baseUrl": ".",
+    "paths": {
+      "@ohjs/core": ["packages/core/src/index.ts"],
+      "@ohjs/transport-hdc": ["packages/transport-hdc/src/index.ts"],
+      "@ohjs/schemas": ["packages/schemas/src/index.ts"],
+      "@ohjs/test-kit": ["packages/test-kit/src/index.ts"],
+      "@ohjs/schema-extractor": ["tools/schema-extractor/src/index.ts"]
+    }
+  },
+  "include": ["packages/*/src/**/*.ts", "tools/*/src/**/*.ts", "vitest.config.ts"]
+}

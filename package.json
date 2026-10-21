@@ -1,0 +1,44 @@
+{
+  "name": "ohos-lite-js-ide-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VS Code IDE for OpenHarmony small-system (ArkUI.Lite JS) applications",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "tsc -b && pnpm -r --if-present run bundle",
+    "typecheck": "tsc -b && tsc -p tsconfig.test.json",
+    "clean": "tsc -b --clean && pnpm -r --if-present run clean",
+    "lint": "eslint . --max-warnings=0 && prettier --check . && node scripts/check-license-headers.mjs",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "pnpm --filter ohos-lite-js-ide run test:integration",
+    "schema:generate": "pnpm --filter @ohjs/schema-extractor run generate",
+    "schema:check": "pnpm --filter @ohjs/schema-extractor run check",
+    "ci:build": "pnpm run build",
+    "ci:test": "pnpm run lint && pnpm run test:coverage",
+    "ci:package": "pnpm --filter ohos-lite-js-ide run package"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^20.19.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^3.2.4",
+    "@types/vscode": "~1.140.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

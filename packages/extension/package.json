@@ -1,0 +1,86 @@
+{
+  "name": "ohos-lite-js-ide",
+  "displayName": "OpenHarmony Lite JS IDE",
+  "description": "Develop, deploy and debug ArkUI.Lite (JS) applications for OpenHarmony small-system devices",
+  "version": "0.1.0",
+  "publisher": "ohos-lite-js-ide",
+  "license": "Apache-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://atomgit.com/ohos-lite-js-ide/ohos-lite-js-ide.git"
+  },
+  "engines": {
+    "vscode": "^1.143.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "OpenHarmony",
+    "ArkUI",
+    "HML",
+    "JerryScript",
+    "hdc"
+  ],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "activationEvents": [
+    "workspaceContains:**/src/main/config.json"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%capabilities.untrusted%"
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "configuration": {
+      "title": "OpenHarmony Lite JS",
+      "properties": {
+        "ohjs.tools.hdcPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "%config.tools.hdcPath%"
+        },
+        "ohjs.device.profile": {
+          "type": "string",
+          "default": "2k0300-1024x768",
+          "scope": "resource",
+          "description": "%config.device.profile%"
+        },
+        "ohjs.advanced.outputEncoding": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "utf8",
+            "gbk"
+          ],
+          "default": "auto",
+          "scope": "machine",
+          "description": "%config.advanced.outputEncoding%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "bundle": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "test:integration": "pnpm run bundle && tsc -p test/integration/tsconfig.json && node out-test/runTest.js",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/vscode": "~1.140.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
+    "esbuild": "^0.25.11",
+    "mocha": "^11.7.4"
+  }
+}

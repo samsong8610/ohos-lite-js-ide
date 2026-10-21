@@ -1,0 +1,12 @@
+{
+  "app": { "bundleName": "com.example.ohjs.smoke", "vendor": "example", "version": { "code": 1, "name": "1.0.0" } },
+  "deviceConfig": {},
+  "module": {
+    "package": "com.example.ohjs.smoke",
+    "name": ".MyApplication",
+    "deviceType": ["smartVision"],
+    "distro": { "deliveryWithInstall": true, "moduleName": "entry", "moduleType": "entry" },
+    "abilities": [{ "name": "default", "label": "smoke", "type": "page", "launchType": "standard", "srcLanguage": "js" }],
+    "js": [{ "name": "default", "pages": ["pages/index/index"] }]
+  }
+}

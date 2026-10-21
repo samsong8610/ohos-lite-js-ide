@@ -1,0 +1,12 @@
+node_modules
+out
+dist
+coverage
+pnpm-lock.yaml
+LICENSE
+packages/schemas/v*/
+packages/schemas/diff-*.md
+packages/schemas/sources.lock.json
+**/fixtures/**
+**/__snapshots__/**
+.vscode-test

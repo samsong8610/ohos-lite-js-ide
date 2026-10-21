@@ -1,0 +1,15 @@
+{
+  "name": "@ohjs/build",
+  "version": "0.1.0",
+  "private": true,
+  "description": "IBuildBackend: hvigor / ace-loader backends, HapPacker, SnapshotChecker (M2)",
+  "license": "Apache-2.0",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "dependencies": {
+    "@ohjs/core": "workspace:*"
+  }
+}

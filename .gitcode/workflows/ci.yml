@@ -1,0 +1,31 @@
+# AtomGit Action pipeline (GitHub Actions compatible syntax, .gitcode/workflows/).
+# AtomGit hosted runners are Linux only (ubuntu-latest / euler-latest); CI runs mocks only (NFR-TST-005).
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: enable pnpm
+        run: corepack enable && corepack prepare pnpm@10.34.6 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run ci:build
+      - run: pnpm run typecheck
+      - name: schema --check (skips with a warning when OpenHarmony sources are not mounted)
+        run: pnpm run schema:check
+      - name: unit tests + coverage gate (overall >= 80%, parsers/schema >= 90%)
+        run: pnpm run test:coverage
+      - name: integration smoke (@vscode/test-electron under xvfb)
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libnss3 libasound2t64 libgbm1 || true; xvfb-run -a pnpm run test:integration
+      - run: pnpm run ci:package
+      - name: VSIX size gate (<= 20 MB, NFR-PERF-005)
+        run: node scripts/check-vsix-size.mjs packages/extension 20

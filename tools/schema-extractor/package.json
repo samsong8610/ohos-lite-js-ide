@@ -1,0 +1,19 @@
+{
+  "name": "@ohjs/schema-extractor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extracts versioned component schemas from OpenHarmony sources",
+  "license": "Apache-2.0",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "dependencies": {
+    "@ohjs/schemas": "workspace:*"
+  },
+  "scripts": {
+    "generate": "echo \"schema-extractor not implemented yet\"",
+    "check": "echo \"schema-extractor not implemented yet\""
+  }
+}
