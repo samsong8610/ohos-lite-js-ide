@@ -2,5 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/** Placeholder: Extracts versioned component schemas from OpenHarmony sources. Implemented in a following commit. */
-export const PLACEHOLDER = true;
+export { generateSchema, type SourceSet } from './generate';
+export { diffSchemas, renderDiffMarkdown, type SchemaDiff } from './diff';
+export { parseSourcesConfig, expandVars } from './config';
+export { runGenerate, runCheck, buildOutputs } from './run';

@@ -100,7 +100,11 @@ importers:
         specifier: workspace:*
         version: link:../schemas
 
-  packages/schemas: {}
+  packages/schemas:
+    dependencies:
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
 
   packages/test-kit:
     dependencies:

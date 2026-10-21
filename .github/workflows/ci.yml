@@ -25,6 +25,8 @@ jobs:
         if: matrix.os != 'macos-latest'
         run: pnpm run lint
       - run: pnpm run typecheck
+      - name: schema --check (skips with a warning when OpenHarmony sources are absent)
+        run: pnpm run schema:check
       - run: pnpm run test:coverage
       - name: integration smoke (xvfb on linux)
         if: matrix.os == 'ubuntu-latest'

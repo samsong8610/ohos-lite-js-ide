@@ -1,0 +1,4749 @@
+{
+  "schemaFormat": 1,
+  "ohVersion": "6.1-LTS",
+  "provisional": true,
+  "provisionalReason": "6.1-LTS is not yet verified on the target board; extracted from OpenHarmony-v6.1-LTS tagged mirror checkouts, re-check when the board vendor ships 6.1 firmware",
+  "target": "linux",
+  "generator": "@ohjs/schema-extractor 0.1.0",
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "arkui_ace_engine_lite",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "commit": "fac685fd9175ebe099870b26279f4b66eaefe3f1",
+      "remote": "https://github.com/openharmony/arkui_ace_engine_lite.git"
+    },
+    {
+      "repo": "loader",
+      "path": "developtools_ace_js2bundle",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "commit": "b280383eb7aa1ec7c46302aa83ce08cdafdefd96",
+      "remote": "https://github.com/openharmony/developtools_ace_js2bundle.git"
+    },
+    {
+      "repo": "docs",
+      "path": "docs",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "commit": "c9f9f7480eeb3684fd46fffbaf4d00ffd6f1b678",
+      "remote": "https://github.com/openharmony/docs.git"
+    }
+  ],
+  "features": {
+    "ENABLE_MODULE_CIPHER": {
+      "value": true
+    },
+    "FEATURE_ACELITE_DFX_MODULE": {
+      "value": true
+    },
+    "FEATURE_ACELITE_HI_LOG_PRINTF": {
+      "value": true
+    },
+    "FEATURE_ACELITE_JS_PROFILER": {
+      "value": true
+    },
+    "FEATURE_ACELITE_LITE_DFX_MODULE": {
+      "value": true
+    },
+    "FEATURE_ACELITE_SYSTEM_CAPABILITY": {
+      "value": true
+    },
+    "FEATURE_API_VERSION": {
+      "value": true
+    },
+    "FEATURE_COMPONENT_CAMERA": {
+      "value": "conditional",
+      "dependsOn": [
+        "defined(ACE_ENGINE_LITE_CAMERA_LITE_ENABLE)"
+      ]
+    },
+    "FEATURE_COMPONENT_CANVAS": {
+      "value": true
+    },
+    "FEATURE_COMPONENT_DEVICE_ATTEST": {
+      "value": true
+    },
+    "FEATURE_COMPONENT_EDITTEXT": {
+      "value": true
+    },
+    "FEATURE_COMPONENT_QRCODE": {
+      "value": true
+    },
+    "FEATURE_COMPONENT_VIDEO": {
+      "value": "conditional",
+      "dependsOn": [
+        "defined(ACE_ENGINE_LITE_MEDIA_LITE_ENABLE)"
+      ]
+    },
+    "FEATURE_LOCALIZATION_MODULE": {
+      "value": true
+    },
+    "FEATURE_MODULE_AUDIO": {
+      "value": true
+    },
+    "FEATURE_MODULE_DEVICE": {
+      "value": true
+    },
+    "FEATURE_MODULE_DIALOG": {
+      "value": true
+    },
+    "FEATURE_MODULE_OHOS_HILOG": {
+      "value": true
+    },
+    "FEATURE_MODULE_STORAGE": {
+      "value": true
+    },
+    "FEATURE_ROOTVIEW_CUSTOM_BACKGROUND_COLOR": {
+      "value": true
+    },
+    "FEATURE_SYSCAP_MODULE": {
+      "value": true
+    },
+    "FEATURE_TEST_IMPLEMENTATION": {
+      "value": true
+    },
+    "FEATURE_TIMER_MODULE": {
+      "value": true
+    },
+    "FEATURE_UPDATE_VIDEO_PROGRESS_ASYNC": {
+      "value": true
+    }
+  },
+  "components": {
+    "analog-clock": {
+      "tag": "analog-clock",
+      "category": "runtime-extension",
+      "availability": "disabled-by-feature",
+      "implClasses": [
+        "AnalogClockComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "AnalogClockComponent",
+          "typeValues": [],
+          "availability": "disabled-by-feature"
+        }
+      ],
+      "attributes": {
+        "hour": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/analog_clock_component.cpp",
+              "line": 63
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "min": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/analog_clock_component.cpp",
+              "line": 66
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "sec": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/analog_clock_component.cpp",
+              "line": 69
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        }
+      },
+      "styles": {},
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 151
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 42
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+    },
+    "camera": {
+      "tag": "camera",
+      "category": "runtime-extension",
+      "availability": "conditional",
+      "implClasses": [
+        "CameraComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "CameraComponent",
+          "typeValues": [],
+          "availability": "conditional"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {
+        "error": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/camera_component.cpp",
+              "line": 319
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_CAMERA"
+        }
+      },
+      "methods": {
+        "takePhoto": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/camera_component.cpp",
+              "line": 267
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_CAMERA"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 87
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 70
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_CAMERA"
+    },
+    "canvas": {
+      "tag": "canvas",
+      "category": "canvas",
+      "availability": "code",
+      "implClasses": [
+        "CanvasComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "CanvasComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {},
+      "methods": {
+        "getContext": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/canvas_component.cpp",
+              "line": 233
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-canvas-canvas.md",
+              "line": 61
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_CANVAS",
+          "doc": "string | 获取canvas绘图上下文，参数仅支持“2d”，返回值为2D绘制对象，该对象提供具体的2D绘制操作。详见CanvasRenderingContext2D对象章节。"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 92
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 73
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-canvas-canvas.md",
+          "line": 1
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_CANVAS",
+      "since": 5,
+      "children": "none"
+    },
+    "chart": {
+      "tag": "chart",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "ChartComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "ChartComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "datasets": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/chart_component.cpp",
+              "line": 114
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-chart.md",
+              "line": 27
+            }
+          ],
+          "doc": "Array<ChartDataset> | 是 | 数据集合，柱状图和线形图必须设置数据集合。可以设置多条数据集及其背景色。"
+        },
+        "options": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/chart_component.cpp",
+              "line": 118
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-chart.md",
+              "line": 26
+            }
+          ],
+          "doc": "ChartOptions | 是 | 图表参数设置，柱状图和线形图必须设置参数设置。可以设置x轴、y轴的最小值、最大值、刻度数、是否显示，线条宽度、是否平滑等。（不支持动态修改）"
+        }
+      },
+      "styles": {},
+      "events": {},
+      "methods": {
+        "append": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/chart_component.cpp",
+              "line": 1041
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-chart.md",
+              "line": 102
+            }
+          ],
+          "doc": "{ serial: number, // 设置要更新的线形图数据下标 data: Array<number>, // 设置新增的数据 } | 往已有的数据序列中动态添加数据，根据serial指定目标序列，serial为datasets数组的下标，从0开始。注意：不会更新datasets[index].data。仅线形图支持，按横坐标加1递增（与xAxis min/max设置相关）。"
+        }
+      },
+      "docOnly": {
+        "attributes": [
+          "type"
+        ],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 176
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 85
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-chart.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "clock-hand": {
+      "tag": "clock-hand",
+      "category": "runtime-extension",
+      "availability": "disabled-by-feature",
+      "implClasses": [
+        "ClockHandComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "ClockHandComponent",
+          "typeValues": [],
+          "availability": "disabled-by-feature"
+        }
+      ],
+      "attributes": {
+        "src": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 165
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "type": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 196
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        }
+      },
+      "styles": {
+        "color": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 143
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "opacity": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 146
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "pivot-x": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 137
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        },
+        "pivot-y": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/clock_hand_component.cpp",
+              "line": 140
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 148
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 87
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_ANALOG_CLOCK"
+    },
+    "div": {
+      "tag": "div",
+      "category": "container",
+      "availability": "code",
+      "implClasses": [
+        "DivComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "DivComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {},
+      "styles": {
+        "align-items": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 72
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-div.md",
+              "line": 47
+            }
+          ],
+          "doc": "string | stretch flex-start | 否 | flex容器当前行的交叉轴对齐格式，可选值为： - stretch：弹性元素在交叉轴方向被拉伸到与容器相同的高度或宽度。 - flex-start：元素向交叉轴起点对齐。 - flex-end：元素向交叉轴终点对齐。 - center：元素沿交叉轴方向居中。"
+        },
+        "flex-direction": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 64
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-div.md",
+              "line": 44
+            }
+          ],
+          "doc": "string | row | 否 | flex容器主轴方向。可选项有： - column：垂直方向从上到下 - row：水平方向从左到右"
+        },
+        "flex-wrap": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 92
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-div.md",
+              "line": 45
+            }
+          ],
+          "doc": "string | nowrap | 否 | flex容器是单行还是多行显示，此属性暂不支持动态修改。可选项有： - nowrap：不换行，单行显示。 - wrap：换行，多行显示。"
+        },
+        "justify-content": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 68
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-div.md",
+              "line": 46
+            }
+          ],
+          "doc": "string | flex-start | 否 | flex容器当前行的主轴对齐格式。可选项有： - flex-start：项目位于容器的开头。 - flex-end：项目位于容器的结尾。 - center：项目位于容器的中心。 - space-between：项目位于各行之间留有空白的容器内。 - space-around：项目位于各行之前、之间、之后都留有空白的容器内。"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 96
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 107
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-div.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "any"
+    },
+    "image": {
+      "tag": "image",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "ImageComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "ImageComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "src": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_component.cpp",
+              "line": 59
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image.md",
+              "line": 25
+            }
+          ],
+          "doc": "string | 否 | 图片的路径，支持的图片格式包括png、jpg。 说明：部分轻量级设备不支持原图片格式的解析。所以，在应用编译阶段，图片会被直接编译为可解析的位图（总字节数约：图片长x宽x4），并打包在应用安装包里，这会增加安装包的大小。因此，在使用图片资源时，应尽量控制图片的分辨率，尺寸越大的图片对于空间的占用越明显。"
+        }
+      },
+      "styles": {
+        "fit-original-size": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_component.cpp",
+              "line": 98
+            }
+          ]
+        },
+        "height": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_component.cpp",
+              "line": 102
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image.md",
+              "line": 46
+            }
+          ],
+          "doc": "<length> | <percentage> | - | 否 | 设置组件自身的高度。 未设置时组件高度默认为0。"
+        },
+        "object-fit": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_component.cpp",
+              "line": 89
+            }
+          ]
+        },
+        "width": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_component.cpp",
+              "line": 109
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image.md",
+              "line": 45
+            }
+          ],
+          "doc": "<length> | <percentage> | - | 否 | 设置组件自身的宽度。 未设置时组件宽度默认为0。"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 102
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 147
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "image-animator": {
+      "tag": "image-animator",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "ImageAnimatorComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "ImageAnimatorComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "duration": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 119
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 29
+            }
+          ],
+          "doc": "string | - | 是 | 设置单次播放时长。单位支持[s(秒)|ms(毫秒)]，默认单位为ms。 duration为0时，不播放图片。 值改变只会在下一次循环开始时生效。"
+        },
+        "fillmode": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 109
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 30
+            }
+          ],
+          "since": 5,
+          "doc": "string | forwards | 否 | 指定帧动画执行结束后的状态。可选项有： - none：恢复初始状态。 - forwards：保持帧动画结束时的状态（在最后一个关键帧中定义）。"
+        },
+        "fixedsize": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 111
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 28
+            }
+          ],
+          "doc": "boolean | true | 否 | 设置图片大小是否固定为组件大小。 true表示图片大小与组件大小一致，此时设置图片的width 、height 、top 和left属性是无效的。false表示每一张图片的 width 、height 、top和left属性都要单独设置。"
+        },
+        "images": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 113
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 25
+            }
+          ],
+          "doc": "Array<ImageFrame> | - | 是 | 设置图片帧信息集合。每一帧的帧信息包含图片路径、图片大小和图片位置信息。目前支持以下图片格式：png、jpg和bmp。ImageFrame的详细说明请参见表1。 **说明：** 1.使用时需要使用数据绑定的方式，如images = {{images}}。JS中声明相应变量：images: [{src: \"/common/heart-rate01.png\"}, {src: \"/common/heart-rate02.png\"}]。 2.部分轻量级设备不支持原图片格式的解析。所以，在应用编译阶段，图片会被直接编译为可解析的位图（总字节数约：图片长x宽x4），并打包在应用安装包里，这会增加安装包的大小。因此，在使用图片资源时，应尽量控制图片的分辨率，尺寸越大的图片对于空间的占用越明显。"
+        },
+        "iteration": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 115
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 26
+            }
+          ],
+          "doc": "number | string | infinite | 否 | 设置帧动画播放次数。number表示固定次数，infinite枚举表示无限次数播放。"
+        },
+        "reverse": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 117
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 27
+            }
+          ],
+          "doc": "boolean | false | 否 | 设置播放顺序。false表示从第1张图片播放到最后1张图片； true表示从最后1张图片播放到第1张图片。"
+        }
+      },
+      "styles": {},
+      "events": {
+        "stop": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 142
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 51
+            }
+          ],
+          "doc": "- | 帧动画结束时触发。"
+        }
+      },
+      "methods": {
+        "getState": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 53
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 84
+            }
+          ],
+          "doc": "- | 获取播放状态。可能值有： - playing：播放中 - paused：已暂停 - stopped：已停止"
+        },
+        "pause": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 50
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 81
+            }
+          ],
+          "doc": "- | 暂停播放图片帧动画。"
+        },
+        "resume": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 51
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 83
+            }
+          ],
+          "doc": "- | 继续播放图片帧。"
+        },
+        "start": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 49
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 80
+            }
+          ],
+          "doc": "- | 开始播放图片帧动画。再次调用，重新从第1帧开始播放。"
+        },
+        "stop": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/image_animator_component.cpp",
+              "line": 52
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+              "line": 82
+            }
+          ],
+          "doc": "- | 停止播放图片帧动画。"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 105
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 148
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-image-animator.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "input": {
+      "tag": "input",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "InputCheckboxComponent",
+        "InputRadioComponent",
+        "InputEditTextComponent",
+        "InputButtonComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "InputCheckboxComponent",
+          "typeValues": [
+            "checkbox"
+          ],
+          "availability": "code"
+        },
+        {
+          "implClass": "InputRadioComponent",
+          "typeValues": [
+            "radio"
+          ],
+          "availability": "code"
+        },
+        {
+          "implClass": "InputEditTextComponent",
+          "typeValues": [
+            "text",
+            "password"
+          ],
+          "availability": "code",
+          "feature": "FEATURE_COMPONENT_EDITTEXT"
+        },
+        {
+          "implClass": "InputButtonComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "checked": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_checkbox_component.cpp",
+              "line": 43
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 26
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_radio_component.cpp",
+              "line": 44
+            }
+          ],
+          "doc": "boolean | false | 否 | 当前组件是否选中，true表示选中，false表示未选中。仅type为checkbox和radio生效。"
+        },
+        "maxlength": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 117
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT"
+        },
+        "name": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_radio_component.cpp",
+              "line": 55
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 27
+            }
+          ],
+          "doc": "string | - | 否 | input组件的名称。"
+        },
+        "placeholder": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 115
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT"
+        },
+        "type": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 111
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 25
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT",
+          "doc": "string | button | 否 | input组件类型，可选值为button，checkbox，radio，text。 button，checkbox，radio，text不支持动态修改。可选值定义如下： - button：定义可点击的按钮。 - checkbox：定义多选框。 - radio：定义单选按钮，允许在多个拥有相同name值的选项中选中其中一个。 - text：定义用于文字输入的文本框，仅在支持输入法功能的真机设备上，支持点击拉起文字输入界面，UI预览无效果。"
+        },
+        "value": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 113
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 28
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 62
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT",
+          "doc": "string | - | 否 | input组件的value值，当类型为radio时必填且相同name值的选项该值唯一。"
+        }
+      },
+      "styles": {
+        "background-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 87
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 69
+            }
+          ],
+          "doc": "<color> | - | 否 | 设置背景颜色。"
+        },
+        "background-image": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_checkbox_component.cpp",
+              "line": 86
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_radio_component.cpp",
+              "line": 98
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 89
+            }
+          ]
+        },
+        "border-bottom-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 101
+            }
+          ]
+        },
+        "border-bottom-width": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 96
+            }
+          ]
+        },
+        "border-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 105
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 67
+            }
+          ],
+          "doc": "<color> | black | 否 | 使用简写属性设置元素的所有边框颜色。"
+        },
+        "border-left-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 102
+            }
+          ]
+        },
+        "border-left-width": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 97
+            }
+          ]
+        },
+        "border-radius": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 106
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 68
+            }
+          ],
+          "doc": "<length> | - | 否 | border-radius属性是设置元素的外边框圆角半径。"
+        },
+        "border-right-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 103
+            }
+          ]
+        },
+        "border-right-width": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 98
+            }
+          ]
+        },
+        "border-top-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 104
+            }
+          ]
+        },
+        "border-top-width": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 99
+            }
+          ]
+        },
+        "border-width": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 100
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 66
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 使用简写属性设置元素的所有边框宽度。"
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 156
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 57
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 85
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT",
+          "doc": "<color> | \\#ffffff | 否 | 按钮的文本颜色。"
+        },
+        "font-family": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 77
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 61
+            }
+          ],
+          "doc": "string | SourceHanSansSC-Regular | 否 | 字体。目前仅支持SourceHanSansSC-Regular 字体。"
+        },
+        "font-size": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 153
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 58
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 75
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT",
+          "doc": "<length> | 30px | 否 | 按钮的文本尺寸。"
+        },
+        "padding": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 91
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 62
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 使用简写属性设置所有的内边距属性。 该属性可以有1到4个值： - 指定一个值时，该值指定四个边的内边距。 - 指定两个值时，第一个值指定上下两边的内边距，第二个指定左右两边的内边距。 - 指定三个值时，第一个指定上边的内边距，第二个指定左右两边的内边距，第三个指定下边的内边距。 - 指定四个值时分别为上、右、下、左边的内边距（顺时针顺序）。"
+        },
+        "padding-bottom": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 92
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 63
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+        },
+        "padding-left": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 93
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 63
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+        },
+        "padding-right": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 94
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 63
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+        },
+        "padding-top": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 95
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 63
+            }
+          ],
+          "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+        },
+        "placeholder-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 159
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_EDITTEXT"
+        },
+        "text-align": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_button_component.cpp",
+              "line": 83
+            }
+          ]
+        }
+      },
+      "events": {
+        "change": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_checkbox_component.cpp",
+              "line": 63
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 40
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_radio_component.cpp",
+              "line": 76
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_edittext_component.cpp",
+              "line": 129
+            }
+          ],
+          "doc": "{ checked:true | false } | checkbox多选框或radio单选框的checked状态发生变化时触发该事件。"
+        },
+        "click": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_checkbox_component.cpp",
+              "line": 71
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+              "line": 48
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/input_radio_component.cpp",
+              "line": 84
+            }
+          ],
+          "doc": "- | 点击动作触发该事件。"
+        }
+      },
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 155
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 151
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-input.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "list": {
+      "tag": "list",
+      "category": "container",
+      "availability": "code",
+      "implClasses": [
+        "ListComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "ListComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {},
+      "styles": {
+        "flex-direction": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 72
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 48
+            }
+          ],
+          "doc": "string | column | 否 | 设置flex容器主轴的方向，指定flex项如何放置在flex容器中，可选值为： - column：主轴为纵向。 - row：主轴为横向。 其他组件默认值为row，在list组件中默认值为column。轻量级智能穿戴设备不支持动态修改。"
+        }
+      },
+      "events": {
+        "itemselected": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 100
+            }
+          ],
+          "feature": "FEATURE_LIST_SPECIFIC_EVENT_ENABLE"
+        },
+        "scrollbottom": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 111
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 41
+            }
+          ],
+          "since": 8,
+          "doc": "- | 当前列表已滑动到底部位置。"
+        },
+        "scrollend": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 105
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 36
+            }
+          ],
+          "doc": "- | 列表滑动已经结束。"
+        },
+        "scrollstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 96
+            }
+          ],
+          "feature": "FEATURE_LIST_SPECIFIC_EVENT_ENABLE"
+        },
+        "scrolltop": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 108
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 40
+            }
+          ],
+          "since": 8,
+          "doc": "- | 当前列表已滑动到顶部位置。"
+        }
+      },
+      "methods": {
+        "rotation": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 35
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 69
+            }
+          ],
+          "feature": "FEATURE_ROTATION_API",
+          "doc": "{ focus: boolean } | 控制list是否请求旋转表冠的焦点。设置focus参数为true，list将获取旋转表冠的焦点，允许用户通过旋转表冠来滚动选择器中的选项；设置为false将释放旋转表冠的焦点。"
+        },
+        "scrollTo": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/list_component.cpp",
+              "line": 33
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+              "line": 68
+            }
+          ],
+          "doc": "{ index: number(指定位置) } | list滑动到指定index的item位置。"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 141
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 163
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": [
+        "list-item"
+      ]
+    },
+    "list-item": {
+      "tag": "list-item",
+      "category": "container",
+      "availability": "code",
+      "implClasses": [
+        "DivComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "DivComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {},
+      "styles": {
+        "align-items": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 72
+            }
+          ]
+        },
+        "flex-direction": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 64
+            }
+          ]
+        },
+        "flex-wrap": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 92
+            }
+          ]
+        },
+        "justify-content": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/div_component.cpp",
+              "line": 68
+            }
+          ]
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 144
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 164
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-list-item.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "any"
+    },
+    "marquee": {
+      "tag": "marquee",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "MarqueeComponent",
+        "TextComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "MarqueeComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "scrollamount": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/marquee_component.cpp",
+              "line": 51
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-marquee.md",
+              "line": 25
+            }
+          ],
+          "doc": "number | 6 | 否 | 跑马灯每次滚动时移动的最大长度。"
+        },
+        "scrolldelay": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/marquee_component.cpp",
+              "line": 55
+            }
+          ]
+        },
+        "value": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 84
+            }
+          ]
+        }
+      },
+      "styles": {
+        "absolutesizespanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 178
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "absolutesizespansize": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 182
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "absolutesizespanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 174
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 126
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 138
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 134
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 100
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-marquee.md",
+              "line": 45
+            }
+          ],
+          "doc": "<color> | \\#ffffff | 否 | 设置跑马灯中文字的文本颜色。"
+        },
+        "font-family": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 112
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-marquee.md",
+              "line": 47
+            }
+          ],
+          "doc": "string | SourceHanSansSC-Regular | 否 | 字体。目前仅支持SourceHanSansSC-Regular 字体。"
+        },
+        "font-size": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 109
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-marquee.md",
+              "line": 46
+            }
+          ],
+          "doc": "<length> | 30 | 否 | 设置跑马灯中文字的文本尺寸。"
+        },
+        "foregroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 142
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "foregroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 154
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "foregroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 150
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "letter-spacing": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 103
+            }
+          ]
+        },
+        "line-height": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 122
+            }
+          ]
+        },
+        "linebackgroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 158
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "linebackgroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 170
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "linebackgroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 166
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 190
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespansize": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 194
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 186
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannableend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 215
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannablestart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 211
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannablestyle": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 198
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "text-align": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 106
+            }
+          ]
+        },
+        "text-overflow": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 119
+            }
+          ]
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 173
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 175
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-marquee.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "picker-view": {
+      "tag": "picker-view",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "PickerViewComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "PickerViewComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "end": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 412
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_DATE_PICKER"
+        },
+        "range": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 398
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 35
+            }
+          ],
+          "doc": "Array | - | 否 | 设置文本选择器的取值范围。 使用时需要使用数据绑定的方式，如range = {{data}}，js中声明相应变量：data：[\"15\", \"20\", \"25\"]。"
+        },
+        "selected": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 394
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 42
+            }
+          ],
+          "doc": "string | 00:00 | 否 | 设置时间选择器的默认取值，格式为 HH:mm；"
+        },
+        "start": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 405
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_DATE_PICKER"
+        }
+      },
+      "styles": {
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 437
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 64
+            }
+          ],
+          "doc": "<color> | \\#808080 | 否 | 候选项字体颜色。"
+        },
+        "font-family": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 446
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 69
+            }
+          ],
+          "doc": "string | HYQiHei-65S | 否 | 选项字体类型。"
+        },
+        "font-size": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 443
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 65
+            }
+          ],
+          "doc": "<length> | 30px | 否 | 候选项字体尺寸，类型length，单位px。"
+        },
+        "selected-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 449
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 66
+            }
+          ],
+          "doc": "<color> | \\#ffffff | 否 | 选中项字体颜色。"
+        },
+        "selected-font-family": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 458
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 68
+            }
+          ],
+          "doc": "string | HYQiHei-65S | 否 | 选中项字体类型。"
+        },
+        "selected-font-size": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 455
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 67
+            }
+          ],
+          "doc": "<length> | 38px | 否 | 选中项字体尺寸，类型length，单位px。"
+        }
+      },
+      "events": {
+        "change": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 473
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 57
+            }
+          ],
+          "doc": "{ hour: hour, minute: minute} | 时间选择器选定值后触发该事件。"
+        }
+      },
+      "methods": {
+        "rotation": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/picker_view_component.cpp",
+              "line": 109
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+              "line": 87
+            }
+          ],
+          "feature": "FEATURE_ROTATION_API",
+          "doc": "{ focus: boolean } | 控制picker-view是否请求旋转表冠的焦点。设置focus参数为true，picker-view将获取旋转表冠的焦点，允许用户通过旋转表冠来滚动选择器中的选项；设置为false将释放旋转表冠的焦点。该功能仅在picker-view为单列时生效，对于多列picker-view，需通过用户点击来获取焦点以支持旋转表冠操作。"
+        }
+      },
+      "docOnly": {
+        "attributes": [
+          "type"
+        ],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 179
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 207
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-picker-view.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "progress": {
+      "tag": "progress",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "CircleProgressComponent",
+        "HorizonProgressComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "CircleProgressComponent",
+          "typeValues": [
+            "arc"
+          ],
+          "availability": "code"
+        },
+        {
+          "implClass": "HorizonProgressComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "percent": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 76
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 41
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/horizon_progress_component.cpp",
+              "line": 29
+            }
+          ],
+          "doc": "number | 0 | 否 | 当前进度。取值范围为0-100。"
+        },
+        "type": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/component_factory.h",
+              "line": 111
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 25
+            }
+          ],
+          "doc": "string | horizontal | 否 | 设置进度条的类型，该属性不支持动态修改，可选值为： - horizontal：线性进度条； - arc：弧形进度条。"
+        }
+      },
+      "styles": {
+        "background-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 192
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 67
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/horizon_progress_component.cpp",
+              "line": 91
+            }
+          ],
+          "doc": "<color> | - | 否 | 弧形进度条的背景色。"
+        },
+        "center-x": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 164
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 71
+            }
+          ],
+          "doc": "<length> | - | 否 | 弧形进度条中心位置，（坐标原点为组件左上角顶点）。该样式需要和center-y和radius一起。"
+        },
+        "center-y": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 168
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 72
+            }
+          ],
+          "doc": "<length> | - | 否 | 弧形进度条中心位置，（坐标原点为组件左上角顶点）。该样式需要和center-x和radius一起。"
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 184
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 66
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/horizon_progress_component.cpp",
+              "line": 81
+            }
+          ],
+          "doc": "<color> | - | 否 | 弧形进度条的颜色。"
+        },
+        "radius": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 172
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 73
+            }
+          ],
+          "doc": "<length> | - | 否 | 弧形进度条半径，该样式需要和center-x和center-y一起。"
+        },
+        "start-angle": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 176
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 69
+            }
+          ],
+          "doc": "<deg> | 240 | 否 | 弧形进度条起始角度，以时钟0点为基线。范围为0到360（顺时针）。"
+        },
+        "stroke-width": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 187
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 68
+            },
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/horizon_progress_component.cpp",
+              "line": 76
+            }
+          ],
+          "doc": "<length> | - | 否 | 弧形进度条的宽度。 进度条宽度越大，进度条越靠近圆心。即进度条始终在半径区域内。"
+        },
+        "total-angle": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/circle_progress_component.cpp",
+              "line": 180
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+              "line": 70
+            }
+          ],
+          "doc": "<deg> | 240 | 否 | 弧形进度条总长度，范围为-360到360，负数标识起点到终点为逆时针。"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 108
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 220
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-progress.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "qrcode": {
+      "tag": "qrcode",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "QrcodeComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "QrcodeComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "value": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/qrcode_component.cpp",
+              "line": 44
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-qrcode.md",
+              "line": 25
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_QRCODE",
+          "doc": "string | - | 是 | 用来生成二维码的内容。最大长度为256。"
+        }
+      },
+      "styles": {
+        "background-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/qrcode_component.cpp",
+              "line": 84
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-qrcode.md",
+              "line": 46
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_QRCODE",
+          "doc": "<color> | \\#ffffff | 否 | 二维码背景颜色。"
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/qrcode_component.cpp",
+              "line": 88
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-qrcode.md",
+              "line": 45
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_QRCODE",
+          "doc": "<color> | \\#000000 | 否 | 二维码颜色。"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 183
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 222
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-qrcode.md",
+          "line": 1
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_QRCODE",
+      "since": 5,
+      "children": "none"
+    },
+    "slider": {
+      "tag": "slider",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "SliderComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "SliderComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "max": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 50
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 26
+            }
+          ],
+          "doc": "number | 100 | 否 | 滑动选择器的最大值。"
+        },
+        "min": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 47
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 25
+            }
+          ],
+          "doc": "number | 0 | 否 | 滑动选择器的最小值。"
+        },
+        "step": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 53
+            }
+          ]
+        },
+        "value": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 56
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 27
+            }
+          ],
+          "doc": "number | 0 | 否 | 滑动选择器的初始值。"
+        }
+      },
+      "styles": {
+        "block-color": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 107
+            }
+          ]
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 89
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 55
+            }
+          ],
+          "doc": "<color> | \\#000000 | 否 | 滑动条的背景颜色。"
+        },
+        "direction": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 122
+            }
+          ]
+        },
+        "left": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 114
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 68
+            }
+          ],
+          "doc": "<length> | <percentage> | - | 否 | left|top确定元素的偏移位置。 - left属性规定元素的左边缘。该属性定义了定位元素左外边距边界与其包含块左边界之间的偏移。 - top属性规定元素的顶部边缘。该属性定义了一个定位元素的上外边距边界与其包含块上边界之间的偏移。"
+        },
+        "selected-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 98
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 56
+            }
+          ],
+          "doc": "<color> | \\#ffffff | 否 | 滑动条的已选择颜色。"
+        },
+        "top": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 118
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 68
+            }
+          ],
+          "doc": "<length> | <percentage> | - | 否 | left|top确定元素的偏移位置。 - left属性规定元素的左边缘。该属性定义了定位元素左外边距边界与其包含块左边界之间的偏移。 - top属性规定元素的顶部边缘。该属性定义了一个定位元素的上外边距边界与其包含块上边界之间的偏移。"
+        }
+      },
+      "events": {
+        "change": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 70
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 38
+            }
+          ],
+          "doc": "ChangeEvent | 选择值发生变化时触发该事件。"
+        }
+      },
+      "methods": {
+        "rotation": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/slider_component.cpp",
+              "line": 34
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+              "line": 74
+            }
+          ],
+          "feature": "FEATURE_ROTATION_API",
+          "doc": "{ focus: boolean } | 控制slider是否请求旋转表冠的焦点。设置focus参数为true，slider将获取旋转表冠的焦点，允许用户通过旋转表冠来滚动选择器中的选项；设置为false将释放旋转表冠的焦点。"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 138
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 263
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-slider.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "stack": {
+      "tag": "stack",
+      "category": "container",
+      "availability": "code",
+      "implClasses": [
+        "StackComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "StackComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 99
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 270
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-stack.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "any"
+    },
+    "swiper": {
+      "tag": "swiper",
+      "category": "container",
+      "availability": "code",
+      "implClasses": [
+        "SwiperComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "SwiperComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "duration": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 55
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 27
+            }
+          ],
+          "doc": "number | - | 否 | 子组件切换的动画时长。"
+        },
+        "index": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 71
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 25
+            }
+          ],
+          "doc": "number | 0 | 否 | 当前在容器中显示的子组件的索引值。"
+        },
+        "loop": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 63
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 26
+            }
+          ],
+          "doc": "boolean | true | 否 | 是否开启循环轮播。true为开启循环，false为不开启循环。"
+        },
+        "vertical": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 78
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 28
+            }
+          ],
+          "doc": "boolean | false | 否 | 是否为纵向滑动，纵向滑动时采用纵向的指示器。true为纵向滑动，false为水平滑动。 不支持动态修改。"
+        }
+      },
+      "styles": {},
+      "events": {
+        "change": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 136
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 39
+            }
+          ],
+          "doc": "{ index: currentIndex } | 当前显示的组件索引变化时触发该事件。"
+        }
+      },
+      "methods": {
+        "rotation": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/swiper_component.cpp",
+              "line": 36
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+              "line": 67
+            }
+          ],
+          "feature": "FEATURE_ROTATION_API",
+          "doc": "{ focus: boolean } | 控制swiper是否请求旋转表冠的焦点。设置focus参数为true，swiper将获取旋转表冠的焦点，允许用户通过旋转表冠来滚动选择器中的选项；设置为false将释放旋转表冠的焦点。"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 132
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 280
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-container-swiper.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": [
+        "list"
+      ]
+    },
+    "switch": {
+      "tag": "switch",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "SwitchComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "SwitchComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "checked": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/switch_component.cpp",
+              "line": 81
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-switch.md",
+              "line": 25
+            }
+          ],
+          "doc": "boolean | false | 否 | 是否选中。true表示被选中，false表示不被选中。"
+        }
+      },
+      "styles": {
+        "background-color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/switch_component.cpp",
+              "line": 51
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-switch.md",
+              "line": 55
+            }
+          ],
+          "doc": "<color> | - | 否 | 设置背景颜色。"
+        }
+      },
+      "events": {
+        "change": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/switch_component.cpp",
+              "line": 93
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-switch.md",
+              "line": 36
+            }
+          ],
+          "doc": "{ checked: checkedValue } | 选中状态改变时触发该事件。"
+        },
+        "click": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/switch_component.cpp",
+              "line": 101
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-switch.md",
+              "line": 37
+            }
+          ],
+          "doc": "- | 点击动作触发该事件。"
+        }
+      },
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 135
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 281
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-switch.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "tab-bar": {
+      "tag": "tab-bar",
+      "category": "runtime-extension",
+      "availability": "disabled-by-feature",
+      "implClasses": [
+        "TabBarComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "TabBarComponent",
+          "typeValues": [],
+          "availability": "disabled-by-feature"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 119
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 283
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_TABS"
+    },
+    "tab-content": {
+      "tag": "tab-content",
+      "category": "runtime-extension",
+      "availability": "disabled-by-feature",
+      "implClasses": [
+        "TabContentComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "TabContentComponent",
+          "typeValues": [],
+          "availability": "disabled-by-feature"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 122
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 284
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_TABS"
+    },
+    "tabs": {
+      "tag": "tabs",
+      "category": "runtime-extension",
+      "availability": "disabled-by-feature",
+      "implClasses": [
+        "TabsComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "TabsComponent",
+          "typeValues": [],
+          "availability": "disabled-by-feature"
+        }
+      ],
+      "attributes": {},
+      "styles": {},
+      "events": {
+        "change": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/tabs_component.cpp",
+              "line": 150
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TABS"
+        }
+      },
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 125
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 285
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_TABS"
+    },
+    "text": {
+      "tag": "text",
+      "category": "basic",
+      "availability": "code",
+      "implClasses": [
+        "TextComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "TextComponent",
+          "typeValues": [],
+          "availability": "code"
+        }
+      ],
+      "attributes": {
+        "value": {
+          "availability": "code-doc-missing",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 84
+            }
+          ]
+        }
+      },
+      "styles": {
+        "absolutesizespanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 178
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "absolutesizespansize": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 182
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "absolutesizespanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 174
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 126
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 138
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "backgroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 134
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "color": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 100
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 44
+            }
+          ],
+          "doc": "<color> | \\#ffffff | 否 | 设置文本的颜色。"
+        },
+        "font-family": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 112
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 49
+            }
+          ],
+          "doc": "string | SourceHanSansSC-Regular | 否 | 字体。目前仅支持SourceHanSansSC-Regular 字体。"
+        },
+        "font-size": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 109
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 45
+            }
+          ],
+          "doc": "<length> | 30px | 否 | 设置文本的尺寸。"
+        },
+        "foregroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 142
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "foregroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 154
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "foregroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 150
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "letter-spacing": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 103
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 46
+            }
+          ],
+          "doc": "<length> | 2px | 否 | 设置文本的字符间距。"
+        },
+        "line-height": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 122
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 63
+            }
+          ],
+          "since": 10,
+          "doc": "number | 0px | 否 | 设置文本的行高。 单位：px 未设置时文本行高默认为适应性行高。"
+        },
+        "linebackgroundcolorspancolor": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 158
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "linebackgroundcolorspanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 170
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "linebackgroundcolorspanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 166
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespanend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 190
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespansize": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 194
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "relativesizespanstart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 186
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannableend": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 215
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannablestart": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 211
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "spannablestyle": {
+          "availability": "disabled-by-feature",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 198
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_TEXT_SPANNABLE"
+        },
+        "text-align": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 106
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 47
+            }
+          ],
+          "doc": "string | left | 否 | 设置文本的文本对齐方式，可选值为： - left：文本左对齐； - center：文本居中对齐； - right：文本右对齐；"
+        },
+        "text-overflow": {
+          "availability": "code",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/text_component.cpp",
+              "line": 119
+            },
+            {
+              "repo": "docs",
+              "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+              "line": 48
+            }
+          ],
+          "doc": "string | clip | 否 | 可选值为： - clip：将文本根据父容器大小进行裁剪显示； - ellipsis：根据父容器大小显示，显示不下的文本用省略号代替。"
+        }
+      },
+      "events": {},
+      "methods": {},
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 129
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 287
+        },
+        {
+          "repo": "docs",
+          "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-basic-text.md",
+          "line": 1
+        }
+      ],
+      "since": 4,
+      "children": "none"
+    },
+    "video": {
+      "tag": "video",
+      "category": "runtime-extension",
+      "availability": "conditional",
+      "implClasses": [
+        "VideoComponent"
+      ],
+      "variants": [
+        {
+          "implClass": "VideoComponent",
+          "typeValues": [],
+          "availability": "conditional"
+        }
+      ],
+      "attributes": {
+        "autoplay": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 319
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "controls": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 323
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "muted": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 311
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "src": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 315
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        }
+      },
+      "styles": {},
+      "events": {
+        "error": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 270
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "finish": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 286
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "pause": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 282
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "prepared": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 274
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "seeked": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 294
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "seeking": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 290
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "start": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 278
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "timeupdate": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 298
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        }
+      },
+      "methods": {
+        "pause": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 60
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "setCurrentTime": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 61
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "setVolume": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 62
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        },
+        "start": {
+          "availability": "conditional",
+          "evidence": [
+            {
+              "repo": "engine",
+              "file": "frameworks/src/core/components/video_component.cpp",
+              "line": 59
+            }
+          ],
+          "feature": "FEATURE_COMPONENT_VIDEO"
+        }
+      },
+      "docOnly": {
+        "attributes": [],
+        "styles": [],
+        "events": [],
+        "methods": []
+      },
+      "evidence": [
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/components/component_factory.h",
+          "line": 188
+        },
+        {
+          "repo": "engine",
+          "file": "frameworks/src/core/base/keys.h",
+          "line": 311
+        }
+      ],
+      "feature": "FEATURE_COMPONENT_VIDEO"
+    }
+  },
+  "common": {
+    "attributes": {
+      "class": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 18
+          }
+        ],
+        "doc": "string | 否 | 组件的样式类，用于引用样式表。"
+      },
+      "id": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 298
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 16
+          }
+        ],
+        "doc": "string | 否 | 组件的唯一标识。"
+      },
+      "ref": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 313
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 19
+          }
+        ],
+        "doc": "string | 否 | 用来指定指向子元素的引用信息，该引用将注册到父组件的$refs 属性对象上。"
+      },
+      "show": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 309
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 30
+          }
+        ],
+        "doc": "boolean | 根据设置的boolean值，显示或隐藏当前元素。"
+      },
+      "style": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 17
+          }
+        ],
+        "doc": "string | 否 | 组件的样式声明。"
+      }
+    },
+    "styles": {
+      "animation-delay": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 680
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 17
+          }
+        ],
+        "doc": "<time> | 0 | 定义动画播放的延迟时间。支持的单位为[s(秒)|ms(毫秒) ]，默认单位为ms，格式为：1000ms或1s。"
+      },
+      "animation-duration": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 668
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 18
+          }
+        ],
+        "doc": "<time> | 0 | 定义一个动画周期。支持的单位为[s(秒)|ms(毫秒) ]，默认单位为ms，格式为：1000ms或1s。 **说明：** animation-duration 样式必须设置，否则时长为 0，则不会播放动画。"
+      },
+      "animation-fill-mode": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 676
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 21
+          }
+        ],
+        "doc": "string | none | 指定动画开始和结束的状态： - none：在动画执行之前和之后都不会应用任何样式到目标上。 - forwards：在动画结束后，目标将保留动画结束时的状态（在最后一个关键帧中定义）。"
+      },
+      "animation-iteration-count": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 684
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 19
+          }
+        ],
+        "doc": "number | infinite | 1 | 定义动画播放的次数，默认播放一次，可通过设置为infinite无限次播放。"
+      },
+      "animation-name": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 688
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 16
+          }
+        ],
+        "doc": "string | - | 指定\\@keyframes，详见表2。"
+      },
+      "animation-timing-function": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 672
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-components-common-animation.md",
+            "line": 20
+          }
+        ],
+        "doc": "string | linear | 描述动画执行的速度曲线，用于使动画更为平滑。 可选项有： - linear：表示动画从头到尾的速度都是相同的。 - ease-in：表示动画以低速开始，cubic-bezier(0.42, 0.0, 1.0, 1.0)。 - ease-out：表示动画以低速结束，cubic-bezier(0.0, 0.0, 0.58, 1.0)。 - ease-in-out：表示动画以低速开始和结束，cubic-bezier(0.42, 0.0, 0.58, 1.0)。"
+      },
+      "background-color": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 656
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 24
+          }
+        ],
+        "doc": "<color> | - | 否 | 设置背景颜色。"
+      },
+      "border-bottom-color": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 644
+          }
+        ]
+      },
+      "border-bottom-width": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 636
+          }
+        ]
+      },
+      "border-color": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 648
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 22
+          }
+        ],
+        "doc": "<color> | black | 否 | 使用简写属性设置元素的所有边框颜色。"
+      },
+      "border-left-color": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 645
+          }
+        ]
+      },
+      "border-left-width": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 637
+          }
+        ]
+      },
+      "border-radius": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 652
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 23
+          }
+        ],
+        "doc": "<length> | - | 否 | border-radius属性是设置元素的外边框圆角半径。"
+      },
+      "border-right-color": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 646
+          }
+        ]
+      },
+      "border-right-width": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 638
+          }
+        ]
+      },
+      "border-top-color": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 647
+          }
+        ]
+      },
+      "border-top-width": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 639
+          }
+        ]
+      },
+      "border-width": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 640
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 21
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 使用简写属性设置元素的所有边框宽度。"
+      },
+      "display": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 593
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 26
+          }
+        ],
+        "doc": "string | flex | 否 | 确定一个元素所产生的框的类型，可选值为： - flex：弹性布局。 - none：不渲染此元素。"
+      },
+      "height": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 585
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 16
+          }
+        ],
+        "doc": "<length> | <percentage> | - | 否 | 设置组件自身的高度。 未设置时组件高度默认为0。"
+      },
+      "left": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 660
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 27
+          }
+        ],
+        "doc": "<length> | <percentage> | - | 否 | left|top确定元素的偏移位置。 - left属性规定元素的左边缘。该属性定义了定位元素左外边距边界与其包含块左边界之间的偏移。 - top属性规定元素的顶部边缘。该属性定义了一个定位元素的上外边距边界与其包含块上边界之间的偏移。"
+      },
+      "margin": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 597
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 19
+          }
+        ],
+        "doc": "<length> | <percentage> | 0 | 否 | 使用简写属性设置所有的外边距属性，该属性可以有1到4个值。 - 只有一个值时，这个值会被指定给全部的四个边。 - 两个值时，第一个值被匹配给上和下，第二个值被匹配给左和右。 - 三个值时，第一个值被匹配给上, 第二个值被匹配给左和右，第三个值被匹配给下。 - 四个值时，会依次按上、右、下、左的顺序匹配 (即顺时针顺序)。"
+      },
+      "margin-bottom": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 604
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 20
+          }
+        ],
+        "doc": "<length> | <percentage> | 0 | 否 | 设置左、上、右、下外边距属性。"
+      },
+      "margin-left": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 608
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 20
+          }
+        ],
+        "doc": "<length> | <percentage> | 0 | 否 | 设置左、上、右、下外边距属性。"
+      },
+      "margin-right": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 612
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 20
+          }
+        ],
+        "doc": "<length> | <percentage> | 0 | 否 | 设置左、上、右、下外边距属性。"
+      },
+      "margin-top": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 616
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 20
+          }
+        ],
+        "doc": "<length> | <percentage> | 0 | 否 | 设置左、上、右、下外边距属性。"
+      },
+      "opacity": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 692
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 25
+          }
+        ],
+        "since": 5,
+        "doc": "number | 1 | 否 | 元素的透明度，取值范围为0到1，1表示为不透明，0表示为完全透明。"
+      },
+      "padding": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 620
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 17
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 使用简写属性设置所有的内边距属性。 该属性可以有1到4个值： - 指定一个值时，该值指定四个边的内边距。 - 指定两个值时，第一个值指定上下两边的内边距，第二个指定左右两边的内边距。 - 指定三个值时，第一个指定上边的内边距，第二个指定左右两边的内边距，第三个指定下边的内边距。 - 指定四个值时分别为上、右、下、左边的内边距（顺时针顺序）。"
+      },
+      "padding-bottom": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 623
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 18
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+      },
+      "padding-left": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 626
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 18
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+      },
+      "padding-right": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 629
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 18
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+      },
+      "padding-top": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 632
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 18
+          }
+        ],
+        "doc": "<length> | 0 | 否 | 设置左、上、右、下内边距属性。"
+      },
+      "rotate": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 822
+          }
+        ]
+      },
+      "top": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 664
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 27
+          }
+        ],
+        "doc": "<length> | <percentage> | - | 否 | left|top确定元素的偏移位置。 - left属性规定元素的左边缘。该属性定义了定位元素左外边距边界与其包含块左边界之间的偏移。 - top属性规定元素的顶部边缘。该属性定义了一个定位元素的上外边距边界与其包含块上边界之间的偏移。"
+      },
+      "translate-x": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 828
+          }
+        ]
+      },
+      "translate-y": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 834
+          }
+        ]
+      },
+      "width": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 589
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-styles.md",
+            "line": 15
+          }
+        ],
+        "doc": "<length> | <percentage> | - | 否 | 设置组件自身的宽度。 未设置时组件宽度默认为0。"
+      }
+    },
+    "events": {
+      "click": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1330
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-events.md",
+            "line": 15
+          }
+        ],
+        "doc": "- | 点击动作触发该事件。"
+      },
+      "key": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1356
+          }
+        ]
+      },
+      "longpress": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1334
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-events.md",
+            "line": 16
+          }
+        ],
+        "doc": "- | 长按动作触发该事件。"
+      },
+      "swipe": {
+        "availability": "code",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1338
+          },
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-events.md",
+            "line": 17
+          }
+        ],
+        "since": 5,
+        "doc": "SwipeEvent | 组件上快速滑动后触发。"
+      },
+      "touchEnd": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1350
+          }
+        ]
+      },
+      "touchStart": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1342
+          }
+        ]
+      },
+      "touchcancel": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1360
+          }
+        ]
+      },
+      "touchmove": {
+        "availability": "code-doc-missing",
+        "evidence": [
+          {
+            "repo": "engine",
+            "file": "frameworks/src/core/components/component.cpp",
+            "line": 1346
+          }
+        ]
+      }
+    },
+    "directives": {
+      "elif": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-framework-syntax-hml.md",
+            "line": 258
+          }
+        ]
+      },
+      "for": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 28
+          }
+        ],
+        "doc": "Array | 根据设置的数据列表，展开当前元素。"
+      },
+      "if": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 29
+          }
+        ],
+        "doc": "boolean | 根据设置的boolean值，添加或移除当前元素。"
+      },
+      "show": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-common-attributes.md",
+            "line": 30
+          }
+        ],
+        "doc": "boolean | 根据设置的boolean值，显示或隐藏当前元素。"
+      },
+      "tid": {
+        "availability": "framework",
+        "evidence": [
+          {
+            "repo": "docs",
+            "file": "zh-cn/application-dev/reference/apis-arkui/arkui-js-lite/js-lite-framework-syntax-hml.md",
+            "line": 177
+          }
+        ]
+      }
+    }
+  },
+  "aceLoader": {
+    "imageExtensions": [
+      "bmp",
+      "jpeg",
+      "jpg",
+      "png"
+    ],
+    "specialStyles": {
+      "OPACITY": "opacity",
+      "BORDEROPACITY": "borderOpacity",
+      "ANIMATION_DELAY": "animationDelay",
+      "ANIMATION_DURATION": "animationDuration",
+      "ANIMATION_ITERATION_COUNT": "animationIterationCount",
+      "BACKGROUND_IMAGE": "backgroundImage",
+      "BACKGROUND_IMAGE_ACTIVE": "backgroundImage:active",
+      "BACKGROUND_IMAGE_CHECKED": "backgroundImage:checked"
+    },
+    "regexps": {
+      "REGEXP_NUMBER_PX": "/^[-+]?[0-9]*\\.?[0-9]+(px|cm|em|deg|rad)?$/",
+      "REGEXP_COLOR": "/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/",
+      "REGEXP_UNIT": "/px|cm|em|deg|rad/",
+      "REGEXP_PNG": "/(\\.png|\\.jpg|\\.bmp|\\.jpeg|\\.BMP|\\.JPG|\\.PNG|\\.JPEG)$/",
+      "REGXP_QUOTES": "/\"|'/g",
+      "REGXP_LANGUAGE": "/\\$t/",
+      "REGXP_LANGUAGE_KEY": "/_vm\\.\\$t\\([^()]+?\\)/g",
+      "REGXP_FUNC_RETURN": "/return(.*)}/g"
+    }
+  },
+  "warnings": [
+    "component <analog-clock> is implemented but has no documentation page",
+    "component <camera> is implemented but has no documentation page",
+    "component <clock-hand> is implemented but has no documentation page",
+    "component <tab-bar> is implemented but has no documentation page",
+    "component <tab-content> is implemented but has no documentation page",
+    "component <tabs> is implemented but has no documentation page",
+    "component <video> is implemented but has no documentation page",
+    "feature macro FEATURE_COMPONENT_ANALOG_CLOCK not defined for target linux; treated as disabled",
+    "feature macro FEATURE_COMPONENT_DATE_PICKER not defined for target linux; treated as disabled",
+    "feature macro FEATURE_COMPONENT_TABS not defined for target linux; treated as disabled",
+    "feature macro FEATURE_COMPONENT_TEXT_SPANNABLE not defined for target linux; treated as disabled",
+    "feature macro FEATURE_LIST_SPECIFIC_EVENT_ENABLE not defined for target linux; treated as disabled",
+    "feature macro FEATURE_ROTATION_API not defined for target linux; treated as disabled"
+  ]
+}

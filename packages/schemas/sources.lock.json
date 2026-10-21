@@ -1,0 +1,54 @@
+{
+  "5.0.3": [
+    {
+      "repo": "engine",
+      "commit": "691fbcec2e88fef8eaa8ee60cba8bdb1f05d06f9",
+      "tags": [
+        "OpenHarmony-v5.0.3-Release"
+      ],
+      "remote": "https://gitee.com/openharmony/arkui_ace_engine_lite.git"
+    },
+    {
+      "repo": "loader",
+      "commit": "2848967f4f3d009d9c0e211e95231083b0f9e544",
+      "tags": [
+        "OpenHarmony-v5.0.3-Release"
+      ],
+      "remote": "https://gitee.com/openharmony/developtools_ace_js2bundle.git"
+    },
+    {
+      "repo": "docs",
+      "commit": "d9a19d9342efd1dc035730e23201ad845e463e54",
+      "tags": [
+        "OpenHarmony-v5.0.3-Release"
+      ],
+      "remote": "https://github.com/openharmony/docs.git"
+    }
+  ],
+  "6.1-LTS": [
+    {
+      "repo": "engine",
+      "commit": "fac685fd9175ebe099870b26279f4b66eaefe3f1",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "remote": "https://github.com/openharmony/arkui_ace_engine_lite.git"
+    },
+    {
+      "repo": "loader",
+      "commit": "b280383eb7aa1ec7c46302aa83ce08cdafdefd96",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "remote": "https://github.com/openharmony/developtools_ace_js2bundle.git"
+    },
+    {
+      "repo": "docs",
+      "commit": "c9f9f7480eeb3684fd46fffbaf4d00ffd6f1b678",
+      "tags": [
+        "OpenHarmony-v6.1-LTS"
+      ],
+      "remote": "https://github.com/openharmony/docs.git"
+    }
+  ]
+}

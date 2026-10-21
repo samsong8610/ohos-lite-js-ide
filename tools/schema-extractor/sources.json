@@ -1,0 +1,23 @@
+{
+  "$comment": "Source checkouts per OpenHarmony version. ${VAR:-default} is expanded from the environment.",
+  "versions": [
+    {
+      "ohVersion": "5.0.3",
+      "provisional": false,
+      "target": "linux",
+      "engine": "${OHJS_SRC_5_0_3:-/workspace/research/src}/arkui_ace_engine_lite_OpenHarmony-v5.0.3-Release",
+      "loader": "${OHJS_SRC_5_0_3:-/workspace/research/src}/developtools_ace_js2bundle_OpenHarmony-v5.0.3-Release",
+      "docs": "${OHJS_DOCS_5_0_3:-/workspace/ohjs-ide/research/v5.0.3-Release/docs}"
+    },
+    {
+      "ohVersion": "6.1-LTS",
+      "provisional": true,
+      "provisionalReason": "6.1-LTS is not yet verified on the target board; extracted from OpenHarmony-v6.1-LTS tagged mirror checkouts, re-check when the board vendor ships 6.1 firmware",
+      "target": "linux",
+      "engine": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/arkui_ace_engine_lite",
+      "loader": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/developtools_ace_js2bundle",
+      "docs": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/docs"
+    }
+  ],
+  "diff": [{ "from": "5.0.3", "to": "6.1-LTS" }]
+}

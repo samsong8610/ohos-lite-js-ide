@@ -7,13 +7,14 @@
   "main": "out/index.js",
   "types": "out/index.d.ts",
   "files": [
-    "out"
+    "out",
+    "sources.json"
   ],
   "dependencies": {
     "@ohjs/schemas": "workspace:*"
   },
   "scripts": {
-    "generate": "echo \"schema-extractor not implemented yet\"",
-    "check": "echo \"schema-extractor not implemented yet\""
+    "generate": "tsc -b && node out/cli.js generate",
+    "check": "tsc -b && node out/cli.js check"
   }
 }

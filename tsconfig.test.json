@@ -17,5 +17,5 @@
       "@ohjs/schema-extractor": ["tools/schema-extractor/src/index.ts"]
     }
   },
-  "include": ["packages/*/src/**/*.ts", "tools/*/src/**/*.ts", "vitest.config.ts"]
+  "include": ["packages/*/src/**/*.ts", "tools/*/src/**/*.ts", "tools/*/test/**/*.ts", "vitest.config.ts"]
 }
