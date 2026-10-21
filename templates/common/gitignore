@@ -1,0 +1,6 @@
+# OpenHarmony Lite JS extension: generated on every SDK switch (do not commit)
+/.ohjs/types/
+/.ohjs/jsconfig.base.json
+# build output
+/build/
+/entry/build/

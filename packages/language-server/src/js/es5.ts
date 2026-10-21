@@ -11,14 +11,14 @@ export interface Es6Finding {
   end: number;
 }
 
-type AnyNode = Node & Record<string, unknown>;
+export type AnyNode = Node & Record<string, unknown>;
 
 function isNode(v: unknown): v is AnyNode {
   return typeof v === 'object' && v !== null && typeof (v as { type?: unknown }).type === 'string';
 }
 
 /** Depth-first visit of every ESTree node (acorn nodes carry only data fields). */
-function visit(
+export function visit(
   node: AnyNode,
   parent: AnyNode | undefined,
   fn: (n: AnyNode, parent: AnyNode | undefined) => void,
@@ -157,6 +157,8 @@ export interface Es5CheckResult {
   comments: Array<{ text: string; start: number; end: number }>;
   /** the file does not parse even as ES2022+ (the TS server already reports syntax errors) */
   syntaxError?: string;
+  /** the parsed program (absent on syntax errors), reused by other JS rules */
+  ast?: Node;
 }
 
 /** Checks a page/app .js file against ES5.1 (module syntax allowed). */
@@ -180,7 +182,7 @@ export function checkEs5(code: string): Es5CheckResult {
       return { findings: [], modules: [], comments, syntaxError: (e as Error).message };
     }
   }
-  return { findings: findEs6(ast), modules: moduleRefs(ast), comments };
+  return { findings: findEs6(ast), modules: moduleRefs(ast), comments, ast };
 }
 
 /** Checks one `{{ }}` expression body; offsets are relative to `expr`. Unparseable (half-typed) text yields []. */

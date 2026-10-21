@@ -11,3 +11,4 @@ packages/schemas/sources.lock.json
 **/__snapshots__/**
 .vscode-test
 out-test
+**/test/grammar/*.test.css

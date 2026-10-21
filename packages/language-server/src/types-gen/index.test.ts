@@ -6,6 +6,9 @@ import { describe, expect, it } from 'vitest';
 import { loadSystemModules } from '@ohjs/schemas';
 import {
   BASE_EXTENDS,
+  JSCONFIG_BASE,
+  OHJS_DIR,
+  TYPES_DIR,
   generateEnvDts,
   generateSystemModulesDts,
   jsconfigBase,
@@ -110,5 +113,17 @@ describe('generated declarations are valid TypeScript', () => {
       const r = ts.transpileModule(text, { reportDiagnostics: true, fileName: 'x.ts' });
       expect(r.diagnostics ?? []).toEqual([]);
     }
+  });
+});
+
+describe('project template .gitignore', () => {
+  it('ignores exactly the regenerated .ohjs files (project.json stays versioned)', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const lines = fs
+      .readFileSync(path.resolve(__dirname, '../../../../templates/common/gitignore'), 'utf8')
+      .split(/\r?\n/)
+      .filter((l) => l.startsWith('/.ohjs'));
+    expect(lines).toEqual([`/${OHJS_DIR}/${TYPES_DIR}/`, `/${OHJS_DIR}/${JSCONFIG_BASE}`]);
   });
 });

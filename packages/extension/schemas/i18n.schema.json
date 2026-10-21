@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ohjs://schemas/i18n.schema.json",
+  "title": "ArkUI.Lite i18n/<locale>.json",
+  "description": "Nested objects whose leaves are strings, referenced from HML as $t('a.b.c').",
+  "type": "object",
+  "additionalProperties": { "$ref": "#/definitions/entry" },
+  "definitions": {
+    "entry": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "object", "additionalProperties": { "$ref": "#/definitions/entry" } }
+      ]
+    }
+  }
+}

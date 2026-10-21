@@ -141,6 +141,54 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.ok((await read('.ohjs', 'types', 'ohjs-env.d.ts')).includes('interface OhjsViewModel'));
     });
 
+    it('i18n key jump, enum value completion, JSON Schema for config.json (FR-LANG-004/008)', async () => {
+      const [uri] = await vscode.workspace.findFiles('**/pages/index/index.hml');
+      const doc = await vscode.workspace.openTextDocument(uri!);
+      await vscode.window.showTextDocument(doc);
+      const at = doc.positionAt(doc.getText().indexOf('strings.hello') + 3);
+      const defs = await vscode.commands.executeCommand<Array<vscode.Location | vscode.LocationLink>>(
+        'vscode.executeDefinitionProvider',
+        uri,
+        at,
+      );
+      const targets = defs.map((d) => ('targetUri' in d ? d.targetUri : d.uri).path.split('/').pop()).sort();
+      assert.deepStrictEqual(targets, ['en-US.json', 'zh-CN.json']);
+      // enum values of <input type="">
+      const edit = new vscode.WorkspaceEdit();
+      const end = doc.positionAt(doc.getText().indexOf('</div>'));
+      edit.insert(uri!, end, '<input type=""></input>\n');
+      assert.ok(await vscode.workspace.applyEdit(edit));
+      const pos = doc.positionAt(doc.getText().indexOf('type=""') + 6);
+      const list = await vscode.commands.executeCommand<vscode.CompletionList>(
+        'vscode.executeCompletionItemProvider',
+        uri,
+        pos,
+      );
+      const labels = list.items.map((i) => (typeof i.label === 'string' ? i.label : i.label.label));
+      for (const l of ['checkbox', 'radio', 'button'])
+        assert.ok(labels.includes(l), `${l} missing: ${labels.join(',')}`);
+      await vscode.commands.executeCommand('workbench.action.files.revert');
+      // config.json: the contributed JSON Schema (VS Code JSON service) reports a bad moduleType
+      const [cfg] = await vscode.workspace.findFiles('**/src/main/config.json');
+      const cdoc = await vscode.workspace.openTextDocument(cfg!);
+      await vscode.window.showTextDocument(cdoc);
+      const o = cdoc.getText().indexOf('"moduleType": "entry"') + '"moduleType": "'.length;
+      const e2 = new vscode.WorkspaceEdit();
+      e2.replace(cfg!, new vscode.Range(cdoc.positionAt(o), cdoc.positionAt(o + 5)), 'har');
+      assert.ok(await vscode.workspace.applyEdit(e2));
+      assert.ok(
+        await waitFor(
+          () =>
+            vscode.languages
+              .getDiagnostics(cfg!)
+              .some((d) => d.source !== 'ohjs' && /entry|feature/.test(d.message)),
+          20000,
+        ),
+        `no JSON schema diagnostic: ${JSON.stringify(vscode.languages.getDiagnostics(cfg!).map((d) => d.message))}`,
+      );
+      await vscode.commands.executeCommand('workbench.action.files.revert');
+    });
+
     it('language server: config.json deviceType edit is diagnosed', async () => {
       const [uri] = await vscode.workspace.findFiles('**/src/main/config.json');
       const doc = await vscode.workspace.openTextDocument(uri!);

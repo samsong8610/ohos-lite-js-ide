@@ -1,0 +1,7 @@
+/* SYNTAX TEST "source.css" "ArkUI.Lite CSS injection (M1-6)"
+    .a { block-color: red; total-angle: 240; }
+/*       ^^^^^^^^^^^ support.type.property-name.css.ohlite
+/*                         ^^^^^^^^^^^ support.type.property-name.css.ohlite
+    .b { unknown-x: 1; width: 10px; }
+/*       ^^^^^^^^^ - support.type.property-name.css.ohlite
+/*                     ^^^^^ support.type.property-name.css.ohlite

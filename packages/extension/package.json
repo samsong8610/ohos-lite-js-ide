@@ -141,7 +141,10 @@
               "prj/page-file-missing",
               "prj/page-not-registered",
               "i18n/missing-key",
-              "i18n/missing-translation"
+              "i18n/missing-translation",
+              "prj/page-name-conflict",
+              "res/image-format",
+              "feature/rotation-disabled"
             ]
           }
         }
@@ -149,11 +152,12 @@
     },
     "jsonValidation": [
       {
-        "fileMatch": [
-          "**/.ohjs/device-profiles/*.json",
-          "**/device-profiles/*.json"
-        ],
-        "url": "./dist/schemas/device-profile.schema.json"
+        "fileMatch": "**/src/main/config.json",
+        "url": "./schemas/config.schema.json"
+      },
+      {
+        "fileMatch": "**/src/main/js/*/i18n/*.json",
+        "url": "./schemas/i18n.schema.json"
       }
     ],
     "commands": [
@@ -186,6 +190,15 @@
           "meta.embedded.expression.hml": "javascript",
           "source.js.embedded.hml": "javascript"
         }
+      },
+      {
+        "scopeName": "source.css.ohlite.injection",
+        "path": "./syntaxes/css-ohlite.injection.json",
+        "injectTo": [
+          "source.css",
+          "source.css.less",
+          "source.css.scss"
+        ]
       }
     ]
   },
@@ -195,7 +208,7 @@
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "test:integration": "pnpm run bundle && tsc -p test/integration/tsconfig.json && node out-test/runTest.js",
     "package": "vsce package --no-dependencies",
-    "test:grammar": "vscode-tmgrammar-test -g syntaxes/hml.tmLanguage.json -g test/grammar/source.js.stub.tmLanguage.json \"test/grammar/*.test.hml\""
+    "test:grammar": "vscode-tmgrammar-test -g syntaxes/hml.tmLanguage.json -g test/grammar/source.js.stub.tmLanguage.json -g test/grammar/source.css.stub.tmLanguage.json \"test/grammar/*.test.hml\" \"test/grammar/*.test.css\""
   },
   "dependencies": {
     "@ohjs/core": "workspace:*",
@@ -210,6 +223,7 @@
     "@types/vscode": "~1.140.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.2",
+    "ajv": "^8.20.0",
     "esbuild": "^0.25.11",
     "mocha": "^11.7.4",
     "vscode-tmgrammar-test": "^0.1.3"

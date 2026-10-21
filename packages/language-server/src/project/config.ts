@@ -14,6 +14,7 @@ export interface ConfigFinding {
     | 'prj/missing-app-module'
     | 'prj/device-type'
     | 'prj/missing-pages'
+    | 'prj/page-name-conflict'
     | 'prj/first-page-not-index'
     | 'prj/page-file-missing';
   message: string;
@@ -54,6 +55,8 @@ export function readConfig(text: string): ConfigInfo | undefined {
 export function validateConfig(
   text: string,
   pageExists: (jsName: string, page: string) => boolean,
+  /** component tags of the SDK: a page file named like one is rejected by ace-loader */
+  reservedTags: ReadonlySet<string> = new Set(),
 ): ConfigFinding[] {
   const out: ConfigFinding[] = [];
   const root = parseTree(text);
@@ -130,6 +133,13 @@ export function validateConfig(
         message: `The first page (home page) must be "${HOME_PAGE}"`,
       });
     for (const p of list) {
+      const fileName = p.type === 'string' ? String(p.value).split('/').pop()! : '';
+      if (reservedTags.has(fileName))
+        out.push({
+          rule: 'prj/page-name-conflict',
+          range: rangeOf(p),
+          message: `Page file name "${fileName}" is a component name; ace-loader rejects it ("The file name cannot contain reserved tag name")`,
+        });
       if (p.type === 'string' && !pageExists(jsName, String(p.value)))
         out.push({
           rule: 'prj/page-file-missing',

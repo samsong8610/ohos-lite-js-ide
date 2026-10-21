@@ -1,0 +1,12 @@
+{
+  "comment": "Test-only stand-in for VS Code's built-in CSS grammar (source.css): just the property-list scope the ArkUI.Lite injection targets.",
+  "scopeName": "source.css",
+  "patterns": [
+    {
+      "begin": "\\{",
+      "end": "\\}",
+      "name": "meta.property-list.css",
+      "patterns": [{ "match": "[A-Za-z-]+(?=\\s*:)", "name": "meta.property-name.css" }]
+    }
+  ]
+}

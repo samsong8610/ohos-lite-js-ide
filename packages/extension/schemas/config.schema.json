@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ohjs://schemas/config.schema.json",
+  "title": "OpenHarmony small-system (FA, ArkUI.Lite) config.json",
+  "description": "Required fields and value checks follow bm_lite services/bundlemgr_lite/src/bundle_parser.cpp (identical in OpenHarmony 5.0.3 and 6.1-LTS); module.js follows the ArkUI.Lite docs. Cross-file rules (page files, home page) are reported by the OHJS language server.",
+  "type": "object",
+  "required": ["app", "module"],
+  "properties": {
+    "app": {
+      "type": "object",
+      "required": ["bundleName", "version"],
+      "properties": {
+        "bundleName": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 127,
+          "pattern": "^([a-zA-Z0-9_]+\\.)+[a-zA-Z0-9_]+$",
+          "description": "Bundle name, e.g. com.example.demo (7-127 characters, dot-separated [a-zA-Z0-9_] segments)."
+        },
+        "vendor": { "type": "string", "maxLength": 255 },
+        "version": {
+          "type": "object",
+          "required": ["code", "name"],
+          "properties": {
+            "code": { "type": "integer", "minimum": 0 },
+            "name": { "type": "string", "maxLength": 127 }
+          }
+        },
+        "apiVersion": {
+          "type": "object",
+          "description": "bm_lite rejects an installed HAP without it; in source projects the build tool usually fills it in from the build configuration, so it is optional here.",
+          "required": ["compatible"],
+          "properties": {
+            "compatible": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum API version; must not exceed the device's."
+            },
+            "target": { "type": "integer", "minimum": 0, "description": "Must be >= compatible." }
+          }
+        }
+      }
+    },
+    "deviceConfig": {
+      "type": ["object", "null"],
+      "properties": {
+        "default": { "$ref": "#/definitions/deviceConfigEntry" },
+        "smartVision": { "$ref": "#/definitions/deviceConfigEntry" }
+      }
+    },
+    "module": {
+      "type": "object",
+      "required": ["deviceType", "distro", "abilities"],
+      "properties": {
+        "package": { "type": "string" },
+        "name": { "type": "string", "maxLength": 255 },
+        "description": { "type": "string" },
+        "deviceType": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "anyOf": [{ "enum": ["smartVision"] }, { "type": "string" }] },
+          "contains": { "const": "smartVision" },
+          "description": "Must contain exactly \"smartVision\" (bm_lite compares with strcmp)."
+        },
+        "distro": {
+          "type": "object",
+          "required": ["deliveryWithInstall", "moduleName", "moduleType"],
+          "properties": {
+            "deliveryWithInstall": { "type": "boolean" },
+            "moduleName": { "type": "string", "maxLength": 31, "not": { "pattern": "\\.\\./" } },
+            "moduleType": { "enum": ["entry", "feature"] }
+          }
+        },
+        "metaData": {
+          "type": "object",
+          "properties": {
+            "customizeData": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "value": { "type": "string" },
+                  "extra": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "abilities": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string", "maxLength": 255 },
+              "description": { "type": "string" },
+              "label": { "type": "string", "maxLength": 255 },
+              "icon": { "type": "string" },
+              "type": { "anyOf": [{ "enum": ["page", "service"] }, { "type": "string" }] },
+              "launchType": { "anyOf": [{ "enum": ["singleton", "standard"] }, { "type": "string" }] },
+              "visible": { "type": "boolean" },
+              "srcPath": { "type": "string" },
+              "deviceCapability": { "type": "array", "items": { "type": "string" } },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entities": { "type": "array", "items": { "type": "string" } },
+                    "actions": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "reqPermissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "reason": { "type": "string" },
+              "usedScene": {
+                "type": "object",
+                "properties": {
+                  "ability": { "type": "array", "items": { "type": "string" } },
+                  "when": { "enum": ["inuse", "always"] }
+                }
+              }
+            }
+          }
+        },
+        "js": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "default": "default" },
+              "pages": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "pattern": "^pages/" },
+                "description": "Page paths; the first (home) page must be pages/index/index."
+              },
+              "window": {
+                "type": "object",
+                "properties": {
+                  "designWidth": { "type": "integer" },
+                  "autoDesignWidth": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "deviceConfigEntry": {
+      "type": "object",
+      "properties": { "keepAlive": { "type": "boolean" } }
+    }
+  }
+}

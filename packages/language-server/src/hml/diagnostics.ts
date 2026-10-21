@@ -2,6 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { checkImagePath } from '../project/images';
 import { checkExpressionEs5 } from '../js/es5';
 import { interpolations, translationRefs } from '../project/i18n';
 import { LineIndex } from '../text';
@@ -127,6 +128,12 @@ export function validateHml(
             ? `only ${c.map((t) => `<${t}>`).join(', ')} allowed`
             : `<${el.tag}> is excluded`;
       report('hml/invalid-child', el.nameRange, `<${el.tag}> is not allowed inside <${parent.tag}>: ${hint}`);
+    }
+    // <image src> only: <video src> is a media file
+    for (const a of el.tag === 'image' ? el.attributes : []) {
+      if (a.name !== 'src' || a.value === undefined || !a.valueRange) continue;
+      const f = checkImagePath(a.value, a.valueRange, view.schema.aceLoader.imageExtensions);
+      if (f) report(f.rule, f.range, f.message);
     }
     const names = new Set(el.attributes.map((a) => a.name));
     if (names.has('for') && names.has('if')) {

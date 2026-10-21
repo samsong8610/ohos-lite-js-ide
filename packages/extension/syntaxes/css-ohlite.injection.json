@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ArkUI.Lite CSS (injection)",
+  "scopeName": "source.css.ohlite.injection",
+  "comment": "Injected into CSS/LESS/SCSS: marks ArkUI.Lite style names (union of the component schemas, kept in sync by a unit test) as property names, including Lite-only ones the stock CSS grammar does not know (e.g. block-color, total-angle, center-x).",
+  "injectionSelector": "L:meta.property-list.css -comment -string, L:meta.property-list.less -comment -string, L:meta.property-list.scss -comment -string",
+  "patterns": [
+    {
+      "include": "#lite-property-name"
+    }
+  ],
+  "repository": {
+    "lite-property-name": {
+      "match": "(?<![\\w-])(linebackgroundcolorspancolor|linebackgroundcolorspanstart|linebackgroundcolorspanend|animation-iteration-count|animation-timing-function|backgroundcolorspancolor|backgroundcolorspanstart|foregroundcolorspancolor|foregroundcolorspanstart|backgroundcolorspanend|foregroundcolorspanend|absolutesizespanstart|relativesizespanstart|absolutesizespansize|relativesizespansize|selected-font-family|absolutesizespanend|animation-fill-mode|border-bottom-color|border-bottom-width|relativesizespanend|animation-duration|border-right-color|border-right-width|selected-font-size|border-left-color|border-left-width|fit-original-size|placeholder-color|background-color|background-image|border-top-color|border-top-width|animation-delay|justify-content|animation-name|flex-direction|letter-spacing|padding-bottom|selected-color|spannablestart|spannablestyle|border-radius|margin-bottom|padding-right|text-overflow|border-color|border-width|margin-right|padding-left|spannableend|stroke-width|align-items|block-color|font-family|line-height|margin-left|padding-top|start-angle|total-angle|translate-x|translate-y|margin-top|object-fit|text-align|direction|flex-wrap|font-size|center-x|center-y|display|opacity|padding|pivot-x|pivot-y|height|margin|radius|rotate|color|width|left|top)(?=\\s*:)",
+      "captures": {
+        "1": {
+          "name": "support.type.property-name.css.ohlite"
+        }
+      }
+    }
+  }
+}

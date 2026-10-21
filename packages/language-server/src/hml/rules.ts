@@ -33,6 +33,9 @@ export const RULES = {
   'prj/page-not-registered': 'warning',
   'i18n/missing-key': 'error',
   'i18n/missing-translation': 'warning',
+  'prj/page-name-conflict': 'error',
+  'res/image-format': 'error',
+  'feature/rotation-disabled': 'warning',
 } as const satisfies Record<string, RuleSeverity>;
 
 export type RuleId = keyof typeof RULES;

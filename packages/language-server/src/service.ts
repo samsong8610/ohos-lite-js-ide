@@ -3,25 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
+  type Location,
+  type Position,
   CompletionItemKind,
   DiagnosticSeverity,
   InsertTextFormat,
   type CompletionItem,
   type Diagnostic,
 } from 'vscode-languageserver';
-import type { TextDocument } from 'vscode-languageserver-textdocument';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import { completeCss, validateCss } from './css/css-features';
 import { parseCss, type CssDocument } from './css/parser';
 import { completeHml, type HmlCompletion } from './hml/completion';
 import { validateHml, type HmlDiagnostic, type HmlProjectContext } from './hml/diagnostics';
-import { parseHml, type HmlDocument } from './hml/parser';
+import { parseHml, walk, type HmlDocument } from './hml/parser';
 import { SchemaView } from './hml/schema-view';
 import { checkEs5 } from './js/es5';
 import { checkSystemModules } from './js/system-modules';
+import { checkFeatureMethods, methodCalls } from './js/feature-methods';
 import { completeThis } from './js/this-completion';
 import { extractViewModel, type ViewModelSymbols } from './js/viewmodel';
 import { readConfig, validateConfig } from './project/config';
-import { i18nKeys } from './project/i18n';
+import { i18nKeys, i18nKeyRange, translationRefs } from './project/i18n';
 import { mainUriOfConfig, moduleLayout } from './project/layout';
 import { isSuppressed, parseSuppressions, resolveSeverity, type RuleId } from './hml/rules';
 import { LineIndex } from './text';
@@ -74,6 +77,7 @@ const KIND: Record<HmlCompletion['kind'], CompletionItemKind> = {
   method: CompletionItemKind.Method,
   function: CompletionItemKind.Function,
   i18nKey: CompletionItemKind.Constant,
+  enumValue: CompletionItemKind.EnumMember,
 };
 
 interface RuleFinding {
@@ -144,6 +148,25 @@ export class OhjsLanguageService {
   }
 
   /** locale file → leaf keys for the module of `hmlUri`; undefined outside an FA js tree */
+  /** Go to definition: `$t('a.b')` in HML → the key in every i18n/<locale>.json defining it. */
+  definition(doc: TextDocument, position: Position): Location[] {
+    if (documentKind(doc) !== 'hml') return [];
+    const offset = doc.offsetAt(position);
+    const ref = translationRefs(this.hml(doc)).find((r) => r.range.start <= offset && offset <= r.range.end);
+    const layout = moduleLayout(doc.uri);
+    if (!ref || !layout || !this.files.list) return [];
+    const out: Location[] = [];
+    for (const name of (this.files.list(layout.i18nDirUri) ?? []).filter((n) => /\.json$/i.test(n)).sort()) {
+      const uri = layout.i18nDirUri + name;
+      const text = this.files.read(uri);
+      const r = text === undefined ? undefined : i18nKeyRange(text, ref.key);
+      if (!r) continue;
+      const target = TextDocument.create(uri, 'json', 0, text!);
+      out.push({ uri, range: { start: target.positionAt(r.start), end: target.positionAt(r.end) } });
+    }
+    return out;
+  }
+
   i18n(hmlUri: string): Map<string, Set<string>> | undefined {
     const layout = moduleLayout(hmlUri);
     if (!layout || !this.files.list) return undefined;
@@ -160,7 +183,10 @@ export class OhjsLanguageService {
     const rules = this.settings.rules;
     // selector rules apply to plain CSS; LESS/SCSS nesting (`&:active`, nested rules) is compiled away later
     if (kind === 'css' && doc.languageId !== 'less' && !/\.less$/i.test(doc.uri)) {
-      return validateCss(this.css(doc), { rules }).map((d) => this.toDiagnostic(doc, d));
+      return validateCss(this.css(doc), {
+        rules,
+        imageExtensions: this.view.schema.aceLoader.imageExtensions,
+      }).map((d) => this.toDiagnostic(doc, d));
     }
     if (kind === 'js') {
       const r = checkEs5(doc.getText());
@@ -169,6 +195,7 @@ export class OhjsLanguageService {
         doc,
         [
           ...(pack ? checkSystemModules(r.modules, pack) : []),
+          ...(r.ast ? checkFeatureMethods(methodCalls(r.ast), this.view.schema, this.refTags(doc.uri)) : []),
           ...r.findings.map((f) => ({
             rule: 'js/es6-syntax' as const,
             range: f,
@@ -183,6 +210,7 @@ export class OhjsLanguageService {
       const findings = validateConfig(
         doc.getText(),
         (jsName, page) => this.files.read(`${main}js/${jsName}/${page}.hml`) !== undefined,
+        new Set(Object.keys(this.view.schema.components)),
       );
       return this.filtered(doc, findings, []);
     }
@@ -203,6 +231,18 @@ export class OhjsLanguageService {
     return validateHml(this.hml(doc), this.view, { rules, ...(project ? { project } : {}) }).map((d) =>
       this.toDiagnostic(doc, d),
     );
+  }
+
+  /** `ref="x"` → tag in the same-name .hml of a page script */
+  private refTags(jsUri: string): Map<string, string> {
+    const out = new Map<string, string>();
+    const text = this.files.read(companionUri(jsUri, 'hml'));
+    if (text === undefined) return out;
+    for (const el of walk(parseHml(text).roots)) {
+      const ref = el.attributes.find((a) => a.name === 'ref');
+      if (ref?.value && !ref.value.includes('{{')) out.set(ref.value, el.tag);
+    }
+    return out;
   }
 
   /** severity overrides and `ohjs-disable` comments for the non-HML rule families */
@@ -249,12 +289,12 @@ export class OhjsLanguageService {
       const hml = hmlText === undefined ? undefined : parseHml(hmlText);
       return completeCss(this.css(doc), offset, this.view, hml).map((c) => ({
         label: c.label,
-        kind: CompletionItemKind.Property,
+        kind: c.kind === 'value' ? CompletionItemKind.EnumMember : CompletionItemKind.Property,
         ...(c.detail ? { detail: c.detail } : {}),
         ...(c.documentation ? { documentation: { kind: 'markdown' as const, value: c.documentation } } : {}),
         textEdit: {
           range: { start: doc.positionAt(c.replace.start), end: doc.positionAt(c.replace.end) },
-          newText: `${c.label}: `,
+          newText: c.kind === 'value' ? c.label : `${c.label}: `,
         },
       }));
     }

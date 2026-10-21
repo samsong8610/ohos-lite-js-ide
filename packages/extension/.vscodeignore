@@ -4,6 +4,7 @@
 !dist/server.js
 !language-configuration.hml.json
 !syntaxes/**
+!schemas/**
 !dist/schemas/**
 !package.json
 !package.nls.json

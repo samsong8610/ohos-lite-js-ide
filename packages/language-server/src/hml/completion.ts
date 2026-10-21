@@ -17,7 +17,8 @@ export type HmlCompletionKind =
   | 'variable'
   | 'method'
   | 'function'
-  | 'i18nKey';
+  | 'i18nKey'
+  | 'enumValue';
 
 export interface HmlCompletion {
   label: string;
@@ -190,7 +191,9 @@ export function completeHml(
     }
     case 'attributeValue': {
       const k = classifyAttribute(ctx.attribute);
-      if (k.kind !== 'event' || view.attribute(ctx.element.tag, ctx.attribute)) return [];
+      const attr = view.attribute(ctx.element.tag, ctx.attribute);
+      if (attr?.field.values) return enumValues(doc, ctx, attr.field);
+      if (k.kind !== 'event' || attr) return [];
       return (vm?.methods ?? []).map((m) => ({
         label: m,
         kind: 'method' as const,
@@ -272,6 +275,36 @@ export function completeHml(
     default:
       return [];
   }
+}
+
+/** FR-LANG-004 enum values of a static attribute value (not inside `{{ }}`); `-` is part of a value. */
+function enumValues(
+  doc: HmlDocument,
+  ctx: Extract<CompletionContext, { kind: 'attributeValue' }>,
+  field: FieldSchema,
+): HmlCompletion[] {
+  const a = ctx.element.attributes.find(
+    (x) =>
+      x.name === ctx.attribute &&
+      x.valueRange &&
+      x.valueRange.start <= ctx.range.start &&
+      ctx.range.end <= x.valueRange.end,
+  );
+  if (!a?.valueRange || doc.text.slice(a.valueRange.start, a.valueRange.end).includes('{{')) return [];
+  const t = doc.text;
+  let s = ctx.range.start;
+  while (s > a.valueRange.start && /[\w-]/.test(t[s - 1]!)) s--;
+  let e = ctx.range.end;
+  while (e < a.valueRange.end && /[\w-]/.test(t[e]!)) e++;
+  return field.values!.map((v, i) => ({
+    label: v,
+    kind: 'enumValue' as const,
+    insertText: v,
+    snippet: false,
+    replace: { start: s, end: e },
+    detail: `${ctx.attribute} value${field.valuesSource === 'doc' ? ' (from docs)' : ''}`,
+    sortText: String(i).padStart(2, '0'),
+  }));
 }
 
 /**

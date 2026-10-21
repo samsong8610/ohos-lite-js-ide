@@ -143,6 +143,7 @@ export function startServer(connection: Connection): void {
     return {
       capabilities: {
         textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental },
+        definitionProvider: true,
         completionProvider: {
           triggerCharacters: ['<', ' ', '/', '@', ':', '{', '"', "'", '.'],
           resolveProvider: false,
@@ -179,6 +180,11 @@ export function startServer(connection: Connection): void {
     } catch (e) {
       status(false, (e as Error).message);
     }
+  });
+
+  connection.onDefinition((p) => {
+    const doc = documents.get(p.textDocument.uri);
+    return doc && service ? service.definition(doc, p.position) : [];
   });
 
   connection.onCompletion((p) => {

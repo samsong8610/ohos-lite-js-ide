@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { pathToFileURL } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { PassThrough } from 'stream';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
@@ -234,6 +234,21 @@ describe('language server over LSP', () => {
       textDocument: { uri: zhUri, languageId: 'json', version: 1, text: '{ "a": "甲", "b": "乙" }' },
     });
     await h.waitDiagnostics(zhUri);
+    // FR-LANG-008: $t('a') jumps to the key in every locale file (disk + open buffer)
+    const defs = (await h.client.sendRequest('textDocument/definition', {
+      textDocument: { uri: pageUri },
+      position: { line: 0, character: 19 },
+    })) as Array<{ uri: string; range: { start: { line: number; character: number } } }>;
+    expect(defs.map((d) => [path.basename(fileURLToPath(d.uri)), d.range.start.character])).toEqual([
+      ['en-US.json', 2],
+      ['zh-CN.json', 2],
+    ]);
+    expect(
+      await h.client.sendRequest('textDocument/definition', {
+        textDocument: { uri: 'file:///nope.hml' },
+        position: { line: 0, character: 0 },
+      }),
+    ).toEqual([]);
     h.client.sendNotification('textDocument/didOpen', {
       textDocument: { uri: cfgUri, languageId: 'json', version: 1, text: cfgText('"pages/index/index"') },
     });

@@ -2,7 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { parse } from 'jsonc-parser';
+import { findNodeAtLocation, parse, parseTree } from 'jsonc-parser';
 import type { HmlDocument, Range } from '../hml/parser';
 
 /** Leaf key paths of one i18n/<locale>.json (`{"strings": {"hello": "Hi"}}` → `strings.hello`). */
@@ -57,4 +57,15 @@ export function translationRefs(doc: HmlDocument): TranslationRef[] {
     }
   }
   return out;
+}
+
+/** Range of the property key for a dotted i18n key in one locale file (FR-LANG-008 jump); undefined when absent. */
+export function i18nKeyRange(text: string, key: string): Range | undefined {
+  const root = parseTree(text);
+  if (!root) return undefined;
+  const node = findNodeAtLocation(root, key.split('.'));
+  const prop = node?.parent;
+  if (!prop || prop.type !== 'property') return undefined;
+  const k = prop.children![0]!;
+  return { start: k.offset, end: k.offset + k.length };
 }

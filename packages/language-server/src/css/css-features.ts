@@ -2,6 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { checkImagePath, cssUrls } from '../project/images';
 import type { FieldSchema } from '@ohjs/schemas';
 import type { HmlDocument, Range } from '../hml/parser';
 import { walk } from '../hml/parser';
@@ -36,7 +37,7 @@ const SIMPLE = /^(?:\.[A-Za-z_][\w-]*|#[A-Za-z_][\w-]*)$/;
  */
 export function validateCss(
   doc: CssDocument,
-  options: { rules?: Readonly<Record<string, unknown>> } = {},
+  options: { rules?: Readonly<Record<string, unknown>>; imageExtensions?: readonly string[] } = {},
 ): CssDiagnostic[] {
   const lines = new LineIndex(doc.text);
   const suppress = parseSuppressions(
@@ -49,6 +50,13 @@ export function validateCss(
     out.push({ rule, severity, message, range });
   };
   for (const r of doc.rules) {
+    if (options.imageExtensions)
+      for (const d of r.declarations)
+        for (const u of cssUrls(d.value)) {
+          const range = { start: d.valueRange.start + u.start, end: d.valueRange.start + u.end };
+          const f = checkImagePath(u.url, range, options.imageExtensions);
+          if (f) report(f.rule, f.range, f.message);
+        }
     if (r.inKeyframes) continue;
     for (const s of r.selectors) {
       const pseudo = /^(.*?)(::?)([A-Za-z-]+)(\(.*\))?$/.exec(s.text);
@@ -87,9 +95,49 @@ export function validateCss(
 
 export interface CssCompletion {
   label: string;
+  /** 'property' (default) or an enumerated 'value' */
+  kind?: 'property' | 'value';
   replace: Range;
   detail?: string;
   documentation?: string;
+}
+
+/** Enumerated values after `property:` (FR-LANG-004/005); undefined when the offset is not in a value. */
+function completeValue(
+  doc: CssDocument,
+  rule: CssRule,
+  offset: number,
+  view: SchemaView,
+  hml?: HmlDocument,
+): CssCompletion[] | undefined {
+  const t = doc.text;
+  let k = offset;
+  while (k > rule.block.start + 1 && !/[:;{}]/.test(t[k - 1]!)) k--;
+  if (t[k - 1] !== ':') return undefined;
+  let p = k - 1;
+  while (p > rule.block.start + 1 && /\s/.test(t[p - 1]!)) p--;
+  let ps = p;
+  while (ps > rule.block.start + 1 && /[\w-]/.test(t[ps - 1]!)) ps--;
+  const property = t.slice(ps, p);
+  let s = offset;
+  while (s > k && /[\w-]/.test(t[s - 1]!)) s--;
+  if (t.slice(k, s).trim() !== '') return []; // only the first token of a value
+  let e = offset;
+  while (e < t.length && /[\w-]/.test(t[e]!)) e++;
+  const tags = !rule.inKeyframes && hml ? matchedTags(rule, hml) : [];
+  const comps = tags.length
+    ? tags.map((tg) => view.component(tg)).filter((c) => !!c)
+    : view.usableComponents();
+  const field = view.schema.common.styles[property]?.values
+    ? view.schema.common.styles[property]
+    : comps.map((c) => c.styles[property]).find((f) => f?.values);
+  if (!field?.values) return [];
+  return field.values.map((v) => ({
+    label: v,
+    kind: 'value' as const,
+    replace: { start: s, end: e },
+    detail: `${property} value${field.valuesSource === 'doc' ? ' (from docs)' : ''}`,
+  }));
 }
 
 /** Innermost rule whose block contains offset. */
@@ -134,6 +182,8 @@ export function completeCss(
   const rule = ruleAt(doc, offset);
   if (!rule) return [];
   const t = doc.text;
+  const value = completeValue(doc, rule, offset, view, hml);
+  if (value) return value;
   let s = offset;
   while (s > rule.block.start + 1 && /[\w-]/.test(t[s - 1]!)) s--;
   // must be at the start of a declaration: only whitespace back to `{` or `;`
