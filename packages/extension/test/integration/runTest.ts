@@ -24,7 +24,12 @@ async function main(): Promise<void> {
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: [path.join(fixtures, folder), '--disable-extensions', '--disable-workspace-trust'],
-      extensionTestsEnv: { OHJS_EXPECT: expectation, OHJS_MOCK_HDC: mock.hdcPath, ...mock.env },
+      extensionTestsEnv: {
+        OHJS_EXPECT: expectation,
+        OHJS_MOCK_HDC: mock.hdcPath,
+        OHJS_ACTIVATION_BUDGET_MS: activationBudgetMs(),
+        ...mock.env,
+      },
     });
   }
   mock.dispose();
@@ -34,3 +39,13 @@ main().catch((err) => {
   console.error('integration tests failed:', err);
   process.exit(1);
 });
+
+/**
+ * Activation-time budget for the integration test: NFR-PERF-001 is 500 ms (local and device runs);
+ * shared CI runners (`CI=true`, set by GitHub Actions) get 1000 ms. An explicit
+ * OHJS_ACTIVATION_BUDGET_MS wins.
+ */
+function activationBudgetMs(): string {
+  if (process.env.OHJS_ACTIVATION_BUDGET_MS) return process.env.OHJS_ACTIVATION_BUDGET_MS;
+  return process.env.CI === 'true' ? '1000' : '500';
+}

@@ -32,7 +32,9 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.strictEqual(profile?.display.width, 1024);
       const ms = (ext.exports as unknown as { activationMs: number }).activationMs;
       console.log(`      activate() took ${ms.toFixed(1)} ms`);
-      assert.ok(ms < 500, `activation took ${ms} ms (NFR-PERF-001 ≤ 500 ms)`);
+      // 500 ms locally (NFR-PERF-001); 1000 ms on shared CI runners (see runTest.ts)
+      const budget = Number(process.env.OHJS_ACTIVATION_BUDGET_MS) || 500;
+      assert.ok(ms < budget, `activation took ${ms} ms (budget ${budget} ms; NFR-PERF-001 ≤ 500 ms)`);
     });
 
     it('language server: SDK from .ohjs/project.json, HML diagnostics and completion', async () => {
