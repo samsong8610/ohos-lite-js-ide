@@ -4,6 +4,7 @@
  */
 import * as fs from 'fs';
 import { OhjsError } from '../errors';
+import { HDC_TOOLCHAIN_OH_VERSIONS, ohVersionDirName, normalizeHdcToolchainOhVersion } from './oh-version';
 import type { IPlatform, IProcessRunner } from './types';
 
 export type ToolId = 'hdc' | 'node' | 'hvigorw' | 'jerry-snapshot';
@@ -14,8 +15,10 @@ export interface ToolHints {
   user?: string;
   /** project .ohjs/toolchain.json */
   project?: string;
-  /** extension install dir; bundled binaries live in <dir>/bin/<platform-arch>/ */
+  /** extension install dir; bundled binaries live in <dir>/bin/<platform-arch>/[<oh-version>/] */
   extensionDir?: string;
+  /** OpenHarmony release bucket (5.0.3 / 6.1-LTS) for version-specific bundled & SDK paths */
+  ohToolchain?: string;
 }
 
 export interface LocatedTool {
@@ -57,14 +60,28 @@ export class ToolLocator {
     private readonly exists: ExistsFn = defaultExists,
   ) {}
 
-  defaultDirs(tool: ToolId): string[] {
+  defaultDirs(tool: ToolId, ohToolchain?: string): string[] {
     const p = this.platform;
     const home = p.homeDir();
+    const hdcVersioned = (roots: string[]): string[] => {
+      const norm = normalizeHdcToolchainOhVersion(ohToolchain ?? '');
+      if (!norm) return [];
+      const vd = ohVersionDirName(norm);
+      return roots.flatMap((r) => [
+        p.join(r, vd),
+        p.join(r, norm),
+        p.join(r, vd.replace(/^v/i, '')),
+      ]);
+    };
     if (p.kind === 'win32') {
       const local = p.mergeEnv({})['LOCALAPPDATA'] ?? p.join(home, 'AppData', 'Local');
       const sdk = p.join(local, 'Huawei', 'Sdk');
       if (tool === 'hdc')
         return [
+          ...hdcVersioned([
+            p.join(local, 'OpenHarmony', 'Sdk'),
+            p.join(home, 'OpenHarmony', 'Sdk'),
+          ]),
           p.join(sdk, 'openharmony', 'toolchains'),
           p.join(sdk, 'default', 'openharmony', 'toolchains'),
         ];
@@ -73,6 +90,7 @@ export class ToolLocator {
     }
     if (tool === 'hdc')
       return [
+        ...hdcVersioned([p.join(home, 'OpenHarmony', 'Sdk'), p.join(home, 'Library', 'OpenHarmony', 'Sdk')]),
         p.join(home, 'OpenHarmony', 'Sdk', 'toolchains'),
         p.join(home, 'Library', 'OpenHarmony', 'Sdk', 'toolchains'),
       ];
@@ -84,14 +102,26 @@ export class ToolLocator {
     const p = this.platform;
     const name = p.exeName(tool, TOOL_KIND[tool]);
     const out: Array<{ path: string; source: ToolSource }> = [];
+    const oh = normalizeHdcToolchainOhVersion(hints.ohToolchain);
     if (hints.user) out.push({ path: hints.user, source: 'user' });
     if (hints.project) out.push({ path: hints.project, source: 'project' });
     const names = p.kind === 'win32' && TOOL_KIND[tool] === 'script' ? [name, `${tool}.cmd`] : [name];
     for (const dir of p.pathEntries())
       for (const n of names) out.push({ path: p.join(dir, n), source: 'path' });
-    if (hints.extensionDir)
+    if (hints.extensionDir && tool === 'hdc') {
+      const base = p.join(hints.extensionDir, 'bin', p.binKey);
+      const versionOrder = oh
+        ? [oh]
+        : hints.ohToolchain
+          ? []
+          : [...HDC_TOOLCHAIN_OH_VERSIONS].reverse();
+      for (const v of versionOrder)
+        out.push({ path: p.join(base, ohVersionDirName(v), name), source: 'bundled' });
+      out.push({ path: p.join(base, name), source: 'bundled' });
+    } else if (hints.extensionDir) {
       out.push({ path: p.join(hints.extensionDir, 'bin', p.binKey, name), source: 'bundled' });
-    for (const dir of this.defaultDirs(tool)) out.push({ path: p.join(dir, name), source: 'default' });
+    }
+    for (const dir of this.defaultDirs(tool, hints.ohToolchain)) out.push({ path: p.join(dir, name), source: 'default' });
     return out;
   }
 

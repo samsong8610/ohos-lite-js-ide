@@ -27,11 +27,26 @@ describe('ToolLocator (NFR-PLT-002, NFR-DST-004)', () => {
       'path',
       'path',
       'bundled',
+      'bundled',
+      'bundled',
       'default',
       'default',
     ]);
-    expect(c[4]!.path).toBe('C:\\ext\\bin\\win32-x64\\hdc.exe');
-    expect(c[5]!.path).toBe('C:\\L\\Huawei\\Sdk\\openharmony\\toolchains\\hdc.exe');
+    expect(c[4]!.path).toBe('C:\\ext\\bin\\win32-x64\\v6.1-lts\\hdc.exe');
+    expect(c[5]!.path).toBe('C:\\ext\\bin\\win32-x64\\v5.0.3\\hdc.exe');
+    expect(c[6]!.path).toBe('C:\\ext\\bin\\win32-x64\\hdc.exe');
+    expect(c[7]!.path).toBe('C:\\L\\Huawei\\Sdk\\openharmony\\toolchains\\hdc.exe');
+  });
+
+  it('orders version-specific bundled hdc before the legacy flat path', () => {
+    const l = new ToolLocator(lin, () => false);
+    const c = l.candidates('hdc', { extensionDir: '/ext', ohToolchain: '5.0.3' });
+    const bundled = c.filter((x) => x.source === 'bundled').map((x) => x.path);
+    expect(bundled).toEqual(['/ext/bin/linux-x64/v5.0.3/hdc', '/ext/bin/linux-x64/hdc']);
+    const l2 = new ToolLocator(lin, existsIn(['/ext/bin/linux-x64/v5.0.3/hdc']));
+    expect(l2.locate('hdc', { extensionDir: '/ext', ohToolchain: '5.0.3' }).path).toBe(
+      '/ext/bin/linux-x64/v5.0.3/hdc',
+    );
   });
 
   it('finds .bat and .cmd scripts on PATH on win32', () => {

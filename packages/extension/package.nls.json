@@ -1,6 +1,10 @@
 {
   "capabilities.untrusted": "Device deployment and external tools are disabled in untrusted workspaces.",
-  "config.tools.hdcPath": "Path to the hdc executable. Empty = auto-detect.",
+  "config.tools.hdcPath": "Path to the hdc executable. Empty = auto-detect (overrides version-aware selection).",
+  "config.tools.hdcOhVersion": "Force which OpenHarmony host hdc toolchain to use when auto-detection from the device fails. Empty = detect from device / project SDK.",
+  "config.tools.hdcOhVersion.auto": "Auto-detect from the connected device (or project SDK before connect).",
+  "config.tools.hdcOhVersion.503": "OpenHarmony 5.0.x host hdc (bundled path …/v5.0.3/ or SDK).",
+  "config.tools.hdcOhVersion.61": "OpenHarmony 6.1.x host hdc (bundled path …/v6.1-lts/ or SDK).",
   "config.device.profile": "Device profile id or path to a device profile JSON file.",
   "config.advanced.outputEncoding": "Encoding used to decode output of external tools (auto tries UTF-8 then GBK).",
   "config.device.profileOverrides": "Overrides for paths, ports and command templates of the active device profile.",

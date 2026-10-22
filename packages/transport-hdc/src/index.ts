@@ -4,3 +4,5 @@
  */
 export * from './parser';
 export * from './hdc-transport';
+export * from './device-oh-probe';
+export * from './hdc-toolchain';

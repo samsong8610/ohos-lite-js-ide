@@ -50,6 +50,27 @@ Use `IPlatform` / `IProcessRunner` from `@ohjs/core`. ESLint enforces this outsi
 
 CI only runs mocks. Real-device tests are run locally (`pnpm device:selftest`, `pnpm e2e:device`, planned).
 
+## Host `hdc` and device OpenHarmony version
+
+Deploy uses a host `hdc` client that must match the board’s OpenHarmony line (at least **5.0.x** vs **6.1.x**).
+TCP `hdcd` listens on port **8710** (device profile default); this repo does not change the daemon.
+
+Resolution order:
+
+1. **`ohjs.tools.hdcPath`** — explicit executable (wins over everything).
+2. **`.ohjs/toolchain.json`** — optional `{ "hdc": "…", "ohVersion": "5.0.3" }`.
+3. **Auto-detect** — with exactly one connected target, read `/etc/ohjs/runtime-manifest.json` (from the
+   active device profile) or `param get const.product.software.version` / related keys, then locate
+   `hdc` under `<extension>/bin/<platform>/v5.0.3/` or `…/v6.1-lts/` (legacy flat `…/bin/<platform>/hdc`
+   still works).
+4. **`ohjs.tools.hdcOhVersion`** — force `5.0.3` or `6.1-lts` when autodetection fails.
+5. Before connect, the project **SDK** (`.ohjs/project.json` / `ohjs.sdkVersion`) selects the initial
+   bundled/SDK search path.
+
+Verify: run **OHJS: Refresh devices**, check the OHJS output channel for
+`hdc (…) … [toolchain 5.0.3]` or `[device OH … → toolchain …]`. With mock-hdc, set `ohjs.tools.hdcPath`
+to `packages/test-kit/mock-hdc/bin/hdc` and use a scenario `shell` rule for `param get`.
+
 ## License
 
 Apache-2.0, see [LICENSE](LICENSE).
