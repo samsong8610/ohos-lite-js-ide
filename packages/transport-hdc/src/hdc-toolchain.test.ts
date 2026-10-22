@@ -28,7 +28,10 @@ describe('HdcToolchainResolver', () => {
     const ext = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ext-'));
     const v503 = stubHdc(lin, ext, 'bin', lin.binKey, 'v5.0.3', 'hdc');
     const v61 = stubHdc(lin, ext, 'bin', lin.binKey, 'v6.1-lts', 'hdc');
-    const locator = new ToolLocator(lin, (p) => lin.normalize(p) === lin.normalize(v503) || lin.normalize(p) === lin.normalize(v61));
+    const locator = new ToolLocator(
+      lin,
+      (p) => lin.normalize(p) === lin.normalize(v503) || lin.normalize(p) === lin.normalize(v61),
+    );
     const resolver = new HdcToolchainResolver(lin, locator, async () => '5.0.3');
 
     const targets: DeviceInfo[] = [{ key: 'dev1', connType: 'USB', state: 'Connected' }];
