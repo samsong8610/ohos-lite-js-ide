@@ -6,7 +6,13 @@ import Ajv from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { COMPONENTS_FILE_JSON_SCHEMA } from './file-schema';
-import type { ComponentSchema, ComponentsSchemaFile, FieldSchema, SystemModulesFile } from './types';
+import type {
+  ComponentSchema,
+  ComponentsSchemaFile,
+  FieldSchema,
+  JsCapabilitiesFile,
+  SystemModulesFile,
+} from './types';
 
 export * from './types';
 export { COMPONENTS_FILE_JSON_SCHEMA } from './file-schema';
@@ -115,4 +121,49 @@ export function loadSystemModules(
   const v = validateSystemModulesFile(data);
   if (!v.valid) throw new SchemaLoadError(`${file}: ${v.errors.join('; ')}`);
   return data as SystemModulesFile;
+}
+
+/** Structural check for `js-capabilities.json`. */
+export function validateJsCapabilitiesFile(data: unknown): ValidationResult {
+  const errors: string[] = [];
+  const d = data as Partial<JsCapabilitiesFile> | null;
+  if (!d || typeof d !== 'object') return { valid: false, errors: ['/ must be an object'] };
+  if (d.schemaFormat !== 1) errors.push('/schemaFormat must be 1');
+  for (const k of ['ohVersion', 'generator'] as const)
+    if (typeof d[k] !== 'string') errors.push(`/${k} must be a string`);
+  if (!d.engine || d.engine.name !== 'jerryscript' || typeof d.engine.apiVersion !== 'string')
+    errors.push('/engine must name jerryscript with an apiVersion');
+  if (!d.macros || typeof d.macros !== 'object') errors.push('/macros must be an object');
+  else
+    for (const [k, m] of Object.entries(d.macros))
+      if (!m || typeof m.value !== 'number' || typeof m.source !== 'string')
+        errors.push(`/macros/${k} needs a numeric value and a source`);
+  if (!Array.isArray(d.apis)) errors.push('/apis must be an array');
+  else
+    d.apis.forEach((a, i) => {
+      if (!a || typeof a.name !== 'string' || typeof a.since !== 'string' || typeof a.source !== 'string')
+        errors.push(`/apis/${i} needs name, since and source strings`);
+      else if (typeof a.available !== 'boolean') errors.push(`/apis/${i}/available must be a boolean`);
+      else if (!a.available && typeof a.reason !== 'string')
+        errors.push(`/apis/${i}/reason is required when unavailable`);
+    });
+  return { valid: !errors.length, errors };
+}
+
+/** Loads `<dir>/<version>/js-capabilities.json`; undefined when the pack has none. */
+export function loadJsCapabilities(
+  ohVersion: string,
+  dataDir = DEFAULT_DATA_DIR,
+): JsCapabilitiesFile | undefined {
+  const file = path.join(dataDir, versionDirName(ohVersion), 'js-capabilities.json');
+  if (!fs.existsSync(file)) return undefined;
+  let data: unknown;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (e) {
+    throw new SchemaLoadError(`${file}: invalid JSON (${(e as Error).message})`);
+  }
+  const v = validateJsCapabilitiesFile(data);
+  if (!v.valid) throw new SchemaLoadError(`${file}: ${v.errors.join('; ')}`);
+  return data as JsCapabilitiesFile;
 }

@@ -3,4 +3,5 @@
     <list-item><text>{{ $t('strings.hello') }}</text></list-item>
   </list>
   <button></button>
+  <text>{{ `n${2 ** 3}` }}{{ list.map(x => x.a) }}{{ obj?.a }}</text>
 </div>

@@ -132,6 +132,7 @@
               "css/unsupported-selector",
               "css/unsupported-pseudo",
               "hml/es6-in-expression",
+              "hml/expression-rewrite",
               "js/es6-syntax",
               "js/es6-untranspilable",
               "js/unsupported-builtin",

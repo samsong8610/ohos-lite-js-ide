@@ -4,22 +4,38 @@
  */
 import { parse, type Node, type Options } from 'acorn';
 
-/** An ES2015+ construct the JerryScript ES5.1 profile cannot run (FR-LANG-007). */
+/**
+ * An ES2015+ construct, classified against the device engine (third_party/jerryscript 2.3 built with
+ * JERRY_ES2015 = 1, identical in OpenHarmony 5.0.3 and 6.1) and against ace-loader's lite babel
+ * (preset-env, no targets, plus @babel/plugin-transform-runtime). ARCHITECTURE §7.1 "ES 语法诊断".
+ */
 export interface Es6Finding {
   feature: string;
-  /**
-   * `transpilable`: ace-loader's babel (preset-env) lowers it to ES5 (`js/es6-syntax`);
-   * `untranspilable`: babel cannot lower it, or the output needs a runtime the lite bundle lacks
-   * (`js/es6-untranspilable`). Template expressions are never transpiled, so HML ignores the tier.
-   */
-  tier: Es6Tier;
-  /** why an untranspilable construct fails (shown in the diagnostic) */
+  /** the device engine parses and runs it natively */
+  engine: boolean;
+  /** what ace-loader's babel does with it in page scripts */
+  babel: BabelOutcome;
+  /** why it fails (shown in diagnostics) */
   reason?: string;
   start: number;
   end: number;
 }
 
-export type Es6Tier = 'transpilable' | 'untranspilable';
+/** `lowers`: plain ES5 output; `regenerator`: output runs on @babel/runtime regenerator; `cannot`: no transform */
+export type BabelOutcome = 'lowers' | 'regenerator' | 'cannot';
+
+/** Tier of a finding in a page `.js` file (babel runs): `ok` = not reported. */
+export type Es6Tier = 'ok' | 'transpilable' | 'untranspilable';
+
+export function jsTier(f: Pick<Es6Finding, 'engine' | 'babel'>): Es6Tier {
+  if (f.babel === 'cannot' || f.babel === 'regenerator') return 'untranspilable';
+  return f.engine ? 'ok' : 'transpilable';
+}
+
+export interface FindEs6Options {
+  /** RegExp is built into the device engine (js-capabilities.json); regex literals fail to parse otherwise */
+  regexp?: boolean;
+}
 
 export type AnyNode = Node & Record<string, unknown>;
 
@@ -43,103 +59,146 @@ export function visit(
   }
 }
 
-/** why async/generator code fails after babel (ARCHITECTURE §7.2, three-tier ES6 diagnostics) */
+/** why async functions and generators are errors in page scripts (Q24, pending device verification) */
 export const REGENERATOR =
-  'babel rewrites this into regenerator code that calls regeneratorRuntime, which the lite bundle does not provide (webpack.lite.config.js adds no @babel/plugin-transform-runtime)';
+  'babel turns it into @babel/runtime regenerator code; on a host build of the device JerryScript that bundle crashed while JERRY_FUNCTION_BACKTRACE was on (the device build sets it), so it is unverified on the device (ARCHITECTURE Q24)';
 
-const ES2016_ASSIGN = new Set(['**=', '&&=', '||=', '??=']);
+const NOT_ENGINE = 'the device JerryScript engine (2.3, ES2015 profile) cannot parse it';
 
 /** ES2015+ constructs in an ESTree AST. ES module syntax (import/export) is allowed: the build bundles it away. */
-export function findEs6(ast: Node): Es6Finding[] {
+export function findEs6(ast: Node, options: FindEs6Options = {}): Es6Finding[] {
   const out: Es6Finding[] = [];
-  const add = (feature: string, n: { start: number; end: number }): void => {
-    out.push({ feature, tier: 'transpilable', start: n.start, end: n.end });
+  const at = (n: { start: number; end: number }) => ({ start: n.start, end: n.end });
+  /** ES2015 (+ `**`): the engine runs it, babel lowers it */
+  const es2015 = (feature: string, n: { start: number; end: number }): void => {
+    out.push({ feature, engine: true, babel: 'lowers', ...at(n) });
   };
-  const hard = (feature: string, n: { start: number; end: number }, reason: string): void => {
-    out.push({ feature, tier: 'untranspilable', reason, start: n.start, end: n.end });
+  /** newer than the engine; babel lowers it to ES5 */
+  const newer = (feature: string, n: { start: number; end: number }): void => {
+    out.push({ feature, engine: false, babel: 'lowers', reason: NOT_ENGINE, ...at(n) });
   };
+  const regen = (
+    feature: string,
+    n: { start: number; end: number },
+    engine: boolean,
+    reason: string,
+  ): void => {
+    out.push({ feature, engine, babel: 'regenerator', reason, ...at(n) });
+  };
+  const never = (feature: string, n: { start: number; end: number }, reason: string): void => {
+    out.push({ feature, engine: false, babel: 'cannot', reason, ...at(n) });
+  };
+  const ASYNC_ENGINE =
+    'the device engine parses async functions but its await does not unwrap promises (verified on a host build)';
   visit(ast as AnyNode, undefined, (n, parent) => {
     switch (n.type) {
       case 'VariableDeclaration':
         if (n.kind !== 'var')
-          add(`'${String(n.kind)}' declarations`, { start: n.start, end: n.start + String(n.kind).length });
+          es2015(`'${String(n.kind)}' declarations`, {
+            start: n.start,
+            end: n.start + String(n.kind).length,
+          });
         break;
       case 'ArrowFunctionExpression':
-        add('arrow functions', n);
-        if (n.async) hard('async functions', n, REGENERATOR);
+        es2015('arrow functions', n);
+        if (n.async) regen('async functions', n, false, ASYNC_ENGINE);
         break;
       case 'ClassDeclaration':
       case 'ClassExpression':
-        add('classes', n);
+        es2015('classes', n);
+        break;
+      case 'PropertyDefinition':
+        newer('class fields', n);
+        break;
+      case 'PrivateIdentifier':
+        if (parent?.type !== 'PropertyDefinition') newer('private class members', n);
+        break;
+      case 'StaticBlock':
+        newer('class static blocks', n);
         break;
       case 'TemplateLiteral':
-        if (parent?.type !== 'TaggedTemplateExpression') add('template literals', n);
+        if (parent?.type !== 'TaggedTemplateExpression') es2015('template literals', n);
         break;
       case 'TaggedTemplateExpression':
-        add('tagged templates', n);
+        es2015('tagged templates', n);
         break;
       case 'ObjectPattern':
       case 'ArrayPattern':
-        add('destructuring', n);
+        es2015('destructuring', n);
         break;
       case 'SpreadElement':
-        add('spread syntax', n);
+        if (parent?.type === 'ObjectExpression') newer('object spread', n);
+        else es2015('spread syntax', n);
         break;
       case 'RestElement':
-        add('rest parameters/elements', n);
+        if (parent?.type === 'ObjectPattern') newer('object rest properties', n);
+        else es2015('rest parameters/elements', n);
         break;
       case 'AssignmentPattern':
-        add('default values', n);
+        es2015('default values', n);
         break;
       case 'ForOfStatement':
-        if (n.await) hard('for await...of', n, REGENERATOR);
-        else add('for...of', n);
+        if (n.await) never('for await...of', n, NOT_ENGINE);
+        else es2015('for...of', n);
         break;
       case 'FunctionDeclaration':
       case 'FunctionExpression':
-        if (n.generator) hard(n.async ? 'async generators' : 'generators', n, REGENERATOR);
-        else if (n.async) hard('async functions', n, REGENERATOR);
+        if (n.generator && n.async) regen('async generators', n, false, ASYNC_ENGINE);
+        else if (n.generator) regen('generators', n, true, REGENERATOR);
+        else if (n.async) regen('async functions', n, false, ASYNC_ENGINE);
+        break;
+      case 'CatchClause':
+        if (!n.param) newer('optional catch binding', n);
         break;
       case 'Property':
-        if (n.method) add('method shorthand', n);
-        else if (n.shorthand && parent?.type === 'ObjectExpression') add('shorthand properties', n);
-        if (n.computed) add('computed property names', n.key as AnyNode);
+        if (n.method) es2015('method shorthand', n);
+        else if (n.shorthand && parent?.type === 'ObjectExpression') es2015('shorthand properties', n);
+        if (n.computed) es2015('computed property names', n.key as AnyNode);
         break;
       case 'ChainExpression':
-        add('optional chaining', n);
+        newer('optional chaining', n);
         break;
       case 'LogicalExpression':
-        if (n.operator === '??') add('nullish coalescing', n);
+        if (n.operator === '??') newer('nullish coalescing', n);
         break;
       case 'BinaryExpression':
-        if (n.operator === '**') add("exponentiation operator '**'", n);
+        if (n.operator === '**') es2015("exponentiation operator '**'", n);
         break;
       case 'AssignmentExpression':
-        if (ES2016_ASSIGN.has(String(n.operator))) add(`'${String(n.operator)}' assignment`, n);
+        if (n.operator === '**=') es2015("'**=' assignment", n);
+        else if (LOGICAL_ASSIGN.has(String(n.operator))) newer(`'${String(n.operator)}' assignment`, n);
         break;
       case 'MetaProperty':
-        add(`'${String((n.meta as AnyNode).name)}.${String((n.property as AnyNode).name)}'`, n);
+        if ((n.meta as AnyNode).name === 'new') es2015("'new.target'", n);
+        else newer(`'${String((n.meta as AnyNode).name)}.${String((n.property as AnyNode).name)}'`, n);
         break;
       case 'ImportExpression':
-        add('dynamic import()', n);
+        newer('dynamic import()', n);
         break;
       case 'Literal': {
         const raw = String(n.raw ?? '');
         if (typeof n.bigint === 'string')
-          hard('BigInt literals', n, 'babel cannot lower BigInt and the runtime has no BigInt');
-        else if (/^0[bBoO]/.test(raw)) add('binary/octal literals', n);
-        else if (typeof n.value === 'number' && raw.includes('_')) add('numeric separators', n);
-        else if (n.regex && /d/.test(String((n.regex as { flags: string }).flags)))
-          hard('regular expression flag d', n, 'no babel transform exists for match indices');
-        else if (n.regex && /[uys]/.test(String((n.regex as { flags: string }).flags)))
-          add('regular expression flags u/y/s', n);
-        else if (typeof n.value === 'string' && /\\u\{/.test(raw)) add('unicode code point escapes', n);
+          never('BigInt literals', n, 'babel cannot lower BigInt and the engine has no BigInt');
+        else if (n.regex) {
+          if (options.regexp === false)
+            never(
+              'regular expression literals',
+              n,
+              'RegExp is compiled out of the device engine (JERRY_BUILTIN_REGEXP = 0), so the file fails to parse',
+            );
+          else if (/d/.test(String((n.regex as { flags: string }).flags)))
+            never('regular expression flag d', n, 'no babel transform exists for match indices');
+        } else if (/^0[bBoO]/.test(raw)) es2015('binary/octal literals', n);
+        else if (typeof n.value === 'number' && raw.includes('_')) newer('numeric separators', n);
+        else if (typeof n.value === 'string' && /\\u\{/.test(raw)) es2015('unicode code point escapes', n);
         break;
       }
     }
   });
   return out.sort((a, b) => a.start - b.start);
 }
+
+const LOGICAL_ASSIGN = new Set(['&&=', '||=', '??=']);
 
 /** a module specifier: `import x from '…'`, `require('…')` or `requireNative('…')` */
 export interface ModuleRef {
@@ -183,8 +242,8 @@ export interface Es5CheckResult {
   ast?: Node;
 }
 
-/** Checks a page/app .js file against ES5.1 (module syntax allowed). */
-export function checkEs5(code: string): Es5CheckResult {
+/** Checks a page/app .js file against the device engine and babel (module syntax allowed). */
+export function checkEs5(code: string, options: FindEs6Options = {}): Es5CheckResult {
   const comments: Es5CheckResult['comments'] = [];
   const base: Options = {
     ecmaVersion: 'latest',
@@ -204,26 +263,87 @@ export function checkEs5(code: string): Es5CheckResult {
       return { findings: [], modules: [], comments, syntaxError: (e as Error).message };
     }
   }
-  return { findings: findEs6(ast), modules: moduleRefs(ast), comments, ast };
+  return { findings: findEs6(ast, options), modules: moduleRefs(ast), comments, ast };
 }
 
-/** Checks one `{{ }}` expression body; offsets are relative to `expr`. Unparseable (half-typed) text yields []. */
-export function checkExpressionEs5(expr: string): Es6Finding[] {
+/** A template expression construct that ace-loader's parseExpression (plugin/templater/content.js) breaks. */
+export interface RewriteFinding {
+  feature: string;
+  reason: string;
+  start: number;
+  end: number;
+}
+
+function parseTemplateExpression(expr: string): { ast: Node; skip: number } | undefined {
   // `for="{{(i, v) in list}}"` / `{{v in list}}`: only the iterable is an expression
   const loop = /^(\s*(?:\(\s*[\w$]+\s*,\s*[\w$]+\s*\)|[\w$]+)\s+in\s+)/.exec(expr);
   const skip = loop ? loop[1]!.length : 0;
   const body = expr.slice(skip);
-  if (!body.trim()) return [];
-  let ast: Node;
+  if (!body.trim()) return undefined;
   try {
-    ast = parse(`(${body}\n)`, { ecmaVersion: 'latest' });
+    return { ast: parse(`(${body}\n)`, { ecmaVersion: 'latest' }), skip };
   } catch {
-    return [];
+    return undefined;
   }
+}
+
+function shiftInto<T extends { start: number; end: number }>(f: T, skip: number, len: number): T {
   const shift = skip - 1;
-  return findEs6(ast).map((f) => ({
-    ...f,
-    start: Math.max(skip, f.start + shift),
-    end: Math.min(expr.length, f.end + shift),
-  }));
+  return { ...f, start: Math.max(skip, f.start + shift), end: Math.min(len, f.end + shift) };
+}
+
+/** Checks one `{{ }}` expression body; offsets are relative to `expr`. Unparseable (half-typed) text yields []. */
+export function checkExpressionEs5(expr: string, options: FindEs6Options = {}): Es6Finding[] {
+  const p = parseTemplateExpression(expr);
+  return p ? findEs6(p.ast, options).map((f) => shiftInto(f, p.skip, expr.length)) : [];
+}
+
+const PARAM_REWRITE =
+  "ace-loader's template compiler rewrites every identifier to this.<name>, so the body reads the ViewModel instead of the parameter";
+const PATTERN_REWRITE =
+  'ace-loader\'s template compiler rewrites the names inside the pattern to this.<name>; the build fails ("Illegal property in declaration context")';
+const SHORTHAND_REWRITE =
+  "ace-loader's template compiler turns {a} into {this.a}; the build fails (\"Unexpected token '.'\")";
+
+/**
+ * Template constructs that parseExpression (identifier → `this.x`, no scope analysis) breaks, verified by
+ * building with ace-loader 5.0.3: function parameters used in their body, destructuring parameters, and
+ * shorthand object properties.
+ */
+export function checkExpressionRewrites(expr: string): RewriteFinding[] {
+  const p = parseTemplateExpression(expr);
+  if (!p) return [];
+  const out: RewriteFinding[] = [];
+  visit(p.ast as AnyNode, undefined, (n, parent) => {
+    if (n.type === 'Property' && n.shorthand && !n.method && parent?.type === 'ObjectExpression')
+      out.push({ feature: 'shorthand property', reason: SHORTHAND_REWRITE, start: n.start, end: n.end });
+    if (n.type !== 'ArrowFunctionExpression' && n.type !== 'FunctionExpression') return;
+    const names = new Set<string>();
+    for (const param of n.params as AnyNode[]) {
+      const id = param.type === 'AssignmentPattern' ? (param.left as AnyNode) : param;
+      if (id.type === 'Identifier') names.add(String(id.name));
+      else
+        out.push({
+          feature: 'destructuring parameter',
+          reason: PATTERN_REWRITE,
+          start: param.start,
+          end: param.end,
+        });
+    }
+    if (!names.size) return;
+    visit(n.body as AnyNode, n, (x, xp) => {
+      if (x.type !== 'Identifier' || !names.has(String(x.name))) return;
+      // `x => x`: an identifier that is the whole arrow body is left alone by the rewriter
+      if (xp === n) return;
+      if (xp?.type === 'MemberExpression' && xp.property === x && !xp.computed) return;
+      if (xp?.type === 'Property' && xp.key === x && !xp.computed && !xp.shorthand) return;
+      out.push({
+        feature: `parameter '${String(x.name)}'`,
+        reason: PARAM_REWRITE,
+        start: x.start,
+        end: x.end,
+      });
+    });
+  });
+  return out.sort((a, b) => a.start - b.start).map((f) => shiftInto(f, p.skip, expr.length));
 }

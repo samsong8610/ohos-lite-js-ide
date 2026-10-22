@@ -37,6 +37,8 @@ for (const d of readdirSync(schemasRoot)) {
     cpSync(src, join('dist/schemas/components', d, 'components.json'));
     const mods = join(schemasRoot, d, 'system-modules.json');
     if (existsSync(mods)) cpSync(mods, join('dist/schemas/components', d, 'system-modules.json'));
+    const caps = join(schemasRoot, d, 'js-capabilities.json');
+    if (existsSync(caps)) cpSync(caps, join('dist/schemas/components', d, 'js-capabilities.json'));
   }
 }
 

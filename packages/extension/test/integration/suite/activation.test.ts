@@ -56,7 +56,11 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       const diags = vscode.languages.getDiagnostics(uri).filter((d) => d.source === 'ohjs');
       assert.deepStrictEqual(
         diags.map((d) => [String(typeof d.code === 'object' ? d.code.value : d.code), d.range.start.line]),
-        [['hml/unknown-component', 4]],
+        [
+          ['hml/unknown-component', 4],
+          ['hml/expression-rewrite', 5],
+          ['hml/es6-in-expression', 5],
+        ],
       );
       // completion inside <list> offers only <list-item>
       const pos = new vscode.Position(2, 5);
@@ -79,7 +83,7 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.ok(evLabels.includes('tap'), `tap missing: ${evLabels.join(',')}`);
     });
 
-    it('language server: ES5.1 check for page scripts', async () => {
+    it('language server: engine-native ES2015 is silent, newer syntax warns (page scripts)', async () => {
       const [uri] = await vscode.workspace.findFiles('**/default/common/util.js');
       assert.ok(uri, 'fixture util.js not found');
       await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));

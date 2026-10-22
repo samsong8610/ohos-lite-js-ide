@@ -40,6 +40,7 @@ export function parseSourcesConfig(text: string, env: Record<string, string | un
       docs: expandVars(v['docs'] as string, env),
     };
     if (typeof v['provisionalReason'] === 'string') set.provisionalReason = v['provisionalReason'];
+    if (typeof v['jerryscript'] === 'string') set.jerryscript = expandVars(v['jerryscript'], env);
     return set;
   });
   const diff = Array.isArray(raw.diff) ? (raw.diff as Array<{ from: string; to: string }>) : [];
@@ -52,5 +53,7 @@ export function parseSourcesConfig(text: string, env: Record<string, string | un
 }
 
 export function missingSources(set: SourceSet): string[] {
-  return [set.engine, set.loader, set.docs].filter((p) => !fs.existsSync(p));
+  return [set.engine, set.loader, set.docs, ...(set.jerryscript ? [set.jerryscript] : [])].filter(
+    (p) => !fs.existsSync(p),
+  );
 }

@@ -7,7 +7,8 @@
       "target": "linux",
       "engine": "${OHJS_SRC_5_0_3:-/workspace/research/src}/arkui_ace_engine_lite_OpenHarmony-v5.0.3-Release",
       "loader": "${OHJS_SRC_5_0_3:-/workspace/research/src}/developtools_ace_js2bundle_OpenHarmony-v5.0.3-Release",
-      "docs": "${OHJS_DOCS_5_0_3:-/workspace/ohjs-ide/research/v5.0.3-Release/docs}"
+      "docs": "${OHJS_DOCS_5_0_3:-/workspace/ohjs-ide/research/v5.0.3-Release/docs}",
+      "jerryscript": "${OHJS_SRC_5_0_3:-/workspace/research/src}/third_party_jerryscript_OpenHarmony-v5.0.3-Release"
     },
     {
       "ohVersion": "6.1-LTS",
@@ -16,7 +17,8 @@
       "target": "linux",
       "engine": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/arkui_ace_engine_lite",
       "loader": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/developtools_ace_js2bundle",
-      "docs": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/docs"
+      "docs": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/docs",
+      "jerryscript": "${OHJS_SRC_6_1:-/workspace/ohjs-ide/research/v6.1-LTS}/third_party_jerryscript"
     }
   ],
   "diff": [{ "from": "5.0.3", "to": "6.1-LTS" }]

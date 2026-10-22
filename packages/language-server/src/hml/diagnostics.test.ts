@@ -112,7 +112,7 @@ describe('rule switches and suppression comments', () => {
     expect(resolveSeverity('hml/for-with-if', undefined)).toBe('warning');
     expect(isRuleId('hml/syntax')).toBe(true);
     expect(isRuleId('toString')).toBe(false);
-    expect(Object.keys(HML_RULES)).toHaveLength(31);
+    expect(Object.keys(HML_RULES)).toHaveLength(32);
   });
   it('file-level and next-line comments', () => {
     expect(rules('<!-- ohjs-disable hml/unknown-component -->\n<foo></foo>')).toEqual([]);
@@ -164,39 +164,59 @@ describe('ES6 in expressions and cross-file project rules', () => {
   const v = new SchemaView(loadComponentsSchema('5.0.3'));
   const run = (text: string, opts: Parameters<typeof validateHml>[2] = {}) =>
     validateHml(parseHml(text), v, opts);
-  it('hml/es6-in-expression (error) with the construct range; switchable', () => {
+  it('hml/es6-in-expression: ES2015 and ** pass, what the engine cannot parse is an error; switchable', () => {
     const t =
-      '<div><text>{{ items.map(x => x.n) }}</text><text value="{{`a`}}"></text><text>{{ a + 1 }}</text></div>';
+      '<div><text>{{ `a${b}` + (c ** 2) }}</text><text>{{ [...list].length }}</text>' +
+      '<text>{{ obj?.a }}</text><text value="{{ a ?? b }}"></text><text>{{ {...o}.k }}</text><text>{{ a + 1 }}</text></div>';
     const d = run(t).filter((x) => x.rule === 'hml/es6-in-expression');
     expect(d.map((x) => [x.severity, t.slice(x.range.start, x.range.end)])).toEqual([
-      ['error', 'x => x.n'],
-      ['error', '`a`'],
+      ['error', 'obj?.a'],
+      ['error', 'a ?? b'],
+      ['error', '...o'],
     ]);
     expect(d[0]!.message).toBe(
-      'Arrow functions (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device',
+      'Optional chaining cannot be used in template expressions: the device JerryScript engine (2.3, ES2015 profile) cannot parse it, and ace-loader does not transpile templates',
     );
+    expect(run(t).filter((x) => x.rule === 'hml/expression-rewrite')).toEqual([]);
     expect(
       run(t, { rules: { 'hml/es6-in-expression': 'off' } }).filter((x) => x.rule === 'hml/es6-in-expression'),
     ).toEqual([]);
-  });
-  it('hml/es6-in-expression covers event arguments and bare for/elif/show/if expressions (never transpiled)', () => {
-    const t =
-      '<div><text onclick="go(() => 1, `x`)" for="v in list.filter(x => x)">a</text>' +
-      '<text if="{{a}}">b</text><text elif="a ?? b">c</text><text show="{{ [...a].length }}">d</text>' +
-      '<text onclick="go(1)" ontouchstart="noArgs">e</text></div>';
-    const d = run(t).filter((x) => x.rule === 'hml/es6-in-expression');
-    expect(d.map((x) => [x.severity, t.slice(x.range.start, x.range.end)])).toEqual([
-      ['error', '() => 1'],
-      ['error', '`x`'],
-      ['error', 'x => x'],
-      ['error', 'a ?? b'],
-      ['error', '...a'],
+    // regex literals fail when RegExp is compiled out of the engine
+    const r = '<div><text>{{ /a/.test(s) }}</text></div>';
+    expect(run(r).filter((x) => x.rule === 'hml/es6-in-expression')).toEqual([]);
+    expect(run(r, { regexp: false }).map((x) => [x.rule, r.slice(x.range.start, x.range.end)])).toEqual([
+      ['hml/es6-in-expression', '/a/'],
     ]);
+  });
+  it('hml/expression-rewrite: arrow parameters, destructuring parameters and shorthand properties', () => {
+    const t =
+      '<div><text>{{ list.map(x => x.a) }}</text><text>{{ items.map(({a}) => 1) }}</text>' +
+      '<text>{{ f({a}) }}</text><text>{{ f(x => x) }}</text></div>';
+    const d = run(t).filter((x) => x.rule === 'hml/expression-rewrite');
+    expect(d.map((x) => [x.severity, t.slice(x.range.start, x.range.end)])).toEqual([
+      ['error', 'x'],
+      ['error', '{a}'],
+      ['error', 'a'],
+    ]);
+    expect(d[0]!.message).toMatch(
+      /^Parameter 'x': ace-loader's template compiler rewrites every identifier to this\.<name>/,
+    );
     expect(
-      run(t, { rules: { 'hml/es6-in-expression': 'warning' } })
-        .filter((x) => x.rule === 'hml/es6-in-expression')
-        .every((x) => x.severity === 'warning'),
+      run(t, { rules: { 'hml/expression-rewrite': 'warning' } }).every((x) => x.severity !== 'error'),
     ).toBe(true);
+  });
+  it('template expressions without {{ }}: event arguments, for and elif', () => {
+    const t =
+      '<div><text onclick="go(a ?? 1, `e${count}`)" for="v in list?.items">a</text>' +
+      '<text if="{{a}}">b</text><text elif="a ** 2 > b?.c">c</text>' +
+      '<text onclick="go(x => x.n)" ontouchstart="noArgs">e</text></div>';
+    const d = run(t).filter((x) => x.rule === 'hml/es6-in-expression' || x.rule === 'hml/expression-rewrite');
+    expect(d.map((x) => [x.rule, t.slice(x.range.start, x.range.end)])).toEqual([
+      ['hml/es6-in-expression', 'a ?? 1'],
+      ['hml/es6-in-expression', 'list?.items'],
+      ['hml/es6-in-expression', 'b?.c'],
+      ['hml/expression-rewrite', 'x'],
+    ]);
   });
   it('prj/page-not-registered', () => {
     const t = '<div></div>';

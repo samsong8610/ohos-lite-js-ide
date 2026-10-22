@@ -18,7 +18,6 @@ import { completeHml, type HmlCompletion } from './hml/completion';
 import { validateHml, type HmlDiagnostic, type HmlProjectContext } from './hml/diagnostics';
 import { parseHml, walk, type HmlDocument } from './hml/parser';
 import { SchemaView } from './hml/schema-view';
-import { checkEs5 } from './js/es5';
 import { checkSystemModules } from './js/system-modules';
 import { checkFeatureMethods, methodCalls } from './js/feature-methods';
 import { completeThis } from './js/this-completion';
@@ -34,6 +33,7 @@ import {
   type RuleSeverity,
 } from './hml/rules';
 import { findUnsupportedBuiltins } from './js/builtins';
+import { checkEs5, jsTier } from './js/es5';
 import { LineIndex } from './text';
 import type { SchemaRegistry } from './schema-registry';
 
@@ -210,30 +210,37 @@ export class OhjsLanguageService {
       }).map((d) => this.toDiagnostic(doc, d));
     }
     if (kind === 'js') {
-      const r = checkEs5(doc.getText());
+      const caps = this.registry.jsCapabilities;
+      const r = checkEs5(doc.getText(), { regexp: regexpAvailable(caps) });
       const pack = this.registry.modules;
       return this.filtered(
         doc,
         [
           ...(pack ? checkSystemModules(r.modules, pack) : []),
           ...(r.ast ? checkFeatureMethods(methodCalls(r.ast), this.view.schema, this.refTags(doc.uri)) : []),
-          ...r.findings.map((f) =>
-            f.tier === 'transpilable'
-              ? {
-                  rule: 'js/es6-syntax' as const,
-                  range: f,
-                  message: `${cap(f.feature)} (ES2015+): ace-loader's babel transpiles page scripts to ES5 at build time, so this is a reminder, not an error`,
-                }
-              : {
-                  rule: 'js/es6-untranspilable' as const,
-                  range: f,
-                  message: `${cap(f.feature)} cannot run on the device: ${f.reason ?? 'babel cannot transpile it'}`,
-                },
-          ),
-          ...(r.ast ? findUnsupportedBuiltins(r.ast) : []).map((b) => ({
+          ...r.findings.flatMap((f): RuleFinding[] => {
+            const tier = jsTier(f);
+            if (tier === 'ok') return [];
+            return tier === 'transpilable'
+              ? [
+                  {
+                    rule: 'js/es6-syntax' as const,
+                    range: f,
+                    message: `${cap(f.feature)}: ${f.reason ?? 'not supported by the device engine'}; ace-loader's babel transpiles it to ES5 at build time, so this is a reminder, not an error`,
+                  },
+                ]
+              : [
+                  {
+                    rule: 'js/es6-untranspilable' as const,
+                    range: f,
+                    message: `${cap(f.feature)} cannot run on the device: ${f.reason ?? 'babel cannot transpile it'}`,
+                  },
+                ];
+          }),
+          ...(r.ast && caps ? findUnsupportedBuiltins(r.ast, caps) : []).map((b) => ({
             rule: 'js/unsupported-builtin' as const,
             range: b,
-            message: `${b.entry.name} (${b.entry.since}) is not available: ${b.entry.reason}, and ace-loader adds no polyfills`,
+            message: `${b.entry.name} (${b.entry.since}) is not available on the device: ${b.entry.reason}; ace-loader adds no polyfills`,
           })),
         ].sort((a, b) => a.range.start - b.range.start),
         r.comments.map((c) => ({ text: c.text, end: c.end })),
@@ -262,9 +269,11 @@ export class OhjsLanguageService {
         ...(i18n ? { i18n } : {}),
       };
     }
-    return validateHml(this.hml(doc), this.view, { rules, ...(project ? { project } : {}) }).map((d) =>
-      this.toDiagnostic(doc, d),
-    );
+    return validateHml(this.hml(doc), this.view, {
+      rules,
+      regexp: regexpAvailable(this.registry.jsCapabilities),
+      ...(project ? { project } : {}),
+    }).map((d) => this.toDiagnostic(doc, d));
   }
 
   /** `ref="x"` → tag in the same-name .hml of a page script */
@@ -371,4 +380,11 @@ export class OhjsLanguageService {
 
 function cap(s: string): string {
   return `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
+}
+
+/** RegExp availability from js-capabilities.json; unknown (no table) means "do not report". */
+export function regexpAvailable(
+  caps: { apis: Array<{ name: string; available: boolean }> } | undefined,
+): boolean {
+  return caps?.apis.find((a) => a.name === 'RegExp')?.available ?? true;
 }

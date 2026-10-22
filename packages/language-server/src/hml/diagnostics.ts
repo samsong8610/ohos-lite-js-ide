@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { checkImagePath } from '../project/images';
-import { checkExpressionEs5 } from '../js/es5';
+import { checkExpressionEs5, checkExpressionRewrites } from '../js/es5';
 import { interpolations, translationRefs } from '../project/i18n';
 import { LineIndex } from '../text';
 import { classifyAttribute, EVENT_MODIFIERS } from './attribute-names';
@@ -28,6 +28,8 @@ export interface HmlProjectContext {
 }
 
 export interface HmlDiagnosticOptions {
+  /** RegExp is built into the device engine (js-capabilities.json); default true */
+  regexp?: boolean;
   /** `ohjs.lang.rules` overrides: rule ID → severity or 'off' */
   rules?: Readonly<Record<string, unknown>>;
   /** cross-file facts (config.json, i18n) — FR-LANG-008 */
@@ -89,6 +91,23 @@ export function validateHml(
     if (isSuppressed(suppress, rule, lines.lineOf(range.start))) return;
     out.push({ rule, severity, message, range });
   };
+  // template expressions are not transpiled (weex-loader template chain has no babel): only what the
+  // device engine parses natively is allowed, and ace-loader's identifier rewrite must not break it
+  const checkTemplateExpression = (expr: string, base: number): void => {
+    for (const f of checkExpressionEs5(expr, { regexp: options.regexp !== false }))
+      if (!f.engine)
+        report(
+          'hml/es6-in-expression',
+          { start: base + f.start, end: base + f.end },
+          `${capitalize(f.feature)} cannot be used in template expressions: ${f.reason ?? 'the device engine does not support it'}, and ace-loader does not transpile templates`,
+        );
+    for (const f of checkExpressionRewrites(expr))
+      report(
+        'hml/expression-rewrite',
+        { start: base + f.start, end: base + f.end },
+        `${capitalize(f.feature)}: ${f.reason}`,
+      );
+  };
 
   for (const p of doc.problems) report('hml/syntax', p.range, p.message);
 
@@ -135,16 +154,8 @@ export function validateHml(
       const f = checkImagePath(a.value, a.valueRange, view.schema.aceLoader.imageExtensions);
       if (f) report(f.rule, f.range, f.message);
     }
-    for (const a of el.attributes) {
-      for (const x of bareExpression(a)) {
-        for (const f of checkExpressionEs5(x.expr))
-          report(
-            'hml/es6-in-expression',
-            { start: x.start + f.start, end: x.start + f.end },
-            `${capitalize(f.feature)} (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device`,
-          );
-      }
-    }
+    for (const a of el.attributes)
+      for (const x of bareExpression(a)) checkTemplateExpression(x.expr, x.start);
     const names = new Set(el.attributes.map((a) => a.name));
     if (names.has('for') && names.has('if')) {
       const a = el.attributes.find((x) => x.name === 'if')!;
@@ -208,14 +219,7 @@ export function validateHml(
     }
   }
 
-  for (const ip of interpolations(doc)) {
-    for (const f of checkExpressionEs5(ip.expr))
-      report(
-        'hml/es6-in-expression',
-        { start: ip.start + f.start, end: ip.start + f.end },
-        `${capitalize(f.feature)} (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device`,
-      );
-  }
+  for (const ip of interpolations(doc)) checkTemplateExpression(ip.expr, ip.start);
 
   const p = options.project;
   if (p?.page && p.registeredPages && !p.registeredPages.includes(p.page)) {

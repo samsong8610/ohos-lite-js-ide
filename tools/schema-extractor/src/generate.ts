@@ -38,6 +38,8 @@ export interface SourceSet {
   loader: string;
   /** docs checkout */
   docs: string;
+  /** third_party/jerryscript checkout (js-capabilities.json); optional */
+  jerryscript?: string;
 }
 
 export const PATHS = {

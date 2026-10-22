@@ -1,3 +1,3 @@
-var ok = 1;
-let notEs5 = ok;
-export default notEs5;
+var ok = () => `${1 ** 2}`;
+let copy = { ...{ a: ok } };
+export default copy;

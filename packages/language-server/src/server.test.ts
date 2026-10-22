@@ -331,7 +331,7 @@ describe('language server over LSP', () => {
     const sev = (l: Array<{ code?: unknown; severity?: number }>): unknown[] =>
       l.map((d) => [d.code, d.severity]);
     const h = await start({ transpilableSyntax: 'error' });
-    openJs(h, 'let a = 1;\nfunction* g() {}');
+    openJs(h, 'var a = b?.c;\nfunction* g() {}');
     expect(sev(await h.waitDiagnostics(JS))).toEqual([
       ['js/es6-syntax', 1],
       ['js/es6-untranspilable', 1],
@@ -343,7 +343,7 @@ describe('language server over LSP', () => {
 
     const p = await start({ configuration: true });
     p.diag = { transpilableSyntax: 'off' };
-    openJs(p, 'let a = 1;');
+    openJs(p, 'var a = b?.c;');
     await p.waitDiagnostics(JS);
     p.client.sendNotification('workspace/didChangeConfiguration', { settings: null });
     expect(await p.waitDiagnostics(JS, 2)).toEqual([]);

@@ -11,7 +11,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { SchemaLoadError } from '@ohjs/schemas';
 import { fixtureSchema } from '../test/fixture-schema';
 import { normalizeSdkVersion, SchemaRegistry } from './schema-registry';
-import { documentKind, OhjsLanguageService } from './service';
+import { documentKind, OhjsLanguageService, regexpAvailable } from './service';
 
 const hml = (text: string, version = 1) =>
   TextDocument.create('file:///p/pages/index/index.hml', 'hml', version, text);
@@ -183,7 +183,7 @@ describe('OhjsLanguageService: page companions (.js ViewModel, .hml for CSS)', (
   });
 });
 
-describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', () => {
+describe('OhjsLanguageService: JS syntax tiers, config.json and i18n (FR-LANG-007/008)', () => {
   const M = 'file:///w/entry/src/main/';
   const files = new Map<string, string>();
   const reader = {
@@ -202,18 +202,20 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
     expect(documentKind({ languageId: 'json', uri: `${M}js/default/i18n/en-US.json` })).toBe('i18n');
     expect(documentKind({ languageId: 'json', uri: `${M}js/default/data.json` })).toBeUndefined();
   });
-  it('js/es6-syntax on page scripts, with suppression comments and settings', () => {
+  it('js/es6-syntax: engine-native ES2015 is silent, newer syntax babel lowers is a warning; suppression and settings', () => {
     const js = doc(
       'js/default/pages/index/index.js',
       'javascript',
-      'export default {\n  onInit() {\n    let a = 1;\n  }\n};\n// ohjs-disable-next-line js/es6-syntax\nconst b = 2;',
+      'export default {\n  onInit() {\n    let a = () => `x${1 ** 2}`;\n    var b = a?.c;\n  }\n};\n// ohjs-disable-next-line js/es6-syntax\nvar c = a ?? 1;',
     );
     const d = svc.validate(js);
-    const msg = (f: string): string =>
-      `${f} (ES2015+): ace-loader's babel transpiles page scripts to ES5 at build time, so this is a reminder, not an error`;
     expect(d.map((x) => [x.code, x.severity, x.range.start.line, x.message])).toEqual([
-      ['js/es6-syntax', DiagnosticSeverity.Warning, 1, msg('Method shorthand')],
-      ['js/es6-syntax', DiagnosticSeverity.Warning, 2, msg("'let' declarations")],
+      [
+        'js/es6-syntax',
+        DiagnosticSeverity.Warning,
+        3,
+        "Optional chaining: the device JerryScript engine (2.3, ES2015 profile) cannot parse it; ace-loader's babel transpiles it to ES5 at build time, so this is a reminder, not an error",
+      ],
     ]);
     svc.settings = { rules: { 'js/es6-syntax': 'error' } };
     expect(svc.validate(js)[0]!.severity).toBe(DiagnosticSeverity.Error);
@@ -222,11 +224,11 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
     svc.settings = {};
     expect(svc.validate(doc('js/default/i18n/en-US.json', 'json', '{}'))).toEqual([]);
   });
-  it('three ES6 tiers in .js: transpilable (warning, ohjs.diagnostics.transpilableSyntax), untranspilable and missing built-ins (error)', () => {
+  it('three tiers in .js: ES2015 silent; newer-than-engine warning (transpilableSyntax); regenerator/untranspilable and missing built-ins error', () => {
     const js = doc(
       'js/default/pages/index/index.js',
       'javascript',
-      'var f = () => 1;\nasync function load() {}\nfunction* gen() {}\nvar o = Object.entries({});\nvar ok = Object.assign({}, new Map());',
+      'var f = () => ({...o});\nasync function load() {}\nfunction* gen() {}\nvar e = Object.entries({});\nvar ok = Object.assign({}, new Map(), [1].entries());\nvar r = /a+/;',
     );
     const view = (): Array<[unknown, unknown, number]> =>
       svc.validate(js).map((x) => [x.code, x.severity, x.range.start.line]);
@@ -235,22 +237,30 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
       ['js/es6-untranspilable', DiagnosticSeverity.Error, 1],
       ['js/es6-untranspilable', DiagnosticSeverity.Error, 2],
       ['js/unsupported-builtin', DiagnosticSeverity.Error, 3],
+      ['js/es6-untranspilable', DiagnosticSeverity.Error, 5],
     ]);
     const d = svc.validate(js);
     expect(d[1]!.message).toBe(
-      'Async functions cannot run on the device: babel rewrites this into regenerator code that calls regeneratorRuntime, which the lite bundle does not provide (webpack.lite.config.js adds no @babel/plugin-transform-runtime)',
+      'Async functions cannot run on the device: the device engine parses async functions but its await does not unwrap promises (verified on a host build)',
+    );
+    expect(d[2]!.message).toMatch(
+      /^Generators cannot run on the device: babel turns it into @babel\/runtime regenerator code.*Q24/,
     );
     expect(d[3]!.message).toBe(
-      'Object.entries (ES2017) is not available: not implemented by the device JerryScript engine, and ace-loader adds no polyfills',
+      'Object.entries (ES2017) is not available on the device: not implemented by the device JerryScript engine [jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h: no entry]; ace-loader adds no polyfills',
+    );
+    expect(d[4]!.message).toMatch(
+      /^Regular expression literals cannot run on the device: RegExp is compiled out/,
     );
     // the setting moves tier 1 only
     svc.settings = { transpilableSyntax: 'error' };
-    expect(view().map((x) => x[1])).toEqual([1, 1, 1, 1]);
+    expect(view().map((x) => x[1])).toEqual([1, 1, 1, 1, 1]);
     svc.settings = { transpilableSyntax: 'off' };
     expect(view().map((x) => x[0])).toEqual([
       'js/es6-untranspilable',
       'js/es6-untranspilable',
       'js/unsupported-builtin',
+      'js/es6-untranspilable',
     ]);
     svc.settings = { transpilableSyntax: 'bogus' };
     expect(view()[0]![1]).toBe(DiagnosticSeverity.Warning);
@@ -263,8 +273,14 @@ describe('OhjsLanguageService: ES5.1, config.json and i18n (FR-LANG-007/008)', (
       ['js/es6-syntax', DiagnosticSeverity.Hint, 0],
       ['js/es6-untranspilable', DiagnosticSeverity.Warning, 1],
       ['js/es6-untranspilable', DiagnosticSeverity.Warning, 2],
+      ['js/es6-untranspilable', DiagnosticSeverity.Warning, 5],
     ]);
     svc.settings = {};
+  });
+  it('regexpAvailable: unknown table means do not report', () => {
+    expect(regexpAvailable(undefined)).toBe(true);
+    expect(regexpAvailable({ apis: [] })).toBe(true);
+    expect(regexpAvailable({ apis: [{ name: 'RegExp', available: false }] })).toBe(false);
   });
 
   it('config.json: deviceType and page files resolved through the reader', () => {
@@ -323,8 +339,10 @@ describe('OhjsLanguageService: @system modules and this. completion (FR-LANG-007
   const svc = new OhjsLanguageService(new SchemaRegistry());
   const js = (text: string, name = 'pages/index/index.js') =>
     TextDocument.create(`file:///w/entry/src/main/js/default/${name}`, 'javascript', 1, text);
-  it('js/unknown-system-module merged with ES5.1 findings in source order; switchable', () => {
-    const d = svc.validate(js("let a = 1;\nimport f from '@system.fetch';\nimport r from '@system.router';"));
+  it('js/unknown-system-module merged with syntax findings in source order; switchable', () => {
+    const d = svc.validate(
+      js("var a = b?.c;\nimport f from '@system.fetch';\nimport r from '@system.router';"),
+    );
     expect(d.map((x) => [x.code, x.range.start.line])).toEqual([
       ['js/es6-syntax', 0],
       ['js/unknown-system-module', 1],

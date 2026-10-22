@@ -6,9 +6,11 @@ import {
   DEFAULT_DATA_DIR,
   listSchemaVersions,
   loadComponentsSchema,
+  loadJsCapabilities,
   loadSystemModules,
   versionDirName,
   type ComponentsSchemaFile,
+  type JsCapabilitiesFile,
   type SystemModulesFile,
 } from '@ohjs/schemas';
 
@@ -21,6 +23,7 @@ export const DEFAULT_SDK_VERSION = '5.0.3';
 export class SchemaRegistry {
   private readonly cache = new Map<string, ComponentsSchemaFile>();
   private readonly moduleCache = new Map<string, SystemModulesFile | undefined>();
+  private readonly capsCache = new Map<string, JsCapabilitiesFile | undefined>();
   private activeVersion: string;
 
   constructor(
@@ -56,6 +59,13 @@ export class SchemaRegistry {
     const v = this.activeVersion;
     if (!this.moduleCache.has(v)) this.moduleCache.set(v, loadSystemModules(v, this.dataDir));
     return this.moduleCache.get(v);
+  }
+
+  /** built-in API table of the device JerryScript build (undefined when the pack has no js-capabilities.json) */
+  get jsCapabilities(): JsCapabilitiesFile | undefined {
+    const v = this.activeVersion;
+    if (!this.capsCache.has(v)) this.capsCache.set(v, loadJsCapabilities(v, this.dataDir));
+    return this.capsCache.get(v);
   }
 
   private load(v: string): ComponentsSchemaFile {

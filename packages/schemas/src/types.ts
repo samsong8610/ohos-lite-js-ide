@@ -112,3 +112,34 @@ export interface SystemModulesFile {
   categories: string[];
   modules: SystemModuleSchema[];
 }
+
+/** One JerryScript build macro as resolved for the device build (BUILD.gn → engine.gni → config.h). */
+export interface JsMacro {
+  value: number;
+  /** where the value comes from, e.g. `jerry-core/BUILD.gn:227 ← engine.gni:35 jerryscript_jerry_es2015` */
+  source: string;
+}
+
+/** Availability of one ES2015+ (or ES5 but build-dependent) built-in API on the device engine. */
+export interface JsApiCapability {
+  /** `Name`, `Owner.name` or `Owner.prototype.name` */
+  name: string;
+  since: string;
+  available: boolean;
+  /** routine/property table entry (`file:line`) or why it is absent */
+  source: string;
+  /** build macro the entry is guarded by, with its resolved value */
+  guard?: string;
+  /** set when `available` is false: why the API cannot be used */
+  reason?: string;
+}
+
+/** `<version>/js-capabilities.json`: built-in APIs of the device JerryScript build (third_party/jerryscript). */
+export interface JsCapabilitiesFile {
+  schemaFormat: 1;
+  ohVersion: string;
+  generator: string;
+  engine: { name: 'jerryscript'; apiVersion: string; commit?: string; tags: string[] };
+  macros: Record<string, JsMacro>;
+  apis: JsApiCapability[];
+}

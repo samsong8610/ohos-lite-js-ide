@@ -2,7 +2,7 @@
   "name": "@ohjs/ts-plugin",
   "version": "0.1.0",
   "private": true,
-  "description": "TS Server plugin: ViewModel typing and ES5.1 diagnostics (M1-8)",
+  "description": "TS Server plugin: ViewModel typing and engine-profile JS diagnostics (M1-8)",
   "license": "Apache-2.0",
   "main": "out/index.js",
   "types": "out/index.d.ts",

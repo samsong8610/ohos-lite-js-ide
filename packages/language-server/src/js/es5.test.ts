@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from 'vitest';
-import { checkEs5, checkExpressionEs5, REGENERATOR } from './es5';
+import { checkEs5, checkExpressionEs5, checkExpressionRewrites, jsTier, REGENERATOR } from './es5';
 
 const features = (code: string): string[] => checkEs5(code).findings.map((f) => f.feature);
 
-describe('checkEs5 (FR-LANG-007, ES5.1 profile)', () => {
-  it('accepts an ES5.1 page with ES module import/export', () => {
+describe('checkEs5 (FR-LANG-007, device engine profile)', () => {
+  it('accepts a plain ES5 page with ES module import/export', () => {
     const r = checkEs5(`import router from '@system.router';
 export default {
   data: { a: 1, list: [1, 2] },
@@ -73,31 +73,72 @@ export default {
       'binary/octal literals',
       'binary/octal literals',
       'numeric separators',
-      'regular expression flags u/y/s',
       'unicode code point escapes',
     ]);
     expect(features('function f() { return new.target; }')).toEqual(["'new.target'"]);
-    expect(features('/a/d; /a/s;')).toEqual(['regular expression flag d', 'regular expression flags u/y/s']);
+    expect(features('/a/d; /a/s;')).toEqual(['regular expression flag d']);
+    expect(checkEs5('/a/; "x";', { regexp: false }).findings.map((f) => f.feature)).toEqual([
+      'regular expression literals',
+    ]);
+    expect(
+      features(
+        'var o = {...a}; var {x, ...r} = o; try {} catch {} class K { f = 1; #p() {} static {} } a.b = import.meta;',
+      ),
+    ).toEqual([
+      'object spread',
+      'destructuring',
+      'object rest properties',
+      'optional catch binding',
+      'classes',
+      'class fields',
+      'private class members',
+      'class static blocks',
+      "'import.meta'",
+    ]);
   });
-  it('splits findings into transpilable and untranspilable tiers', () => {
-    const tiers = (code: string): string[] => checkEs5(code).findings.map((f) => `${f.feature}:${f.tier}`);
-    expect(tiers('let a = () => `x`; class C {} var {b} = o; for (var x of y) {}')).toEqual([
-      "'let' declarations:transpilable",
-      'arrow functions:transpilable',
-      'template literals:transpilable',
-      'classes:transpilable',
-      'destructuring:transpilable',
-      'for...of:transpilable',
+  it('classifies against the device engine (JerryScript 2.3, ES2015) and babel', () => {
+    const tiers = (code: string): string[] => checkEs5(code).findings.map((f) => `${f.feature}:${jsTier(f)}`);
+    // ES2015 and `**` run natively: not reported in .js
+    expect(
+      tiers('let a = () => `x`; class C {} var {b} = o; for (var x of y) {} a ** 2; a **= 2; f(...l);'),
+    ).toEqual([
+      "'let' declarations:ok",
+      'arrow functions:ok',
+      'template literals:ok',
+      'classes:ok',
+      'destructuring:ok',
+      'for...of:ok',
+      "exponentiation operator '**':ok",
+      "'**=' assignment:ok",
+      'spread syntax:ok',
     ]);
-    const hard = checkEs5('async function f() {} function* g() {} 1n; /x/d;').findings;
-    expect(hard.map((f) => f.tier)).toEqual([
-      'untranspilable',
-      'untranspilable',
-      'untranspilable',
-      'untranspilable',
+    // newer than the engine, lowered by babel
+    expect(tiers('a?.b; a ?? b; a ||= 1; 1_000; var o = {...p};')).toEqual([
+      'optional chaining:transpilable',
+      'nullish coalescing:transpilable',
+      "'||=' assignment:transpilable",
+      'numeric separators:transpilable',
+      'object spread:transpilable',
     ]);
-    expect(hard[0]!.reason).toBe(REGENERATOR);
-    expect(hard[2]!.reason).toMatch(/BigInt/);
+    // regenerator output or no transform
+    const hard = checkEs5(
+      'async function f() {} function* g() {} 1n; /x/d; async function h() { for await (var v of w) {} }',
+    ).findings;
+    expect(hard.map((f) => `${f.feature}:${jsTier(f)}:${f.engine}`)).toEqual([
+      'async functions:untranspilable:false',
+      'generators:untranspilable:true',
+      'BigInt literals:untranspilable:false',
+      'regular expression flag d:untranspilable:false',
+      'async functions:untranspilable:false',
+      'for await...of:untranspilable:false',
+    ]);
+    expect(hard[1]!.reason).toBe(REGENERATOR);
+    expect(hard[0]!.reason).toMatch(/await does not unwrap/);
+    expect(features('async function* g() {} var h = async () => 1;')).toEqual([
+      'async generators',
+      'arrow functions',
+      'async functions',
+    ]);
   });
   it('scripts that are not valid modules, comments, and unparseable code', () => {
     const r = checkEs5('// ohjs-disable-next-line\nwith (o) { let x; }');
@@ -117,7 +158,8 @@ describe('checkExpressionEs5 ({{ }} bodies)', () => {
     expect(e.slice(f!.start, f!.end)).toBe('x => x.a');
     expect(checkExpressionEs5('`a${b}`')[0]).toEqual({
       feature: 'template literals',
-      tier: 'transpilable',
+      engine: true,
+      babel: 'lowers',
       start: 0,
       end: 7,
     });
@@ -148,5 +190,30 @@ describe('moduleRefs', () => {
       ['system.prompt', "'system.prompt'"],
     ]);
     expect(checkEs5('var = ;').modules).toEqual([]);
+  });
+});
+
+describe('checkExpressionRewrites (ace-loader parseExpression: identifier -> this.x)', () => {
+  const show = (e: string): string[] =>
+    checkExpressionRewrites(e).map((f) => `${f.feature}@${e.slice(f.start, f.end)}`);
+  it('flags parameters read in the body, destructuring parameters and shorthand properties', () => {
+    expect(show('list.map(x => x.a)')).toEqual(["parameter 'x'@x"]);
+    expect(show('list.reduce((s, v = 1) => s + v, 0)')).toEqual(["parameter 's'@s", "parameter 'v'@v"]);
+    expect(show('list.filter(function (x) { return x > 1 })')).toEqual(["parameter 'x'@x"]);
+    expect(show('items.map(({a}) => a)')).toEqual(['destructuring parameter@{a}']);
+    expect(show('{ a, b: c }')).toEqual(['shorthand property@a']);
+    expect(checkExpressionRewrites('{a}')[0]!.reason).toMatch(/Unexpected token/);
+    expect(checkExpressionRewrites('f(({a}) => 1)')[0]!.reason).toMatch(/Illegal property/);
+    expect(checkExpressionRewrites('f(x => x.a)')[0]!.reason).toMatch(/this\.<name>/);
+  });
+  it('leaves what the rewriter keeps intact', () => {
+    expect(show('f(x => x)')).toEqual([]);
+    expect(show('list.map(x => 1)')).toEqual([]);
+    expect(show('list.map(x => y.x + o[x0])')).toEqual([]);
+    expect(show('list.map(x => ({ x: 1 }))')).toEqual([]);
+    expect(show('`t${a}` + a ** 2')).toEqual([]);
+    expect(show('(i, v) in list.map(q => q.n)')).toEqual(["parameter 'q'@q"]);
+    expect(show('a +')).toEqual([]);
+    expect(show('   ')).toEqual([]);
   });
 });

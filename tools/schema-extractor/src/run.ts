@@ -6,13 +6,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   validateComponentsFile,
+  validateJsCapabilitiesFile,
+  type JsCapabilitiesFile,
   validateSystemModulesFile,
   versionDirName,
   type ComponentsSchemaFile,
 } from '@ohjs/schemas';
 import { missingSources, type SourcesConfig } from './config';
 import { diffSchemas, renderDiffMarkdown } from './diff';
-import { generateSchema, generateSystemModules } from './generate';
+import { generateSchema, generateSystemModules, GENERATOR } from './generate';
+import { readGitInfo } from './git-info';
+import { generateJsCapabilities, renderJsCapabilitiesDiff } from './js-capabilities';
 
 export interface RunResult {
   /** files written (generate) or found stale (check) */
@@ -33,6 +37,7 @@ export function buildOutputs(
   const outputs = new Map<string, string>();
   const skipped: string[] = [];
   const schemas = new Map<string, ComponentsSchemaFile>();
+  const caps = new Map<string, JsCapabilitiesFile>();
   for (const set of cfg.versions) {
     const missing = missingSources(set);
     if (missing.length) {
@@ -52,6 +57,25 @@ export function buildOutputs(
     if (!mv.valid)
       throw new Error(`generated system modules for ${set.ohVersion} are invalid: ${mv.errors.join('; ')}`);
     outputs.set(`${versionDirName(set.ohVersion)}/system-modules.json`, serialize(modules));
+    if (set.jerryscript) {
+      const git = readGitInfo(set.jerryscript);
+      const c = generateJsCapabilities(set.jerryscript, {
+        ohVersion: set.ohVersion,
+        generator: GENERATOR,
+        ...(git.commit ? { commit: git.commit } : {}),
+        tags: git.tags,
+      });
+      const cv = validateJsCapabilitiesFile(c);
+      if (!cv.valid)
+        throw new Error(
+          `generated js capabilities for ${set.ohVersion} are invalid: ${cv.errors.join('; ')}`,
+        );
+      log(
+        `${set.ohVersion}: ${c.apis.filter((a) => !a.available).length}/${c.apis.length} probed JS APIs unavailable`,
+      );
+      caps.set(set.ohVersion, c);
+      outputs.set(`${versionDirName(set.ohVersion)}/js-capabilities.json`, serialize(c));
+    }
   }
   for (const d of cfg.diff) {
     const a = schemas.get(d.from);
@@ -64,6 +88,15 @@ export function buildOutputs(
       `diff-${versionDirName(d.from).slice(1)}-${versionDirName(d.to).slice(1)}.md`,
       renderDiffMarkdown(diffSchemas(a, b), a, b),
     );
+  }
+  for (const d of cfg.diff) {
+    const a = caps.get(d.from);
+    const b = caps.get(d.to);
+    if (a && b)
+      outputs.set(
+        `diff-js-${versionDirName(d.from).slice(1)}-${versionDirName(d.to).slice(1)}.md`,
+        renderJsCapabilitiesDiff(a, b),
+      );
   }
   if (schemas.size === cfg.versions.length) {
     const lock = Object.fromEntries(

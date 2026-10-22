@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { extractViewModel } from './viewmodel';
 
 describe('extractViewModel', () => {
-  it('ES5.1 page: data object, function-valued methods and lifecycle hooks', () => {
+  it('plain ES5 page: data object, function-valued methods and lifecycle hooks', () => {
     const vm = extractViewModel(`import router from '@system.router';
 export default {
   data: { title: 'x', 'list': [], count: 0 },

@@ -1,0 +1,660 @@
+{
+  "schemaFormat": 1,
+  "ohVersion": "6.1-LTS",
+  "generator": "@ohjs/schema-extractor 0.1.0",
+  "engine": {
+    "name": "jerryscript",
+    "apiVersion": "2.3",
+    "commit": "f1393348514488e4626ee52816a73ed343c13871",
+    "tags": [
+      "OpenHarmony-v6.1-LTS"
+    ]
+  },
+  "macros": {
+    "JERRY_BUILTIN_ARRAY": {
+      "value": 1,
+      "source": "jerry-core/config.h:167 ← JERRY_BUILTINS"
+    },
+    "JERRY_BUILTIN_EVAL_DISABLED": {
+      "value": 1,
+      "source": "jerry-core/config.h:68"
+    },
+    "JERRY_BUILTIN_MATH": {
+      "value": 1,
+      "source": "jerry-core/config.h:187 ← JERRY_BUILTINS"
+    },
+    "JERRY_BUILTIN_NUMBER": {
+      "value": 1,
+      "source": "jerry-core/config.h:191 ← JERRY_BUILTINS"
+    },
+    "JERRY_BUILTIN_REGEXP": {
+      "value": 0,
+      "source": "jerry-core/config.h:24"
+    },
+    "JERRY_BUILTIN_STRING": {
+      "value": 1,
+      "source": "jerry-core/config.h:199 ← JERRY_BUILTINS"
+    },
+    "JERRY_ES2015": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:227 ← engine.gni:35 jerryscript_jerry_es2015"
+    },
+    "JERRY_ES2015_BUILTIN_DATAVIEW": {
+      "value": 0,
+      "source": "jerry-core/BUILD.gn:236 ← engine.gni:44 jerryscript_jerry_es2015_builtin_dataview"
+    },
+    "JERRY_ES2015_BUILTIN_MAP": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:233 ← engine.gni:41 jerryscript_jerry_es2015_builtin_map"
+    },
+    "JERRY_ES2015_BUILTIN_PROMISE": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:230 ← engine.gni:38 jerryscript_jerry_es2015_builtin_promise"
+    },
+    "JERRY_ES2015_BUILTIN_PROXY": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:231 ← engine.gni:39 jerryscript_jerry_es2015_builtin_proxy"
+    },
+    "JERRY_ES2015_BUILTIN_REFLECT": {
+      "value": 0,
+      "source": "jerry-core/BUILD.gn:237 ← engine.gni:45 jerryscript_jerry_es2015_builtin_reflect"
+    },
+    "JERRY_ES2015_BUILTIN_SET": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:229 ← engine.gni:37 jerryscript_jerry_es2015_builtin_set"
+    },
+    "JERRY_ES2015_BUILTIN_TYPEDARRAY": {
+      "value": 1,
+      "source": "jerry-core/BUILD.gn:228 ← engine.gni:36 jerryscript_jerry_es2015_builtin_typedarray"
+    },
+    "JERRY_ES2015_BUILTIN_WEAKMAP": {
+      "value": 0,
+      "source": "jerry-core/BUILD.gn:234 ← engine.gni:42 jerryscript_jerry_es2015_builtin_weakmap"
+    },
+    "JERRY_ES2015_BUILTIN_WEAKSET": {
+      "value": 0,
+      "source": "jerry-core/BUILD.gn:235 ← engine.gni:43 jerryscript_jerry_es2015_builtin_weakset"
+    },
+    "JERRY_NUMBER_TYPE_FLOAT64": {
+      "value": 1,
+      "source": "jerry-core/config.h:422"
+    }
+  },
+  "apis": [
+    {
+      "name": "Symbol",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:237",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Promise",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:202",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_PROMISE)"
+    },
+    {
+      "name": "Map",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:209",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_MAP)"
+    },
+    {
+      "name": "Set",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:216",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_SET)"
+    },
+    {
+      "name": "WeakMap",
+      "since": "ES2015",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:223",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_WEAKMAP)",
+      "reason": "compiled out of the device engine: JERRY_ES2015_BUILTIN_WEAKMAP = 0 (jerry-core/BUILD.gn:234 ← engine.gni:42 jerryscript_jerry_es2015_builtin_weakmap)"
+    },
+    {
+      "name": "WeakSet",
+      "since": "ES2015",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:230",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_WEAKSET)",
+      "reason": "compiled out of the device engine: JERRY_ES2015_BUILTIN_WEAKSET = 0 (jerry-core/BUILD.gn:235 ← engine.gni:43 jerryscript_jerry_es2015_builtin_weakset)"
+    },
+    {
+      "name": "Proxy",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:251",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_PROXY)"
+    },
+    {
+      "name": "Reflect",
+      "since": "ES2015",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:144",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_REFLECT)",
+      "reason": "compiled out of the device engine: JERRY_ES2015_BUILTIN_REFLECT = 0 (jerry-core/BUILD.gn:237 ← engine.gni:45 jerryscript_jerry_es2015_builtin_reflect)"
+    },
+    {
+      "name": "ArrayBuffer",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:157",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_TYPEDARRAY)"
+    },
+    {
+      "name": "DataView",
+      "since": "ES2015",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:244",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_DATAVIEW)",
+      "reason": "compiled out of the device engine: JERRY_ES2015_BUILTIN_DATAVIEW = 0 (jerry-core/BUILD.gn:236 ← engine.gni:44 jerryscript_jerry_es2015_builtin_dataview)"
+    },
+    {
+      "name": "Uint8Array",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:165",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_TYPEDARRAY)"
+    },
+    {
+      "name": "Float64Array",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:190",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_TYPEDARRAY) && ENABLED (JERRY_NUMBER_TYPE_FLOAT64)"
+    },
+    {
+      "name": "RegExp",
+      "since": "ES3",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:93",
+      "guard": "ENABLED (JERRY_BUILTIN_REGEXP)",
+      "reason": "compiled out of the device engine: JERRY_BUILTIN_REGEXP = 0 (jerry-core/config.h:24)"
+    },
+    {
+      "name": "eval",
+      "since": "ES1",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h:259",
+      "reason": "disabled in the device engine: JERRY_BUILTIN_EVAL_DISABLED = 1 (jerry-core/config.h:68); the call returns undefined"
+    },
+    {
+      "name": "BigInt",
+      "since": "ES2020",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "globalThis",
+      "since": "ES2020",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "WeakRef",
+      "since": "ES2021",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "FinalizationRegistry",
+      "since": "ES2021",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "AggregateError",
+      "since": "ES2021",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "SharedArrayBuffer",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Atomics",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-global.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Object.assign",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h:58",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Object.is",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h:59",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Object.setPrototypeOf",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h:57",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Object.getOwnPropertySymbols",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h:42",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Object.entries",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Object.values",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Object.getOwnPropertyDescriptors",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Object.fromEntries",
+      "since": "ES2019",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-object.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Array.from",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array.inc.h:43",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.of",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array.inc.h:44",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.find",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:73",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.findIndex",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:74",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.fill",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:75",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.copyWithin",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:76",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.entries",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:77",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.keys",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:78",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.values",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h:79",
+      "guard": "ENABLED (JERRY_BUILTIN_ARRAY) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Array.prototype.includes",
+      "since": "ES2016",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Array.prototype.flat",
+      "since": "ES2019",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Array.prototype.flatMap",
+      "since": "ES2019",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Array.prototype.at",
+      "since": "ES2022",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-array-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.fromCodePoint",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string.inc.h:44",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.raw",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string.inc.h:45",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.includes",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:73",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.startsWith",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:72",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.endsWith",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:74",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.repeat",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:71",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.codePointAt",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:75",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "String.prototype.normalize",
+      "since": "ES2015",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.match",
+      "since": "ES3",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:53",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_BUILTIN_REGEXP)",
+      "reason": "compiled out of the device engine: JERRY_BUILTIN_REGEXP = 0 (jerry-core/config.h:24)"
+    },
+    {
+      "name": "String.prototype.replace",
+      "since": "ES3",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:54",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_BUILTIN_REGEXP)",
+      "reason": "compiled out of the device engine: JERRY_BUILTIN_REGEXP = 0 (jerry-core/config.h:24)"
+    },
+    {
+      "name": "String.prototype.search",
+      "since": "ES3",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:55",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING) && ENABLED (JERRY_BUILTIN_REGEXP)",
+      "reason": "compiled out of the device engine: JERRY_BUILTIN_REGEXP = 0 (jerry-core/config.h:24)"
+    },
+    {
+      "name": "String.prototype.split",
+      "since": "ES3",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h:58",
+      "guard": "ENABLED (JERRY_BUILTIN_STRING)"
+    },
+    {
+      "name": "String.prototype.padStart",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.padEnd",
+      "since": "ES2017",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.trimStart",
+      "since": "ES2019",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.trimEnd",
+      "since": "ES2019",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.matchAll",
+      "since": "ES2020",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "String.prototype.replaceAll",
+      "since": "ES2021",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-string-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Number.isInteger",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-number.inc.h:90",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Number.isNaN",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-number.inc.h:89",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Number.isFinite",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-number.inc.h:88",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Number.isSafeInteger",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-number.inc.h:91",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Number.EPSILON",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-number.inc.h:59",
+      "guard": "ENABLED (JERRY_BUILTIN_NUMBER) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.trunc",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:111",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.sign",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:108",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.cbrt",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:98",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.log2",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:107",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.log10",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:106",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.hypot",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:103",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.fround",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:102",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.imul",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:104",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Math.clz32",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-math.inc.h:99",
+      "guard": "ENABLED (JERRY_BUILTIN_MATH) && ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Promise.all",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-promise.inc.h:43",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_PROMISE)"
+    },
+    {
+      "name": "Promise.race",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-promise.inc.h:42",
+      "guard": "ENABLED (JERRY_ES2015_BUILTIN_PROMISE)"
+    },
+    {
+      "name": "Promise.allSettled",
+      "since": "ES2020",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-promise.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Promise.any",
+      "since": "ES2021",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-promise.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Promise.prototype.finally",
+      "since": "ES2018",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-promise-prototype.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    },
+    {
+      "name": "Symbol.iterator",
+      "since": "ES2015",
+      "available": true,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-symbol.inc.h:51",
+      "guard": "ENABLED (JERRY_ES2015)"
+    },
+    {
+      "name": "Symbol.asyncIterator",
+      "since": "ES2018",
+      "available": false,
+      "source": "jerry-core/ecma/builtin-objects/ecma-builtin-symbol.inc.h: no entry",
+      "reason": "not implemented by the device JerryScript engine"
+    }
+  ]
+}
