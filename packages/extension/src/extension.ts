@@ -6,14 +6,14 @@ import * as vscode from 'vscode';
 import {
   DeviceProfileRegistry,
   NodeProcessRunner,
-  ToolLocator,
   createHostPlatform,
   type DeviceInfo,
   type DeviceProfile,
   type OutputEncoding,
 } from '@ohjs/core';
-import { HdcTransport } from '@ohjs/transport-hdc';
+import { HdcToolchainResolver, HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
+import { buildHdcToolchainContext } from './hdc-context';
 // type-only: the client (vscode-languageclient, ~440 KB) lives in dist/client.js and is required on demand
 import type * as LanguageClientModule from './language-client';
 import { detectFromConfigJson } from './project-detector';
@@ -49,20 +49,36 @@ function startLanguageServer(
 }
 
 /** `ohjs.device.refresh`: lists hdc targets into the OHJS output channel (FR-DEP-001 groundwork). */
-function registerDeviceCommands(context: vscode.ExtensionContext, output: vscode.LogOutputChannel): void {
+function registerDeviceCommands(
+  context: vscode.ExtensionContext,
+  output: vscode.LogOutputChannel,
+  firmwareManifestPath?: string,
+): void {
   const platform = createHostPlatform();
   const encoding = vscode.workspace
     .getConfiguration('ohjs.advanced')
     .get<OutputEncoding>('outputEncoding', 'auto');
   const runner = new NodeProcessRunner(platform, { encoding });
+  const resolver = new HdcToolchainResolver(platform);
   context.subscriptions.push({ dispose: () => void runner.disposeAll() });
   context.subscriptions.push(
     vscode.commands.registerCommand('ohjs.device.refresh', async (): Promise<DeviceInfo[]> => {
-      const user = vscode.workspace.getConfiguration('ohjs.tools').get<string>('hdcPath') || undefined;
       try {
-        const hdc = new ToolLocator(platform).locate('hdc', { user, extensionDir: context.extensionPath });
-        const targets = await new HdcTransport({ hdcPath: hdc.path, runner }).listTargets();
-        output.info(`hdc (${hdc.source}) ${hdc.path}: ${targets.length} target(s)`);
+        const ctx = await buildHdcToolchainContext(context, runner, firmwareManifestPath);
+        const bootstrap = resolver.locate(ctx);
+        const bootstrapTransport = new HdcTransport({ hdcPath: bootstrap.path, runner });
+        const targets = await bootstrapTransport.listTargets();
+        const resolved = await resolver.resolve(ctx, targets);
+        const { located: hdc, ohToolchain, deviceOhVersion } = resolved;
+        const versionNote =
+          deviceOhVersion != null
+            ? `device OH ${deviceOhVersion}${ohToolchain ? ` → toolchain ${ohToolchain}` : ''}`
+            : ohToolchain
+              ? `toolchain ${ohToolchain}`
+              : '';
+        output.info(
+          `hdc (${hdc.source}) ${hdc.path}${versionNote ? ` [${versionNote}]` : ''}: ${targets.length} target(s)`,
+        );
         for (const t of targets) output.info(`  ${t.key} ${t.connType} ${t.state} ${t.name ?? ''}`);
         return targets;
       } catch (e) {
@@ -94,7 +110,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   await vscode.commands.executeCommand('setContext', 'ohjs.isProject', result.isProject);
   output.info(`project detection: ${result.isProject} (${result.reason})`);
   if (!result.isProject) return { ...result, activationMs: performance.now() - t0 };
-  registerDeviceCommands(context, output);
 
   let languageServer: OhjsExtensionApi['languageServer'];
   let jsTypes: OhjsExtensionApi['jsTypes'];
@@ -131,6 +146,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   } catch (e) {
     output.error(`device profile error: ${(e as Error).message}`);
   }
+  registerDeviceCommands(context, output, deviceProfile?.paths.firmwareManifest);
   const activationMs = performance.now() - t0;
   output.info(`activated in ${Math.round(activationMs)} ms`);
   return {

@@ -48,6 +48,22 @@
           "scope": "machine-overridable",
           "description": "%config.tools.hdcPath%"
         },
+        "ohjs.tools.hdcOhVersion": {
+          "type": "string",
+          "enum": [
+            "",
+            "5.0.3",
+            "6.1-lts"
+          ],
+          "enumDescriptions": [
+            "%config.tools.hdcOhVersion.auto%",
+            "%config.tools.hdcOhVersion.503%",
+            "%config.tools.hdcOhVersion.61%"
+          ],
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "%config.tools.hdcOhVersion%"
+        },
         "ohjs.device.profile": {
           "type": "string",
           "default": "2k0300-1024x768",

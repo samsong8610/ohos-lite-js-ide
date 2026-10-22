@@ -6,7 +6,9 @@ Test doubles (never shipped in the VSIX).
 
 `mock-hdc/bin/hdc` (posix) / `mock-hdc/bin/hdc.cmd` (Windows) is an executable replacement for the
 OpenHarmony `hdc` client, so `HdcTransport` is tested through the real `IProcessRunner` code path.
-Point `ohjs.tools.hdcPath` at it for manual testing.
+Point `ohjs.tools.hdcPath` at it for manual testing. To exercise version-aware hdc selection without a
+real board, add a `shell` scenario rule for `param get const.product.software.version` (or
+`cat '/etc/ohjs/runtime-manifest.json'`) and leave `hdcPath` empty.
 
 State lives in `$MOCK_HDC_STATE` (targets, fport rules, call log, virtual device fs under `fs/<key>/`);
 the scenario comes from `$MOCK_HDC_SCENARIO` (JSON, see `MockHdcScenario` in `src/index.ts`).
