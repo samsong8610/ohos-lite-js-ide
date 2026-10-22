@@ -7,7 +7,7 @@ import { checkExpressionEs5 } from '../js/es5';
 import { interpolations, translationRefs } from '../project/i18n';
 import { LineIndex } from '../text';
 import { classifyAttribute, EVENT_MODIFIERS } from './attribute-names';
-import { walk, type HmlDocument, type Range } from './parser';
+import { walk, type HmlAttribute, type HmlDocument, type Range } from './parser';
 import { isSuppressed, parseSuppressions, resolveSeverity, type HmlRuleId, type RuleSeverity } from './rules';
 import type { SchemaView } from './schema-view';
 
@@ -135,6 +135,16 @@ export function validateHml(
       const f = checkImagePath(a.value, a.valueRange, view.schema.aceLoader.imageExtensions);
       if (f) report(f.rule, f.range, f.message);
     }
+    for (const a of el.attributes) {
+      for (const x of bareExpression(a)) {
+        for (const f of checkExpressionEs5(x.expr))
+          report(
+            'hml/es6-in-expression',
+            { start: x.start + f.start, end: x.start + f.end },
+            `${capitalize(f.feature)} (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device`,
+          );
+      }
+    }
     const names = new Set(el.attributes.map((a) => a.name));
     if (names.has('for') && names.has('if')) {
       const a = el.attributes.find((x) => x.name === 'if')!;
@@ -203,7 +213,7 @@ export function validateHml(
       report(
         'hml/es6-in-expression',
         { start: ip.start + f.start, end: ip.start + f.end },
-        `${capitalize(f.feature)} (ES2015+) cannot be used in expressions: the engine runs ES5.1`,
+        `${capitalize(f.feature)} (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device`,
       );
   }
 
@@ -236,4 +246,18 @@ export function validateHml(
     }
   }
   return out;
+}
+
+/**
+ * Template expressions written without `{{ }}` that ace-loader still parses as JS (component_validator.js):
+ * event arguments `onclick="go(a, b)"`, `for="item in list"` and `elif="cond"`. No babel transform runs on them.
+ */
+function bareExpression(a: HmlAttribute): Array<{ expr: string; start: number }> {
+  if (a.value === undefined || !a.valueRange || a.value.includes('{{')) return [];
+  const v = a.value;
+  const base = a.valueRange.start;
+  if (a.name === 'for' || a.name === 'elif') return [{ expr: v, start: base }];
+  if (classifyAttribute(a.name).kind !== 'event') return [];
+  const m = /^([^(]*)\((.+)\)\s*$/s.exec(v);
+  return m ? [{ expr: m[2]!, start: base + m[1]!.length + 1 }] : [];
 }

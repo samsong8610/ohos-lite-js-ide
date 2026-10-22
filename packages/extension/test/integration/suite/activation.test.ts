@@ -94,6 +94,43 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.match(diags[0]!.message, /babel/);
     });
 
+    it('language server: three ES6 tiers and ohjs.diagnostics.transpilableSyntax', async () => {
+      const code = (d: vscode.Diagnostic) => String(typeof d.code === 'object' ? d.code.value : d.code);
+      const [uri] = await vscode.workspace.findFiles('**/default/common/tiers.js');
+      assert.ok(uri, 'fixture tiers.js not found');
+      await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
+      const view = () =>
+        vscode.languages
+          .getDiagnostics(uri)
+          .filter((d) => d.source === 'ohjs')
+          .map((d) => `${code(d)}:${d.severity}:${d.range.start.line}`);
+      const W = vscode.DiagnosticSeverity.Warning;
+      const E = vscode.DiagnosticSeverity.Error;
+      const expected = [
+        `js/es6-syntax:${W}:0`,
+        `js/es6-untranspilable:${E}:1`,
+        `js/unsupported-builtin:${E}:2`,
+      ];
+      assert.ok(
+        await waitFor(() => view().join() === expected.join(), 15000),
+        `tier diagnostics: ${view().join()}`,
+      );
+      const cfg = vscode.workspace.getConfiguration('ohjs.diagnostics');
+      try {
+        await cfg.update('transpilableSyntax', 'error', vscode.ConfigurationTarget.Workspace);
+        const asError = [`js/es6-syntax:${E}:0`, ...expected.slice(1)];
+        assert.ok(await waitFor(() => view().join() === asError.join(), 15000), `error: ${view().join()}`);
+        await cfg.update('transpilableSyntax', 'off', vscode.ConfigurationTarget.Workspace);
+        assert.ok(
+          await waitFor(() => view().join() === expected.slice(1).join(), 15000),
+          `off: ${view().join()}`,
+        );
+      } finally {
+        await cfg.update('transpilableSyntax', undefined, vscode.ConfigurationTarget.Workspace);
+      }
+      assert.ok(await waitFor(() => view().join() === expected.join(), 15000), `reset: ${view().join()}`);
+    });
+
     it('language server: unknown @system module and this. completion (FR-LANG-007)', async () => {
       const code = (d: vscode.Diagnostic) => String(typeof d.code === 'object' ? d.code.value : d.code);
       const [mods] = await vscode.workspace.findFiles('**/default/common/modules.js');

@@ -25,9 +25,13 @@ export interface InitializationOptions {
   /** directory holding `<version>/components.json`; defaults to the bundled packs */
   schemaDir?: string;
   rules?: Record<string, unknown>;
+  /** `ohjs.diagnostics.transpilableSyntax` */
+  transpilableSyntax?: string;
   /** diagnostics debounce in ms (default 200, ARCHITECTURE §7.2) */
   debounceMs?: number;
 }
 
 /** `workspace/configuration` section read for rule settings */
 export const SETTINGS_SECTION = 'ohjs.lang';
+/** `workspace/configuration` section read for `transpilableSyntax` */
+export const DIAGNOSTICS_SECTION = 'ohjs.diagnostics';

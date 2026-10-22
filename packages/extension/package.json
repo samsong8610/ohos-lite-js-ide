@@ -133,6 +133,8 @@
               "css/unsupported-pseudo",
               "hml/es6-in-expression",
               "js/es6-syntax",
+              "js/es6-untranspilable",
+              "js/unsupported-builtin",
               "js/unknown-system-module",
               "prj/missing-app-module",
               "prj/device-type",
@@ -147,6 +149,17 @@
               "feature/rotation-disabled"
             ]
           }
+        },
+        "ohjs.diagnostics.transpilableSyntax": {
+          "type": "string",
+          "enum": [
+            "warning",
+            "error",
+            "off"
+          ],
+          "default": "warning",
+          "scope": "resource",
+          "markdownDescription": "%config.diagnostics.transpilableSyntax%"
         }
       }
     },

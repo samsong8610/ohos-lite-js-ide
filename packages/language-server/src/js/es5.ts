@@ -7,9 +7,19 @@ import { parse, type Node, type Options } from 'acorn';
 /** An ES2015+ construct the JerryScript ES5.1 profile cannot run (FR-LANG-007). */
 export interface Es6Finding {
   feature: string;
+  /**
+   * `transpilable`: ace-loader's babel (preset-env) lowers it to ES5 (`js/es6-syntax`);
+   * `untranspilable`: babel cannot lower it, or the output needs a runtime the lite bundle lacks
+   * (`js/es6-untranspilable`). Template expressions are never transpiled, so HML ignores the tier.
+   */
+  tier: Es6Tier;
+  /** why an untranspilable construct fails (shown in the diagnostic) */
+  reason?: string;
   start: number;
   end: number;
 }
+
+export type Es6Tier = 'transpilable' | 'untranspilable';
 
 export type AnyNode = Node & Record<string, unknown>;
 
@@ -33,13 +43,20 @@ export function visit(
   }
 }
 
+/** why async/generator code fails after babel (ARCHITECTURE §7.2, three-tier ES6 diagnostics) */
+export const REGENERATOR =
+  'babel rewrites this into regenerator code that calls regeneratorRuntime, which the lite bundle does not provide (webpack.lite.config.js adds no @babel/plugin-transform-runtime)';
+
 const ES2016_ASSIGN = new Set(['**=', '&&=', '||=', '??=']);
 
 /** ES2015+ constructs in an ESTree AST. ES module syntax (import/export) is allowed: the build bundles it away. */
 export function findEs6(ast: Node): Es6Finding[] {
   const out: Es6Finding[] = [];
   const add = (feature: string, n: { start: number; end: number }): void => {
-    out.push({ feature, start: n.start, end: n.end });
+    out.push({ feature, tier: 'transpilable', start: n.start, end: n.end });
+  };
+  const hard = (feature: string, n: { start: number; end: number }, reason: string): void => {
+    out.push({ feature, tier: 'untranspilable', reason, start: n.start, end: n.end });
   };
   visit(ast as AnyNode, undefined, (n, parent) => {
     switch (n.type) {
@@ -49,6 +66,7 @@ export function findEs6(ast: Node): Es6Finding[] {
         break;
       case 'ArrowFunctionExpression':
         add('arrow functions', n);
+        if (n.async) hard('async functions', n, REGENERATOR);
         break;
       case 'ClassDeclaration':
       case 'ClassExpression':
@@ -74,12 +92,13 @@ export function findEs6(ast: Node): Es6Finding[] {
         add('default values', n);
         break;
       case 'ForOfStatement':
-        add('for...of', n);
+        if (n.await) hard('for await...of', n, REGENERATOR);
+        else add('for...of', n);
         break;
       case 'FunctionDeclaration':
       case 'FunctionExpression':
-        if (n.generator) add('generators', n);
-        if (n.async) add('async functions', n);
+        if (n.generator) hard(n.async ? 'async generators' : 'generators', n, REGENERATOR);
+        else if (n.async) hard('async functions', n, REGENERATOR);
         break;
       case 'Property':
         if (n.method) add('method shorthand', n);
@@ -106,11 +125,14 @@ export function findEs6(ast: Node): Es6Finding[] {
         break;
       case 'Literal': {
         const raw = String(n.raw ?? '');
-        if (typeof n.bigint === 'string') add('BigInt literals', n);
+        if (typeof n.bigint === 'string')
+          hard('BigInt literals', n, 'babel cannot lower BigInt and the runtime has no BigInt');
         else if (/^0[bBoO]/.test(raw)) add('binary/octal literals', n);
         else if (typeof n.value === 'number' && raw.includes('_')) add('numeric separators', n);
-        else if (n.regex && /[uysd]/.test(String((n.regex as { flags: string }).flags)))
-          add('regular expression flags u/y/s/d', n);
+        else if (n.regex && /d/.test(String((n.regex as { flags: string }).flags)))
+          hard('regular expression flag d', n, 'no babel transform exists for match indices');
+        else if (n.regex && /[uys]/.test(String((n.regex as { flags: string }).flags)))
+          add('regular expression flags u/y/s', n);
         else if (typeof n.value === 'string' && /\\u\{/.test(raw)) add('unicode code point escapes', n);
         break;
       }

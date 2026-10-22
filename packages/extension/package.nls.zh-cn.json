@@ -9,5 +9,6 @@
   "config.sdkVersion": "目标 OpenHarmony SDK 版本，决定 HML 补全和校验使用的组件 schema。",
   "config.sdkVersion.503": "OpenHarmony 5.0.3-Release",
   "config.sdkVersion.61": "OpenHarmony 6.1-LTS（临时 schema）",
-  "config.lang.rules": "按规则覆盖诊断级别，例如 `{ \"hml/unknown-attribute\": \"warning\", \"hml/for-with-if\": \"off\" }`。"
+  "config.lang.rules": "按规则覆盖诊断级别，例如 `{ \"hml/unknown-attribute\": \"warning\", \"hml/for-with-if\": \"off\" }`。",
+  "config.diagnostics.transpilableSyntax": "页面 `.js` 中可由 ace-loader 的 babel 转为 ES5 的 ES2015+ 语法（`js/es6-syntax`）的诊断级别。不可转译语法（async/await、generator、BigInt）和设备上缺失的内置 API 始终报 error，可在 `#ohjs.lang.rules#` 中按规则调整（该设置也优先于本项）。"
 }

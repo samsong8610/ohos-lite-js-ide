@@ -15,12 +15,13 @@ import {
   SDK_CHANGED_NOTIFICATION,
   SDK_STATUS_NOTIFICATION,
   SETTINGS_SECTION,
+  DIAGNOSTICS_SECTION,
   type InitializationOptions,
   type SdkChangedParams,
   type SdkStatusParams,
 } from './protocol';
 import { DEFAULT_SDK_VERSION, SchemaRegistry } from './schema-registry';
-import { documentKind, OhjsLanguageService } from './service';
+import { documentKind, OhjsLanguageService, type ServiceSettings } from './service';
 
 export const SERVER_NAME = 'ohjs-language-server';
 
@@ -126,11 +127,10 @@ export function startServer(connection: Connection): void {
     hasConfigurationCapability = !!params.capabilities.workspace?.configuration;
     if (typeof opts.debounceMs === 'number') debounceMs = opts.debounceMs;
     const registry = new SchemaRegistry(opts.schemaDir, DEFAULT_SDK_VERSION);
-    service = new OhjsLanguageService(
-      registry,
-      { ...(opts.rules ? { rules: opts.rules } : {}) },
-      { read: readFile, list: listDir },
-    );
+    service = new OhjsLanguageService(registry, toSettings(opts.rules, opts.transpilableSyntax), {
+      read: readFile,
+      list: listDir,
+    });
     let startError: string | undefined;
     if (opts.sdkVersion) {
       try {
@@ -155,18 +155,27 @@ export function startServer(connection: Connection): void {
 
   const pullSettings = async (): Promise<void> => {
     if (!hasConfigurationCapability || !service) return;
-    const cfg = (await connection.workspace.getConfiguration(SETTINGS_SECTION)) as {
-      rules?: Record<string, unknown>;
-    } | null;
-    service.settings = { ...(cfg?.rules ? { rules: cfg.rules } : {}) };
+    const [lang, diag] = (await connection.workspace.getConfiguration([
+      { section: SETTINGS_SECTION },
+      { section: DIAGNOSTICS_SECTION },
+    ])) as Array<{ rules?: Record<string, unknown>; transpilableSyntax?: unknown } | null | undefined>;
+    service.settings = toSettings(lang?.rules, diag?.transpilableSyntax);
   };
   connection.onDidChangeConfiguration(async (change) => {
     if (!service) return;
     if (hasConfigurationCapability) await pullSettings();
     else {
-      const s = (change.settings as { ohjs?: { lang?: { rules?: Record<string, unknown> } } } | undefined)
-        ?.ohjs?.lang;
-      service.settings = { ...(s?.rules ? { rules: s.rules } : {}) };
+      const s = (
+        change.settings as
+          | {
+              ohjs?: {
+                lang?: { rules?: Record<string, unknown> };
+                diagnostics?: { transpilableSyntax?: unknown };
+              };
+            }
+          | undefined
+      )?.ohjs;
+      service.settings = toSettings(s?.lang?.rules, s?.diagnostics?.transpilableSyntax);
     }
     revalidateAll();
   });
@@ -217,4 +226,14 @@ export function startServer(connection: Connection): void {
 
   documents.listen(connection);
   connection.listen();
+}
+
+function toSettings(
+  rules: Record<string, unknown> | undefined,
+  transpilableSyntax: unknown,
+): ServiceSettings {
+  return {
+    ...(rules ? { rules } : {}),
+    ...(transpilableSyntax !== undefined ? { transpilableSyntax } : {}),
+  };
 }

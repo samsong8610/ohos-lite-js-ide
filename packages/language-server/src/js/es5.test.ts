@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from 'vitest';
-import { checkEs5, checkExpressionEs5 } from './es5';
+import { checkEs5, checkExpressionEs5, REGENERATOR } from './es5';
 
 const features = (code: string): string[] => checkEs5(code).findings.map((f) => f.feature);
 
@@ -48,6 +48,17 @@ export default {
       'generators',
       'async functions',
     ]);
+    expect(
+      features(
+        'var a = async () => 1; async function* g() {} async function f() { for await (var x of y) {} }',
+      ),
+    ).toEqual([
+      'arrow functions',
+      'async functions',
+      'async generators',
+      'async functions',
+      'for await...of',
+    ]);
     expect(features('a?.b; a ?? b; a ** 2; a **= 2; a ||= b; tag`x`;')).toEqual([
       'optional chaining',
       'nullish coalescing',
@@ -62,10 +73,31 @@ export default {
       'binary/octal literals',
       'binary/octal literals',
       'numeric separators',
-      'regular expression flags u/y/s/d',
+      'regular expression flags u/y/s',
       'unicode code point escapes',
     ]);
     expect(features('function f() { return new.target; }')).toEqual(["'new.target'"]);
+    expect(features('/a/d; /a/s;')).toEqual(['regular expression flag d', 'regular expression flags u/y/s']);
+  });
+  it('splits findings into transpilable and untranspilable tiers', () => {
+    const tiers = (code: string): string[] => checkEs5(code).findings.map((f) => `${f.feature}:${f.tier}`);
+    expect(tiers('let a = () => `x`; class C {} var {b} = o; for (var x of y) {}')).toEqual([
+      "'let' declarations:transpilable",
+      'arrow functions:transpilable',
+      'template literals:transpilable',
+      'classes:transpilable',
+      'destructuring:transpilable',
+      'for...of:transpilable',
+    ]);
+    const hard = checkEs5('async function f() {} function* g() {} 1n; /x/d;').findings;
+    expect(hard.map((f) => f.tier)).toEqual([
+      'untranspilable',
+      'untranspilable',
+      'untranspilable',
+      'untranspilable',
+    ]);
+    expect(hard[0]!.reason).toBe(REGENERATOR);
+    expect(hard[2]!.reason).toMatch(/BigInt/);
   });
   it('scripts that are not valid modules, comments, and unparseable code', () => {
     const r = checkEs5('// ohjs-disable-next-line\nwith (o) { let x; }');
@@ -83,7 +115,12 @@ describe('checkExpressionEs5 ({{ }} bodies)', () => {
     const [f] = checkExpressionEs5(e);
     expect(f!.feature).toBe('arrow functions');
     expect(e.slice(f!.start, f!.end)).toBe('x => x.a');
-    expect(checkExpressionEs5('`a${b}`')[0]).toEqual({ feature: 'template literals', start: 0, end: 7 });
+    expect(checkExpressionEs5('`a${b}`')[0]).toEqual({
+      feature: 'template literals',
+      tier: 'transpilable',
+      start: 0,
+      end: 7,
+    });
   });
   it('ES5 expressions, for-loop headers and half-typed text are fine', () => {
     expect(checkExpressionEs5(" a ? $t('k') : b.c[0] + 1 ")).toEqual([]);

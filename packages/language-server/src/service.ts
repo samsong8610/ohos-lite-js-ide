@@ -26,7 +26,14 @@ import { extractViewModel, type ViewModelSymbols } from './js/viewmodel';
 import { readConfig, validateConfig } from './project/config';
 import { i18nKeys, i18nKeyRange, translationRefs } from './project/i18n';
 import { mainUriOfConfig, moduleLayout } from './project/layout';
-import { isSuppressed, parseSuppressions, resolveSeverity, type RuleId } from './hml/rules';
+import {
+  isSuppressed,
+  parseSuppressions,
+  resolveSeverity,
+  type RuleId,
+  type RuleSeverity,
+} from './hml/rules';
+import { findUnsupportedBuiltins } from './js/builtins';
 import { LineIndex } from './text';
 import type { SchemaRegistry } from './schema-registry';
 
@@ -46,6 +53,20 @@ export const DIAGNOSTIC_SOURCE = 'ohjs';
 
 export interface ServiceSettings {
   rules?: Record<string, unknown>;
+  /** `ohjs.diagnostics.transpilableSyntax`: default severity of `js/es6-syntax` (warning/error/off) */
+  transpilableSyntax?: unknown;
+}
+
+/** Severity of a finding: `ohjs.lang.rules` wins, then `transpilableSyntax` for `js/es6-syntax`, then the default. */
+export function effectiveSeverity(rule: RuleId, settings: ServiceSettings): RuleSeverity {
+  const t = settings.transpilableSyntax;
+  if (
+    rule === 'js/es6-syntax' &&
+    settings.rules?.[rule] === undefined &&
+    (t === 'warning' || t === 'error' || t === 'off')
+  )
+    return t;
+  return resolveSeverity(rule, settings.rules);
 }
 
 /** Which language service handles a document: by languageId first, then by extension. */
@@ -196,10 +217,23 @@ export class OhjsLanguageService {
         [
           ...(pack ? checkSystemModules(r.modules, pack) : []),
           ...(r.ast ? checkFeatureMethods(methodCalls(r.ast), this.view.schema, this.refTags(doc.uri)) : []),
-          ...r.findings.map((f) => ({
-            rule: 'js/es6-syntax' as const,
-            range: f,
-            message: `${f.feature.charAt(0).toUpperCase()}${f.feature.slice(1)} (ES2015+) is not ES5.1: ace-loader transpiles page scripts to ES5 with babel at build time, so this is a reminder, not an error`,
+          ...r.findings.map((f) =>
+            f.tier === 'transpilable'
+              ? {
+                  rule: 'js/es6-syntax' as const,
+                  range: f,
+                  message: `${cap(f.feature)} (ES2015+): ace-loader's babel transpiles page scripts to ES5 at build time, so this is a reminder, not an error`,
+                }
+              : {
+                  rule: 'js/es6-untranspilable' as const,
+                  range: f,
+                  message: `${cap(f.feature)} cannot run on the device: ${f.reason ?? 'babel cannot transpile it'}`,
+                },
+          ),
+          ...(r.ast ? findUnsupportedBuiltins(r.ast) : []).map((b) => ({
+            rule: 'js/unsupported-builtin' as const,
+            range: b,
+            message: `${b.entry.name} (${b.entry.since}) is not available: ${b.entry.reason}, and ace-loader adds no polyfills`,
           })),
         ].sort((a, b) => a.range.start - b.range.start),
         r.comments.map((c) => ({ text: c.text, end: c.end })),
@@ -256,7 +290,7 @@ export class OhjsLanguageService {
     const sup = parseSuppressions(comments.map((c) => ({ text: c.text, endLine: lines.lineOf(c.end) })));
     const out: Diagnostic[] = [];
     for (const f of findings) {
-      const severity = resolveSeverity(f.rule, this.settings.rules);
+      const severity = effectiveSeverity(f.rule, this.settings);
       if (severity === 'off' || isSuppressed(sup, f.rule, lines.lineOf(f.range.start))) continue;
       out.push(this.toDiagnostic(doc, { ...f, severity }));
     }
@@ -333,4 +367,8 @@ export class OhjsLanguageService {
       },
     }));
   }
+}
+
+function cap(s: string): string {
+  return `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
 }

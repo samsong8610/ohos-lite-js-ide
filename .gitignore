@@ -8,3 +8,4 @@ coverage/
 results/
 .DS_Store
 out-test/
+packages/extension/test/fixtures/*/.vscode/

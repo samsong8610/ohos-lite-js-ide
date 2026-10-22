@@ -24,6 +24,8 @@ export const RULES = {
   'css/unsupported-pseudo': 'error',
   'hml/es6-in-expression': 'error',
   'js/es6-syntax': 'warning',
+  'js/es6-untranspilable': 'error',
+  'js/unsupported-builtin': 'error',
   'js/unknown-system-module': 'error',
   'prj/missing-app-module': 'error',
   'prj/device-type': 'error',

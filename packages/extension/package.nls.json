@@ -9,5 +9,6 @@
   "config.sdkVersion": "OpenHarmony SDK version whose component schema drives HML completion and diagnostics.",
   "config.sdkVersion.503": "OpenHarmony 5.0.3-Release",
   "config.sdkVersion.61": "OpenHarmony 6.1-LTS (provisional schema)",
-  "config.lang.rules": "Per-rule severity overrides, e.g. `{ \"hml/unknown-attribute\": \"warning\", \"hml/for-with-if\": \"off\" }`."
+  "config.lang.rules": "Per-rule severity overrides, e.g. `{ \"hml/unknown-attribute\": \"warning\", \"hml/for-with-if\": \"off\" }`.",
+  "config.diagnostics.transpilableSyntax": "Severity of ES2015+ syntax in page `.js` files that ace-loader's babel transpiles to ES5 (`js/es6-syntax`). Untranspilable syntax (async/await, generators, BigInt) and missing built-in APIs are always errors; tune them per rule in `#ohjs.lang.rules#`, which also overrides this setting."
 }

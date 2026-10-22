@@ -112,7 +112,7 @@ describe('rule switches and suppression comments', () => {
     expect(resolveSeverity('hml/for-with-if', undefined)).toBe('warning');
     expect(isRuleId('hml/syntax')).toBe(true);
     expect(isRuleId('toString')).toBe(false);
-    expect(Object.keys(HML_RULES)).toHaveLength(29);
+    expect(Object.keys(HML_RULES)).toHaveLength(31);
   });
   it('file-level and next-line comments', () => {
     expect(rules('<!-- ohjs-disable hml/unknown-component -->\n<foo></foo>')).toEqual([]);
@@ -173,11 +173,30 @@ describe('ES6 in expressions and cross-file project rules', () => {
       ['error', '`a`'],
     ]);
     expect(d[0]!.message).toBe(
-      'Arrow functions (ES2015+) cannot be used in expressions: the engine runs ES5.1',
+      'Arrow functions (ES2015+) cannot be used in template expressions: ace-loader does not transpile them, and they run as written on the device',
     );
     expect(
       run(t, { rules: { 'hml/es6-in-expression': 'off' } }).filter((x) => x.rule === 'hml/es6-in-expression'),
     ).toEqual([]);
+  });
+  it('hml/es6-in-expression covers event arguments and bare for/elif/show/if expressions (never transpiled)', () => {
+    const t =
+      '<div><text onclick="go(() => 1, `x`)" for="v in list.filter(x => x)">a</text>' +
+      '<text if="{{a}}">b</text><text elif="a ?? b">c</text><text show="{{ [...a].length }}">d</text>' +
+      '<text onclick="go(1)" ontouchstart="noArgs">e</text></div>';
+    const d = run(t).filter((x) => x.rule === 'hml/es6-in-expression');
+    expect(d.map((x) => [x.severity, t.slice(x.range.start, x.range.end)])).toEqual([
+      ['error', '() => 1'],
+      ['error', '`x`'],
+      ['error', 'x => x'],
+      ['error', 'a ?? b'],
+      ['error', '...a'],
+    ]);
+    expect(
+      run(t, { rules: { 'hml/es6-in-expression': 'warning' } })
+        .filter((x) => x.rule === 'hml/es6-in-expression')
+        .every((x) => x.severity === 'warning'),
+    ).toBe(true);
   });
   it('prj/page-not-registered', () => {
     const t = '<div></div>';

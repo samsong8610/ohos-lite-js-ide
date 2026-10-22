@@ -145,6 +145,7 @@ export async function startLanguageClient(
     sdkVersion: sdk.version,
     schemaDir: context.asAbsolutePath('dist/schemas/components'),
     rules: cfg.get<Record<string, unknown>>('lang.rules', {}),
+    transpilableSyntax: cfg.get<string>('diagnostics.transpilableSyntax', 'warning'),
   };
   const clientOptions: LanguageClientOptions = {
     documentSelector: languageDocumentSelector(),

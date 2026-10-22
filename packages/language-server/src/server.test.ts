@@ -33,6 +33,7 @@ interface Harness {
   waitDiagnostics(uri: string, count?: number): Promise<Diagnostic[]>;
   waitStatus(count: number): Promise<SdkStatusParams>;
   config: Record<string, unknown>;
+  diag: Record<string, unknown> | undefined;
 }
 
 const harnesses: Harness[] = [];
@@ -61,6 +62,7 @@ async function start(init: InitializationOptions & { configuration?: boolean } =
     diagnostics,
     statuses,
     config: {},
+    diag: undefined,
     waitDiagnostics: (uri, count = 1) =>
       new Promise((resolve) => {
         const check = () => {
@@ -84,7 +86,9 @@ async function start(init: InitializationOptions & { configuration?: boolean } =
     statuses.push(p);
     poke();
   });
-  client.onRequest('workspace/configuration', () => [h.config]);
+  client.onRequest('workspace/configuration', (p: { items: Array<{ section?: string }> }) =>
+    p.items.map((i) => (i.section === 'ohjs.diagnostics' ? h.diag : h.config)),
+  );
   client.listen();
   const { configuration, ...opts } = init;
   const r = await client.sendRequest('initialize', {
@@ -316,6 +320,33 @@ describe('language server over LSP', () => {
     p.config = null as unknown as Record<string, unknown>;
     p.client.sendNotification('workspace/didChangeConfiguration', { settings: null });
     expect((await p.waitDiagnostics(URI, 3))[0]!.severity).toBe(1);
+  });
+
+  it('applies ohjs.diagnostics.transpilableSyntax from initializationOptions, push and pull', async () => {
+    const JS = 'file:///w/entry/src/main/js/default/pages/index/index.js';
+    const openJs = (h: Harness, text: string): void =>
+      void h.client.sendNotification('textDocument/didOpen', {
+        textDocument: { uri: JS, languageId: 'javascript', version: 1, text },
+      });
+    const sev = (l: Array<{ code?: unknown; severity?: number }>): unknown[] =>
+      l.map((d) => [d.code, d.severity]);
+    const h = await start({ transpilableSyntax: 'error' });
+    openJs(h, 'let a = 1;\nfunction* g() {}');
+    expect(sev(await h.waitDiagnostics(JS))).toEqual([
+      ['js/es6-syntax', 1],
+      ['js/es6-untranspilable', 1],
+    ]);
+    h.client.sendNotification('workspace/didChangeConfiguration', {
+      settings: { ohjs: { diagnostics: { transpilableSyntax: 'off' } } },
+    });
+    expect(sev(await h.waitDiagnostics(JS, 2))).toEqual([['js/es6-untranspilable', 1]]);
+
+    const p = await start({ configuration: true });
+    p.diag = { transpilableSyntax: 'off' };
+    openJs(p, 'let a = 1;');
+    await p.waitDiagnostics(JS);
+    p.client.sendNotification('workspace/didChangeConfiguration', { settings: null });
+    expect(await p.waitDiagnostics(JS, 2)).toEqual([]);
   });
 
   it('debounces diagnostics while typing', async () => {
