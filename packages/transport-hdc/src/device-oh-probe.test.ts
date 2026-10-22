@@ -25,9 +25,9 @@ describe('probeDeviceOhVersion', () => {
     });
     mocks.push(m);
     const t = new HdcTransport({ hdcPath: m.hdcPath, runner, env: m.env });
-    expect(await probeDeviceOhVersion(t, 't1', { firmwareManifestPath: '/etc/ohjs/runtime-manifest.json' })).toBe(
-      '6.1-LTS',
-    );
+    expect(
+      await probeDeviceOhVersion(t, 't1', { firmwareManifestPath: '/etc/ohjs/runtime-manifest.json' }),
+    ).toBe('6.1-LTS');
   });
 
   it('falls back to param get', async () => {

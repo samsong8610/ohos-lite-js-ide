@@ -67,21 +67,14 @@ export class ToolLocator {
       const norm = normalizeHdcToolchainOhVersion(ohToolchain ?? '');
       if (!norm) return [];
       const vd = ohVersionDirName(norm);
-      return roots.flatMap((r) => [
-        p.join(r, vd),
-        p.join(r, norm),
-        p.join(r, vd.replace(/^v/i, '')),
-      ]);
+      return roots.flatMap((r) => [p.join(r, vd), p.join(r, norm), p.join(r, vd.replace(/^v/i, ''))]);
     };
     if (p.kind === 'win32') {
       const local = p.mergeEnv({})['LOCALAPPDATA'] ?? p.join(home, 'AppData', 'Local');
       const sdk = p.join(local, 'Huawei', 'Sdk');
       if (tool === 'hdc')
         return [
-          ...hdcVersioned([
-            p.join(local, 'OpenHarmony', 'Sdk'),
-            p.join(home, 'OpenHarmony', 'Sdk'),
-          ]),
+          ...hdcVersioned([p.join(local, 'OpenHarmony', 'Sdk'), p.join(home, 'OpenHarmony', 'Sdk')]),
           p.join(sdk, 'openharmony', 'toolchains'),
           p.join(sdk, 'default', 'openharmony', 'toolchains'),
         ];
@@ -110,18 +103,15 @@ export class ToolLocator {
       for (const n of names) out.push({ path: p.join(dir, n), source: 'path' });
     if (hints.extensionDir && tool === 'hdc') {
       const base = p.join(hints.extensionDir, 'bin', p.binKey);
-      const versionOrder = oh
-        ? [oh]
-        : hints.ohToolchain
-          ? []
-          : [...HDC_TOOLCHAIN_OH_VERSIONS].reverse();
+      const versionOrder = oh ? [oh] : hints.ohToolchain ? [] : [...HDC_TOOLCHAIN_OH_VERSIONS].reverse();
       for (const v of versionOrder)
         out.push({ path: p.join(base, ohVersionDirName(v), name), source: 'bundled' });
       out.push({ path: p.join(base, name), source: 'bundled' });
     } else if (hints.extensionDir) {
       out.push({ path: p.join(hints.extensionDir, 'bin', p.binKey, name), source: 'bundled' });
     }
-    for (const dir of this.defaultDirs(tool, hints.ohToolchain)) out.push({ path: p.join(dir, name), source: 'default' });
+    for (const dir of this.defaultDirs(tool, hints.ohToolchain))
+      out.push({ path: p.join(dir, name), source: 'default' });
     return out;
   }
 

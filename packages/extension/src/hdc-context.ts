@@ -23,7 +23,9 @@ export async function readProjectJsonRaw(): Promise<string | undefined> {
   const folder = vscode.workspace.workspaceFolders?.[0];
   if (!folder) return undefined;
   try {
-    const bytes = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(folder.uri, '.ohjs', 'project.json'));
+    const bytes = await vscode.workspace.fs.readFile(
+      vscode.Uri.joinPath(folder.uri, '.ohjs', 'project.json'),
+    );
     return new TextDecoder('utf-8').decode(bytes);
   } catch {
     return undefined;

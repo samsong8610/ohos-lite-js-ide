@@ -49,10 +49,7 @@ function hintsFrom(ctx: HdcToolchainContext, ohToolchain?: string) {
     project: ctx.projectToolchain?.hdc,
     extensionDir: ctx.extensionDir,
     ohToolchain:
-      ohToolchain ??
-      ctx.ohVersionOverride ??
-      ctx.projectToolchain?.ohVersion ??
-      ctx.fallbackOhVersion,
+      ohToolchain ?? ctx.ohVersionOverride ?? ctx.projectToolchain?.ohVersion ?? ctx.fallbackOhVersion,
   };
 }
 

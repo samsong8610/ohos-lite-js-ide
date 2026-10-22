@@ -60,7 +60,9 @@ export function parseDeviceOhVersionText(text: string): HdcToolchainOhVersion | 
       .split(/\r?\n/)
       .map((l) => l.trim())
       .find((l) => l && !l.startsWith('[')) ?? trimmed;
-  const ver = line.match(/OpenHarmony[-\s]?(\d+\.\d+(?:\.\d+)?(?:-LTS)?)/i)?.[1] ?? line.match(/(\d+\.\d+(?:\.\d+)?(?:-LTS)?)/i)?.[1];
+  const ver =
+    line.match(/OpenHarmony[-\s]?(\d+\.\d+(?:\.\d+)?(?:-LTS)?)/i)?.[1] ??
+    line.match(/(\d+\.\d+(?:\.\d+)?(?:-LTS)?)/i)?.[1];
   return ver ? normalizeHdcToolchainOhVersion(ver) : undefined;
 }
 
