@@ -16,8 +16,8 @@ const runner = new NodeProcessRunner(lin);
 afterEach(() => mocks.splice(0).forEach((m) => m.dispose()));
 const mocks: MockHdc[] = [];
 
-function stubHdc(ext: string, rel: string): string {
-  const p = path.join(ext, rel);
+function stubHdc(platform: HostPlatform, ext: string, ...parts: string[]): string {
+  const p = platform.join(ext, ...parts);
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
   return p;
@@ -26,9 +26,9 @@ function stubHdc(ext: string, rel: string): string {
 describe('HdcToolchainResolver', () => {
   it('re-locates to the 5.0.3 bundled hdc after probing the device', async () => {
     const ext = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ext-'));
-    const v503 = stubHdc(ext, 'bin/linux-x64/v5.0.3/hdc');
-    const v61 = stubHdc(ext, 'bin/linux-x64/v6.1-lts/hdc');
-    const locator = new ToolLocator(lin, (p) => p === v503 || p === v61);
+    const v503 = stubHdc(lin, ext, 'bin', lin.binKey, 'v5.0.3', 'hdc');
+    const v61 = stubHdc(lin, ext, 'bin', lin.binKey, 'v6.1-lts', 'hdc');
+    const locator = new ToolLocator(lin, (p) => lin.normalize(p) === lin.normalize(v503) || lin.normalize(p) === lin.normalize(v61));
     const resolver = new HdcToolchainResolver(lin, locator, async () => '5.0.3');
 
     const targets: DeviceInfo[] = [{ key: 'dev1', connType: 'USB', state: 'Connected' }];
