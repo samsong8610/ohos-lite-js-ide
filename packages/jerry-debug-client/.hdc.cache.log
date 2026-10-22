@@ -1,0 +1,170 @@
+[D][2026-10-22 22:05:22.663][4bf9e0][main.cpp:191] Foreground cli-mode
+[F][2026-10-22 22:05:22.671][4bf9e0][main.cpp:301] setuid(0) fail Operation not permitted
+[D][2026-10-22 22:05:22.672][4bf9e0][main.cpp:303] Root run rc:-1
+[I][2026-10-22 22:05:22.672][4bf9e0][main.cpp:387] HdcDaemon run as root mode.
+[D][2026-10-22 22:05:22.672][4bf9e0][main.cpp:393] HdcDaemon main run
+[I][2026-10-22 22:05:22.673][4bf9e0][session.cpp:28] Program running. Ver: 3.2.0c Pid:119168
+[I][2026-10-22 22:05:22.673][4bf9e0][session.cpp:36] set UV_THREADPOOL_SIZE:16
+[D][2026-10-22 22:05:22.675][4bf9e0][session.cpp:47] loopMain init
+[D][2026-10-22 22:05:22.676][4bf9e0][daemon.cpp:174] HdcDaemon InitMod
+[I][2026-10-22 22:05:22.676][4bf9e0][daemon_tcp.cpp:152] HdcDaemonTCP init
+[I][2026-10-22 22:05:22.679][4bf9e0][daemon_tcp.cpp:159] TCP listen on port:[8710]
+[F][2026-10-22 22:05:22.682][4bf9e0][connect_validation.cpp:34] Parameter not found or value is empty.
+[I][2026-10-22 22:05:22.683][4bf9e0][daemon.cpp:141] Authentication is not required in root mode
+[I][2026-10-22 22:05:22.683][4bf9e0][daemon.cpp:411] not enable secure, noneed clear keyfile
+[F][2026-10-22 22:05:22.684][c9991a68][uv_status.cpp:133] LoopMonitorWorker every 3000 ms check hung 500 us
+[I][2026-10-22 22:05:26.455][4bf9e0][session.cpp:481] HdcSessionBase NewSession, sessionId:348******130(L:10), connType:1.
+[I][2026-10-22 22:05:26.456][4bf9e0][session.cpp:395] MallocSessionByConnectType init hWorkTCP sid:348******130(L:10)
+[W][2026-10-22 22:05:26.461][bb7fea68][base.cpp:2837] turn On heartbeatSwitch
+[D][2026-10-22 22:05:26.462][bb7fea68][session.cpp:1537] StartHeartbeatWork
+[I][2026-10-22 22:05:26.462][bb7fea68][session.cpp:1562] !!!Workthread run begin, sid:348******130(L:10) instance:daemon
+[I][2026-10-22 22:05:26.463][bb7fea68][session.cpp:1508] session 348******130(L:10) not support heatbeat
+[W][2026-10-22 22:05:26.463][bb7fea68][session.cpp:1370] Dispatch MainThreadCommand  START_SESSION sessionId:348******130(L:10) instance:daemon
+[I][2026-10-22 22:05:26.463][bb7fea68][session.cpp:1300] start tcp open fdChildWorkTCP, sid:348******130(L:10)
+[D][2026-10-22 22:05:26.465][bb7fea68][daemon.cpp:1142] FetchCommand channelId:0 command:1
+[I][2026-10-22 22:05:26.468][bb7fea68][daemon.cpp:859] client auth type is 1 for 206******680(L:10) session
+[I][2026-10-22 22:05:26.468][bb7fea68][session.cpp:1709] peer support features are Ver: 3.2.0c,TCP,linux,heartbeat for session 206******680(L:10)
+[F][2026-10-22 22:05:26.469][bb7fea68][connect_validation.cpp:34] Parameter not found or value is empty.
+[F][2026-10-22 22:05:26.469][bb7fea68][connect_validation.cpp:34] Parameter not found or value is empty.
+[I][2026-10-22 22:05:26.470][bb7fea68][daemon.cpp:799] not enable secure, allow access for 206******680(L:10)
+[F][2026-10-22 22:05:26.470][bb7fea68][connect_validation.cpp:34] Parameter not found or value is empty.
+[D][2026-10-22 22:05:26.472][bb7fea68][daemon.cpp:974] receive hs version = Ver: 3.2.0c7fdbc1aa8c5fefaa
+[D][2026-10-22 22:05:26.473][bb7fea68][daemon.cpp:1142] FetchCommand channelId:0 command:2
+[D][2026-10-22 22:05:26.521][bb7fea68][daemon.cpp:1142] FetchCommand channelId:1805148377 command:12
+[I][2026-10-22 22:05:26.521][bb7fea68][session.cpp:1652] New HTaskInfo cid:1805148377 sid:206******680(L:10) command:12
+[I][2026-10-22 22:05:26.522][bb7fea68][session.cpp:891] AdminTask add task type:0 cid:1805148377 sid:206******680(L:10) mapsize:1
+[D][2026-10-22 22:05:26.522][bb7fea68][daemon.cpp:1142] FetchCommand channelId:1805148377 command:2501
+[D][2026-10-22 22:05:26.523][bb7fea68][task.cpp:34] HdcTaskBase type:3 cid:1805148377 sid:206******680(L:10)
+[W][2026-10-22 22:05:26.523][bb7fea68][forward.cpp:969] CommandDispatch command:2501 payloadSize:21 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.524][bb7fea68][forward.cpp:739] SlaveConnect ctxid:962708408 type:0 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.524][bb7fea68][forward.cpp:213] FreeContext id:962708408, bNotifyRemote:0, finish:0 cid:1805148377 sid:206******680(L:10)
+[D][2026-10-22 22:05:26.525][bb7fea68][forward.cpp:155] Finally to delete id:962708408
+[D][2026-10-22 22:05:26.530][bb7fea68][daemon.cpp:1142] FetchCommand channelId:1805148377 command:2503
+[W][2026-10-22 22:05:26.530][bb7fea68][forward.cpp:969] CommandDispatch command:2503 payloadSize:21 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.530][bb7fea68][forward.cpp:739] SlaveConnect ctxid:2764747417 type:0 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.531][bb7fea68][forward.cpp:495] SetupTCPPoint slave uv_tcp_connect port:5001 ctxid:2764747417 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.911][bb7fea68][forward.cpp:290] ReadForwardBuf nread:-4095 id:2764747417 cid:1805148377 sid:206******680(L:10)
+[I][2026-10-22 22:05:26.911][bb7fea68][forward.cpp:213] FreeContext id:2764747417, bNotifyRemote:1, finish:0 cid:1805148377 sid:206******680(L:10)
+[D][2026-10-22 22:05:26.911][bb7fea68][forward.cpp:155] Finally to delete id:2764747417
+[D][2026-10-22 22:05:27.477][bb7fea68][daemon.cpp:1142] FetchCommand channelId:1805148377 command:2
+[W][2026-10-22 22:05:27.477][bb7fea68][session.cpp:160] BeginRemoveTask taskType:3 channelId:1805148377
+[W][2026-10-22 22:05:27.478][bb7fea68][session.cpp:190] ClearOwnTasks OP_CLEAR finish, sessionId:206******680(L:10) channelIDInput:1805148377
+[W][2026-10-22 22:05:27.478][bb7fea68][session.cpp:115] taskClassDeleteRetry start clear task, taskType:3 cid:1805148377 sid:206******680(L:10)
+[D][2026-10-22 22:05:27.478][bb7fea68][session.cpp:126] TaskDelay task remove retry count 0/30, taskType:3 channelId:1805148377, sessionId:206******680(L:10)
+[D][2026-10-22 22:05:27.479][bb7fea68][forward.cpp:31] ~HdcForwardBase channelId:1805148377
+[D][2026-10-22 22:05:27.479][bb7fea68][task.cpp:40] ~HdcTaskBase type:3 cid:1805148377 sid:206******680(L:10)
+[W][2026-10-22 22:05:27.479][bb7fea68][session.cpp:134] TaskDelay task remove finish, channelId:1805148377
+[D][2026-10-22 22:05:27.479][bb7fea68][base.cpp:969] before uv handle close, the uv handle type is 13
+[I][2026-10-22 22:05:27.488][bb7fea68][tcp.cpp:102] HdcTCPBase::ReadStream < 0 end of file sid:206******680(L:10)
+[I][2026-10-22 22:05:27.488][bb7fea68][uv_status.cpp:121] FreeSession-206******680(L:10) loop[MainLoop] is idle
+[F][2026-10-22 22:05:27.488][bb7fea68][uv_status.cpp:119] FreeSession-206******680(L:10) loop[ChildLoop] is busy for [HdcTCPBase::ReadStream] start[6320439] duration[1]
+[I][2026-10-22 22:05:27.489][bb7fea68][base.cpp:2711] AddDeletedSessionId:206******680(L:10)
+[F][2026-10-22 22:05:27.492][4bf9e0][uv_status.cpp:119] FreeSession-206******680(L:10) loop[MainLoop] is busy for [HdcSessionBase::AsyncMainLoopTask] start[6320443] duration[0]
+[I][2026-10-22 22:05:27.493][4bf9e0][uv_status.cpp:121] FreeSession-206******680(L:10) loop[ChildLoop] is idle
+[I][2026-10-22 22:05:27.493][4bf9e0][base.cpp:2708] SessionId:206******680(L:10) is already in the cache
+[I][2026-10-22 22:05:27.493][4bf9e0][session.cpp:722] Begin to free session, sessionid:206******680(L:10)
+[I][2026-10-22 22:05:27.494][4bf9e0][session.cpp:731] dataFdSend:0, dataFdRecv:883
+[W][2026-10-22 22:05:27.494][4bf9e0][daemon.cpp:1249] NotifyInstanceSessionFree freeOrClear false
+[I][2026-10-22 22:05:27.494][4bf9e0][session.cpp:735] FreeSession sessionId:206******680(L:10) ref:0
+[D][2026-10-22 22:05:27.495][4bf9e0][base.cpp:969] before uv handle close, the uv handle type is 6
+[I][2026-10-22 22:05:27.495][4bf9e0][session.cpp:687] FreeSessionOpeate sid:206******680(L:10) ref:0
+[I][2026-10-22 22:05:27.495][4bf9e0][session.cpp:692] FreeSessionOpeate, send workthread for free. sessionId:206******680(L:10)
+[W][2026-10-22 22:05:27.496][bb7fea68][session.cpp:1375] Dispatch MainThreadCommand STOP_SESSION sessionId:206******680(L:10)
+[D][2026-10-22 22:05:27.496][4bf9e0][base.cpp:969] before uv handle close, the uv handle type is 13
+[W][2026-10-22 22:05:27.496][bb7fea68][base.cpp:2837] turn On heartbeatSwitch
+[I][2026-10-22 22:05:27.496][4bf9e0][session.cpp:698] FreeSessionOpeate childCleared:0 sessionId:206******680(L:10)
+[I][2026-10-22 22:05:27.497][bb7fea68][session.cpp:1497] session 206******680(L:10) stop heartbeatTimer
+[I][2026-10-22 22:05:27.497][bb7fea68][session.cpp:1395] Dispatch MainThreadCommand try close hChildWorkTCP, sid:206******680(L:10)
+[D][2026-10-22 22:05:27.497][bb7fea68][base.cpp:969] before uv handle close, the uv handle type is 8
+[W][2026-10-22 22:05:27.498][bb7fea68][session.cpp:1386] Dispatch MainThreadCommand uv stop childLoop sessionId:206******680(L:10)
+[I][2026-10-22 22:05:27.498][bb7fea68][session.cpp:1564] !!!Workthread run again, sid:348******130(L:10)
+[I][2026-10-22 22:05:27.498][bb7fea68][session.cpp:1469] ReChildLoopForSessionClear sessionId:206******680(L:10)
+[D][2026-10-22 22:05:27.498][bb7fea68][base.cpp:969] before uv handle close, the uv handle type is 13
+[D][2026-10-22 22:05:27.499][bb7fea68][base.cpp:969] before uv handle close, the uv handle type is 13
+[D][2026-10-22 22:05:27.509][bb7fea68][base.cpp:928] Try close loop success
+[I][2026-10-22 22:05:27.510][bb7fea68][session.cpp:1568] !!!Workthread run finish, sid:348******130(L:10)
+[D][2026-10-22 22:06:49.719][4bf9e0][main.cpp:191] Foreground cli-mode
+[F][2026-10-22 22:06:49.727][4bf9e0][main.cpp:301] setuid(0) fail Operation not permitted
+[D][2026-10-22 22:06:49.728][4bf9e0][main.cpp:303] Root run rc:-1
+[I][2026-10-22 22:06:49.728][4bf9e0][main.cpp:387] HdcDaemon run as root mode.
+[D][2026-10-22 22:06:49.729][4bf9e0][main.cpp:393] HdcDaemon main run
+[I][2026-10-22 22:06:49.729][4bf9e0][session.cpp:28] Program running. Ver: 3.2.0c Pid:122284
+[I][2026-10-22 22:06:49.729][4bf9e0][session.cpp:36] set UV_THREADPOOL_SIZE:16
+[D][2026-10-22 22:06:49.732][4bf9e0][session.cpp:47] loopMain init
+[D][2026-10-22 22:06:49.732][4bf9e0][daemon.cpp:174] HdcDaemon InitMod
+[I][2026-10-22 22:06:49.733][4bf9e0][daemon_tcp.cpp:152] HdcDaemonTCP init
+[I][2026-10-22 22:06:49.735][4bf9e0][daemon_tcp.cpp:159] TCP listen on port:[8710]
+[F][2026-10-22 22:06:49.739][4bf9e0][connect_validation.cpp:34] Parameter not found or value is empty.
+[I][2026-10-22 22:06:49.739][4bf9e0][daemon.cpp:141] Authentication is not required in root mode
+[I][2026-10-22 22:06:49.740][4bf9e0][daemon.cpp:411] not enable secure, noneed clear keyfile
+[F][2026-10-22 22:06:49.742][f2399a68][uv_status.cpp:133] LoopMonitorWorker every 3000 ms check hung 500 us
+[I][2026-10-22 22:06:53.511][4bf9e0][session.cpp:481] HdcSessionBase NewSession, sessionId:184******883(L:10), connType:1.
+[I][2026-10-22 22:06:53.512][4bf9e0][session.cpp:395] MallocSessionByConnectType init hWorkTCP sid:184******883(L:10)
+[W][2026-10-22 22:06:53.517][f2335a68][base.cpp:2837] turn On heartbeatSwitch
+[D][2026-10-22 22:06:53.517][f2335a68][session.cpp:1537] StartHeartbeatWork
+[I][2026-10-22 22:06:53.518][f2335a68][session.cpp:1562] !!!Workthread run begin, sid:184******883(L:10) instance:daemon
+[I][2026-10-22 22:06:53.518][f2335a68][session.cpp:1508] session 184******883(L:10) not support heatbeat
+[W][2026-10-22 22:06:53.519][f2335a68][session.cpp:1370] Dispatch MainThreadCommand  START_SESSION sessionId:184******883(L:10) instance:daemon
+[I][2026-10-22 22:06:53.519][f2335a68][session.cpp:1300] start tcp open fdChildWorkTCP, sid:184******883(L:10)
+[D][2026-10-22 22:06:53.520][f2335a68][daemon.cpp:1142] FetchCommand channelId:0 command:1
+[I][2026-10-22 22:06:53.522][f2335a68][daemon.cpp:859] client auth type is 1 for 228******573(L:10) session
+[I][2026-10-22 22:06:53.523][f2335a68][session.cpp:1709] peer support features are Ver: 3.2.0c,TCP,linux,heartbeat for session 228******573(L:10)
+[F][2026-10-22 22:06:53.523][f2335a68][connect_validation.cpp:34] Parameter not found or value is empty.
+[F][2026-10-22 22:06:53.524][f2335a68][connect_validation.cpp:34] Parameter not found or value is empty.
+[I][2026-10-22 22:06:53.524][f2335a68][daemon.cpp:799] not enable secure, allow access for 228******573(L:10)
+[F][2026-10-22 22:06:53.525][f2335a68][connect_validation.cpp:34] Parameter not found or value is empty.
+[D][2026-10-22 22:06:53.526][f2335a68][daemon.cpp:974] receive hs version = Ver: 3.2.0c7fdbc1aa8c5fefaa
+[D][2026-10-22 22:06:53.527][f2335a68][daemon.cpp:1142] FetchCommand channelId:0 command:2
+[D][2026-10-22 22:06:53.573][f2335a68][daemon.cpp:1142] FetchCommand channelId:1700756800 command:12
+[I][2026-10-22 22:06:53.573][f2335a68][session.cpp:1652] New HTaskInfo cid:1700756800 sid:228******573(L:10) command:12
+[I][2026-10-22 22:06:53.574][f2335a68][session.cpp:891] AdminTask add task type:0 cid:1700756800 sid:228******573(L:10) mapsize:1
+[D][2026-10-22 22:06:53.574][f2335a68][daemon.cpp:1142] FetchCommand channelId:1700756800 command:2501
+[D][2026-10-22 22:06:53.575][f2335a68][task.cpp:34] HdcTaskBase type:3 cid:1700756800 sid:228******573(L:10)
+[W][2026-10-22 22:06:53.575][f2335a68][forward.cpp:969] CommandDispatch command:2501 payloadSize:21 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.576][f2335a68][forward.cpp:739] SlaveConnect ctxid:2224683488 type:0 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.576][f2335a68][forward.cpp:213] FreeContext id:2224683488, bNotifyRemote:0, finish:0 cid:1700756800 sid:228******573(L:10)
+[D][2026-10-22 22:06:53.577][f2335a68][forward.cpp:155] Finally to delete id:2224683488
+[D][2026-10-22 22:06:53.581][f2335a68][daemon.cpp:1142] FetchCommand channelId:1700756800 command:2503
+[W][2026-10-22 22:06:53.581][f2335a68][forward.cpp:969] CommandDispatch command:2503 payloadSize:21 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.582][f2335a68][forward.cpp:739] SlaveConnect ctxid:1261576391 type:0 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.582][f2335a68][forward.cpp:495] SetupTCPPoint slave uv_tcp_connect port:5001 ctxid:1261576391 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.948][f2335a68][forward.cpp:290] ReadForwardBuf nread:-4095 id:1261576391 cid:1700756800 sid:228******573(L:10)
+[I][2026-10-22 22:06:53.948][f2335a68][forward.cpp:213] FreeContext id:1261576391, bNotifyRemote:1, finish:0 cid:1700756800 sid:228******573(L:10)
+[D][2026-10-22 22:06:53.949][f2335a68][forward.cpp:155] Finally to delete id:1261576391
+[D][2026-10-22 22:06:54.511][f2335a68][daemon.cpp:1142] FetchCommand channelId:1700756800 command:2
+[W][2026-10-22 22:06:54.512][f2335a68][session.cpp:160] BeginRemoveTask taskType:3 channelId:1700756800
+[W][2026-10-22 22:06:54.512][f2335a68][session.cpp:190] ClearOwnTasks OP_CLEAR finish, sessionId:228******573(L:10) channelIDInput:1700756800
+[W][2026-10-22 22:06:54.513][f2335a68][session.cpp:115] taskClassDeleteRetry start clear task, taskType:3 cid:1700756800 sid:228******573(L:10)
+[D][2026-10-22 22:06:54.513][f2335a68][session.cpp:126] TaskDelay task remove retry count 0/30, taskType:3 channelId:1700756800, sessionId:228******573(L:10)
+[D][2026-10-22 22:06:54.513][f2335a68][forward.cpp:31] ~HdcForwardBase channelId:1700756800
+[D][2026-10-22 22:06:54.514][f2335a68][task.cpp:40] ~HdcTaskBase type:3 cid:1700756800 sid:228******573(L:10)
+[W][2026-10-22 22:06:54.514][f2335a68][session.cpp:134] TaskDelay task remove finish, channelId:1700756800
+[D][2026-10-22 22:06:54.514][f2335a68][base.cpp:969] before uv handle close, the uv handle type is 13
+[I][2026-10-22 22:06:54.521][f2335a68][tcp.cpp:102] HdcTCPBase::ReadStream < 0 end of file sid:228******573(L:10)
+[I][2026-10-22 22:06:54.522][f2335a68][uv_status.cpp:121] FreeSession-228******573(L:10) loop[MainLoop] is idle
+[F][2026-10-22 22:06:54.522][f2335a68][uv_status.cpp:119] FreeSession-228******573(L:10) loop[ChildLoop] is busy for [HdcTCPBase::ReadStream] start[6407472] duration[1]
+[I][2026-10-22 22:06:54.523][f2335a68][base.cpp:2711] AddDeletedSessionId:228******573(L:10)
+[F][2026-10-22 22:06:54.526][4bf9e0][uv_status.cpp:119] FreeSession-228******573(L:10) loop[MainLoop] is busy for [HdcSessionBase::AsyncMainLoopTask] start[6407477] duration[0]
+[I][2026-10-22 22:06:54.526][4bf9e0][uv_status.cpp:121] FreeSession-228******573(L:10) loop[ChildLoop] is idle
+[I][2026-10-22 22:06:54.527][4bf9e0][base.cpp:2708] SessionId:228******573(L:10) is already in the cache
+[I][2026-10-22 22:06:54.527][4bf9e0][session.cpp:722] Begin to free session, sessionid:228******573(L:10)
+[I][2026-10-22 22:06:54.527][4bf9e0][session.cpp:731] dataFdSend:0, dataFdRecv:883
+[W][2026-10-22 22:06:54.527][4bf9e0][daemon.cpp:1249] NotifyInstanceSessionFree freeOrClear false
+[I][2026-10-22 22:06:54.527][4bf9e0][session.cpp:735] FreeSession sessionId:228******573(L:10) ref:0
+[D][2026-10-22 22:06:54.528][4bf9e0][base.cpp:969] before uv handle close, the uv handle type is 6
+[I][2026-10-22 22:06:54.528][4bf9e0][session.cpp:687] FreeSessionOpeate sid:228******573(L:10) ref:0
+[I][2026-10-22 22:06:54.529][4bf9e0][session.cpp:692] FreeSessionOpeate, send workthread for free. sessionId:228******573(L:10)
+[W][2026-10-22 22:06:54.529][f2335a68][session.cpp:1375] Dispatch MainThreadCommand STOP_SESSION sessionId:228******573(L:10)
+[D][2026-10-22 22:06:54.529][4bf9e0][base.cpp:969] before uv handle close, the uv handle type is 13
+[W][2026-10-22 22:06:54.529][f2335a68][base.cpp:2837] turn On heartbeatSwitch
+[I][2026-10-22 22:06:54.529][f2335a68][session.cpp:1497] session 228******573(L:10) stop heartbeatTimer
+[I][2026-10-22 22:06:54.529][4bf9e0][session.cpp:698] FreeSessionOpeate childCleared:0 sessionId:228******573(L:10)
+[I][2026-10-22 22:06:54.530][f2335a68][session.cpp:1395] Dispatch MainThreadCommand try close hChildWorkTCP, sid:228******573(L:10)
+[D][2026-10-22 22:06:54.530][f2335a68][base.cpp:969] before uv handle close, the uv handle type is 8
+[W][2026-10-22 22:06:54.530][f2335a68][session.cpp:1386] Dispatch MainThreadCommand uv stop childLoop sessionId:228******573(L:10)
+[I][2026-10-22 22:06:54.530][f2335a68][session.cpp:1564] !!!Workthread run again, sid:184******883(L:10)
+[I][2026-10-22 22:06:54.531][f2335a68][session.cpp:1469] ReChildLoopForSessionClear sessionId:228******573(L:10)
+[D][2026-10-22 22:06:54.531][f2335a68][base.cpp:969] before uv handle close, the uv handle type is 13
+[D][2026-10-22 22:06:54.531][f2335a68][base.cpp:969] before uv handle close, the uv handle type is 13
+[D][2026-10-22 22:06:54.542][f2335a68][base.cpp:928] Try close loop success
+[I][2026-10-22 22:06:54.542][f2335a68][session.cpp:1568] !!!Workthread run finish, sid:184******883(L:10)

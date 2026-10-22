@@ -14,6 +14,7 @@
       "@ohjs/transport-hdc": ["packages/transport-hdc/src/index.ts"],
       "@ohjs/schemas": ["packages/schemas/src/index.ts"],
       "@ohjs/language-server": ["packages/language-server/src/index.ts"],
+      "@ohjs/jerry-debug-client": ["packages/jerry-debug-client/src/index.ts"],
       "@ohjs/test-kit": ["packages/test-kit/src/index.ts"],
       "@ohjs/schema-extractor": ["tools/schema-extractor/src/index.ts"]
     }

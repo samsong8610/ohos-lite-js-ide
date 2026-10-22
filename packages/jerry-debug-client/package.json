@@ -1,0 +1,15 @@
+{
+  "name": "@ohjs/jerry-debug-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JerryScript debugger protocol v9 client (WebSocket over raw TCP), no runtime deps",
+  "license": "Apache-2.0",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "scripts": {
+    "test:e2e": "node test/e2e/qemu-jsdebug.e2e.mjs"
+  }
+}
