@@ -124,11 +124,11 @@ export async function runBuild(
 ): Promise<BuildResult> {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!root) throw new OhjsError('BLD-NO-PROJECT', 'No workspace folder');
-  const backend = vscode.workspace
-    .getConfiguration('ohjs.build')
-    .get<'auto' | 'fixture' | 'ace-loader'>('backend', 'auto');
+  const buildCfg = vscode.workspace.getConfiguration('ohjs.build');
+  const backend = buildCfg.get<'auto' | 'fixture' | 'ace-loader'>('backend', 'auto');
+  const aceLoaderPath = buildCfg.get<string>('aceLoaderPath', '').trim() || undefined;
   const platform = createHostPlatform();
-  const r = await buildProject(platform, session.runner, { workspaceRoot: root, backend });
+  const r = await buildProject(platform, session.runner, { workspaceRoot: root, backend, aceLoaderPath });
   lastBuild = r;
   session.lastBuild = r;
   session.moduleInfo = r.module;
