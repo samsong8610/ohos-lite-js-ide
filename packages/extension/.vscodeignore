@@ -2,6 +2,8 @@
 !dist/extension.js
 !dist/client.js
 !dist/server.js
+!dist/debugAdapter.js
+!dist/debugAdapter.js.map
 !language-configuration.hml.json
 !syntaxes/**
 !schemas/**
