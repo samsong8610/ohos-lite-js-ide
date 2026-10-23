@@ -31,7 +31,16 @@ export type ErrorCode =
   | 'TRN-HDC-UNKNOWN-COMMAND'
   | 'TRN-HDC-TIMEOUT'
   | 'TRN-HDC-CANCELLED'
-  | 'TRN-HDC-FAILED';
+  | 'TRN-HDC-FAILED'
+  | 'BLD-FAILED'
+  | 'BLD-NO-PROJECT'
+  | 'BLD-TOOL-MISSING'
+  | 'DEP-HAP-PATH'
+  | 'DEP-INSTALL-FAILED'
+  | 'DEP-UNINSTALL-FAILED'
+  | 'DEP-START-FAILED'
+  | 'DEP-NO-TARGET'
+  | 'LOG-CAPTURE-FAILED';
 
 export interface ErrorDetail {
   raw?: string;

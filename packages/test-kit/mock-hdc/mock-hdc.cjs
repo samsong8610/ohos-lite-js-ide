@@ -197,16 +197,32 @@ function okTransfer(size, start) {
 /** Minimal device shell: scenario rules first, then a few builtins; supports `;` chains and $?. */
 function runShell(t, cmdline) {
   let rc = 0;
-  for (const raw of cmdline.split(';')) {
-    const c = raw.trim().replace(/\$\?/g, String(rc));
-    if (!c) continue;
-    rc = runOne(t, c);
+  const segments = cmdline.split(';').flatMap((s) => s.split('&&'));
+  for (const raw of segments) {
+    const jobs = raw
+      .trim()
+      .split('&')
+      .map((j) => j.trim());
+    for (let i = 0; i < jobs.length; i++) {
+      const c = jobs[i].replace(/\$\?/g, String(rc)).replace(/\$!/g, String(scenario.lastBgPid || '0'));
+      if (!c) continue;
+      rc = runOne(t, c);
+    }
   }
 }
 function unquote(s) {
   return s.replace(/^'(.*)'$/, '$1').replace(/'\\''/g, "'");
 }
 function runOne(t, c) {
+  const echoRedirect = /^echo\s+(\S+)\s*>\s*(\S+)\s*$/.exec(c);
+  if (echoRedirect) {
+    const [, val, dst] = echoRedirect;
+    fs.mkdirSync(path.dirname(devPath(t, dst)), { recursive: true });
+    fs.writeFileSync(devPath(t, dst), val + '\n');
+    return 0;
+  }
+  const bg = tryBackgroundRedirect(t, c);
+  if (bg != null) return 0;
   for (const rule of scenario.shell || []) {
     if (new RegExp(rule.match).test(c)) {
       if (rule.stdout) echo(rule.stdout);
@@ -219,6 +235,14 @@ function runOne(t, c) {
   const paths = args.filter((a) => !a.startsWith('-'));
   switch (cmd) {
     case 'echo':
+      if (args.length === 1 && /^\d+$/.test(args[0]) && scenario.lastBgPid) {
+        const dst = paths[0];
+        if (dst) {
+          fs.mkdirSync(path.dirname(devPath(t, dst)), { recursive: true });
+          fs.writeFileSync(devPath(t, dst), scenario.lastBgPid + '\n');
+          scenario.lastBgPid = undefined;
+        }
+      }
       echo(args.join(' '));
       return 0;
     case 'mkdir':
@@ -246,10 +270,86 @@ function runOne(t, c) {
         echo(fs.readFileSync(devPath(t, p), 'utf8'));
       }
       return 0;
+    case 'kill': {
+      const pid = paths[0];
+      if (scenario.killedPids) scenario.killedPids.push(pid);
+      return 0;
+    }
+    case 'hilogcat': {
+      const out = scenario.hilogcatLine || '10-23 00:00:00.000 1 1 I A0/ACE: mock-hilogcat';
+      echo(out);
+      return 0;
+    }
+    case 'bm':
+      return runBm(t, args);
+    case 'aa':
+      return runAa(t, args);
     default:
       echo(`sh: ${cmd}: not found`);
       return 127;
   }
+}
+
+function runBm(t, args) {
+  const sub = args[0];
+  if (sub === 'set' && args.includes('disable')) {
+    const msg = scenario.bmSetDisable ?? 'success';
+    echo(msg);
+    return 0;
+  }
+  if (sub === 'install') {
+    const i = args.indexOf('-p');
+    const hap = i >= 0 ? args[i + 1] : '';
+    if (!hap || !fs.existsSync(devPath(t, hap))) {
+      echo('resultMessage is ERR_NO_FILE');
+      return 0;
+    }
+    echo('resultMessage is install success !');
+    return 0;
+  }
+  if (sub === 'uninstall') {
+    echo('resultMessage is uninstall success !');
+    return 0;
+  }
+  echo('usage: bm …');
+  return 0;
+}
+
+function runAa(_t, args) {
+  const sub = args[0];
+  if (sub === 'start') {
+    if (scenario.aaStartFail) {
+      echo('Failed to run the command.');
+      return 0;
+    }
+    echo('start ability success');
+    return 0;
+  }
+  if (sub === 'terminate') {
+    echo('terminate ability success');
+    return 0;
+  }
+  echo('usage: aa …');
+  return 0;
+}
+
+/** Handles `cmd > file &` background redirects used by hilog capture. */
+function tryBackgroundRedirect(t, c) {
+  const m = /^(.+?)\s*>\s*(\S+)\s*&\s*$/.exec(c);
+  if (!m) return null;
+  const inner = m[1].trim();
+  const outFile = m[2];
+  const pid = String(9000 + (scenario.nextPid = (scenario.nextPid || 9000) + 1));
+  if (inner.startsWith('hilogcat')) {
+    const line = scenario.hilogcatLine || '10-23 00:00:00.000 1 1 I A0/ACE: mock-hilogcat';
+    fs.mkdirSync(path.dirname(devPath(t, outFile)), { recursive: true });
+    fs.writeFileSync(devPath(t, outFile), line + '\n');
+  } else {
+    fs.mkdirSync(path.dirname(devPath(t, outFile)), { recursive: true });
+    fs.writeFileSync(devPath(t, outFile), '');
+  }
+  scenario.lastBgPid = pid;
+  return pid;
 }
 
 const h = handlers[sub];

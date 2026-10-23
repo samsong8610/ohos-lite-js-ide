@@ -171,10 +171,10 @@ describe('fport', () => {
 
 describe('shell rc marker', () => {
   it('wraps and parses', () => {
-    expect(wrapWithRc('ls /x')).toBe('ls /x; echo __OHJS_RC=$?');
-    expect(parseShellOutput('a\r\nb\r\n__OHJS_RC=0\r\n')).toEqual({ output: 'a\nb\n', exitCode: 0 });
-    expect(parseShellOutput('__OHJS_RC=127\n')).toEqual({ output: '', exitCode: 127 });
+    expect(wrapWithRc('ls /x')).toBe('ls /x; echo __RC=$?');
+    expect(parseShellOutput('a\r\nb\r\n__RC=0\r\n')).toEqual({ output: 'a\nb\n', exitCode: 0 });
+    expect(parseShellOutput('__RC=127\n')).toEqual({ output: '', exitCode: 127 });
     expect(parseShellOutput('no marker')).toEqual({ output: 'no marker', exitCode: null });
-    expect(parseShellOutput('x __OHJS_RC=1')).toEqual({ output: 'x __OHJS_RC=1', exitCode: null });
+    expect(parseShellOutput('x __RC=1')).toEqual({ output: 'x __RC=1', exitCode: null });
   });
 });

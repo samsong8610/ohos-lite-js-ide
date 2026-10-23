@@ -22,7 +22,7 @@
   "connection": { "preferred": "tcp", "fallback": [], "tcpPort": 8710 },
   "paths": {
     "tmpDir": "/tmp/ohjs",
-    "snapshotFlag": "/user/data/js_snapshot_enable",
+    "snapshotFlag": "/data/ohjs/js_snapshot_enable",
     "appInstallRoot": "/storage/app/run",
     "firmwareManifest": "/etc/ohjs/runtime-manifest.json"
   },
@@ -42,7 +42,7 @@
   "debug": {
     "port": 5001,
     "enableMethod": "flagFile",
-    "enableFlag": "/user/data/ohjs_debugger_enable",
+    "enableFlag": "/data/ohjs/debugger_enable",
     "requireDebugFirmware": true
   },
   "jerry": { "snapshotVersion": 49, "debuggerProtocol": 9, "cpointer32": null }

@@ -48,6 +48,13 @@
           "scope": "machine-overridable",
           "description": "%config.tools.hdcPath%"
         },
+        "ohjs.tools.hdcServer": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "%config.tools.hdcServer%",
+          "pattern": "^$|^([0-9.\\[\\]:a-fA-F]+:)?\\d{1,5}$"
+        },
         "ohjs.tools.hdcOhVersion": {
           "type": "string",
           "enum": [
@@ -63,6 +70,23 @@
           "default": "",
           "scope": "machine-overridable",
           "description": "%config.tools.hdcOhVersion%"
+        },
+        "ohjs.device.targetKey": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "%config.device.targetKey%"
+        },
+        "ohjs.build.backend": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "fixture",
+            "ace-loader"
+          ],
+          "default": "auto",
+          "scope": "resource",
+          "description": "%config.build.backend%"
         },
         "ohjs.device.profile": {
           "type": "string",
@@ -196,6 +220,48 @@
         "title": "%command.device.refresh%",
         "category": "OHJS",
         "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.project.build",
+        "title": "%command.project.build%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.app.deploy",
+        "title": "%command.app.deploy%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.app.launch",
+        "title": "%command.app.launch%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.app.stop",
+        "title": "%command.app.stop%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.logs.start",
+        "title": "%command.logs.start%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.logs.stop",
+        "title": "%command.logs.stop%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.app.run",
+        "title": "%command.app.run%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
       }
     ],
     "languages": [
@@ -244,6 +310,7 @@
     "@ohjs/core": "workspace:*",
     "@ohjs/language-server": "workspace:*",
     "@ohjs/schemas": "workspace:*",
+    "@ohjs/build": "workspace:*",
     "@ohjs/transport-hdc": "workspace:*",
     "vscode-languageclient": "^10.1.2"
   },

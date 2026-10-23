@@ -10,6 +10,7 @@
     "out"
   ],
   "dependencies": {
-    "@ohjs/core": "workspace:*"
+    "@ohjs/core": "workspace:*",
+    "yazl": "^3.3.1"
   }
 }

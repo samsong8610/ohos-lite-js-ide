@@ -27,7 +27,7 @@ const base: DeviceProfileInput = {
   connection: { preferred: 'usb', fallback: ['tcp'], tcpPort: 8710 },
   paths: {
     tmpDir: '/tmp/ohjs',
-    snapshotFlag: '/user/data/js_snapshot_enable',
+    snapshotFlag: '/data/ohjs/js_snapshot_enable',
     appInstallRoot: '/storage/app/run',
   },
   commands: {
@@ -153,7 +153,7 @@ describe('DeviceProfileRegistry', () => {
     });
     expect(p.display).toEqual({ width: 640, height: 480, shape: 'rect' });
     expect(p.paths.tmpDir).toBe('/data/tmp');
-    expect(p.paths.snapshotFlag).toBe('/user/data/js_snapshot_enable');
+    expect(p.paths.snapshotFlag).toBe('/data/ohjs/js_snapshot_enable');
     expect(p.name).toBe('base');
   });
 

@@ -20,6 +20,9 @@
     },
     {
       "path": "../language-server"
+    },
+    {
+      "path": "../build"
     }
   ]
 }
