@@ -61,4 +61,4 @@ export OHJS_BUILD_BACKEND=ace-loader
 
 Unit tests use `packages/build/test/fixtures/fake-ace-loader/` (stub webpack CLI). Optional integration: set **`OHJS_ACE_LOADER_MAIN`** to your real checkout root in local/CI matrix jobs.
 
-Output: `.ohjs/build/<module>.hap`.
+Output (ace-loader): `<module>/build/default/outputs/default/app/<module>-default.hap`, with `pack.info` in `<module>/build/default/outputs/default/pack.info`. Staging under `.ohjs/build/` when using the extension default out dir.
