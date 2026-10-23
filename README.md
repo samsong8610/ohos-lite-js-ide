@@ -69,6 +69,17 @@ Machine-readable keys: [`docs/ide-contract.manifest.json`](docs/ide-contract.man
 
 Override upstream fetch: `HDC_MANIFEST_REF=`, `HDC_MANIFEST_FILE=` (local clone path). `SKIP_UPSTREAM_MANIFEST=1` skips the hdc-repo diff.
 
+Machine-readable hdc failure map: [`docs/ide-error-codes.json`](docs/ide-error-codes.json) — vendored from developtools_hdc `@5327930b`
+(`lite/docs/ide-error-codes.json`, **version 1.0.0**). Schema: [`docs/ide-error-codes.schema.json`](docs/ide-error-codes.schema.json).
+**1.x add-only** — do not change semantics of existing `code` / `pattern` / `when` / `ide_hint` entries without a major bump upstream.
+
+| Side                       | Check                                                                   |
+| -------------------------- | ----------------------------------------------------------------------- |
+| **IDE (this repo)**        | `pnpm run error-codes:check` → `scripts/check-ide-error-codes-drift.sh` |
+| **hdc (developtools_hdc)** | `lite/ci/validate-ide-error-codes.sh`                                   |
+
+Override upstream fetch: `HDC_ERROR_CODES_REF=`, `HDC_ERROR_CODES_FILE=`. `SKIP_UPSTREAM_ERROR_CODES=1` skips the hdc-repo diff (local schema validation still runs).
+
 ## Host `hdc` and device OpenHarmony version
 
 Deploy uses a host `hdc` client that must match the board’s OpenHarmony line (at least **5.0.x** vs **6.1.x**).
