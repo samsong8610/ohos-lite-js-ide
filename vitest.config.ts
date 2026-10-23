@@ -24,6 +24,7 @@ export default defineConfig({
   test: {
     include: [
       'packages/*/src/**/*.test.ts',
+      'packages/extension/test/integration/*.test.ts',
       'packages/*/test/unit/**/*.test.ts',
       'tools/*/src/**/*.test.ts',
       'tools/*/test/**/*.test.ts',

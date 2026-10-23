@@ -6,6 +6,7 @@
 import * as path from 'path';
 import { runTests } from '@vscode/test-electron';
 import { createMockHdc } from '@ohjs/test-kit';
+import { activationBudgetMs } from './activation-budget';
 
 async function main(): Promise<void> {
   const extensionDevelopmentPath = path.resolve(__dirname, '..');
@@ -39,13 +40,3 @@ main().catch((err) => {
   console.error('integration tests failed:', err);
   process.exit(1);
 });
-
-/**
- * Activation-time budget for the integration test: NFR-PERF-001 is 500 ms (local and device runs);
- * shared CI runners (`CI=true`, set by GitHub Actions) get 1000 ms. An explicit
- * OHJS_ACTIVATION_BUDGET_MS wins.
- */
-function activationBudgetMs(): string {
-  if (process.env.OHJS_ACTIVATION_BUDGET_MS) return process.env.OHJS_ACTIVATION_BUDGET_MS;
-  return process.env.CI === 'true' ? '1000' : '500';
-}
