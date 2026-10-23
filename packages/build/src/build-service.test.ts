@@ -56,16 +56,26 @@ describe('buildProject (fixture backend)', () => {
   });
 
   it('auto uses fake ace-loader when path is set', async () => {
+    const prevRestool = process.env.OHJS_RESTOOL;
+    process.env.OHJS_RESTOOL = path.join(__dirname, '../test/fixtures/restool-shim/restool.cjs');
+    const helloliteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-hellolite-'));
+    fs.cpSync(path.join(__dirname, '../test/fixtures/hellolite-lite'), helloliteRoot, { recursive: true });
+    outDirs.push(helloliteRoot);
     const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-bld-'));
     outDirs.push(outDir);
     const runner = new NodeProcessRunner(createHostPlatform());
-    const r = await buildProject(createHostPlatform(), runner, {
-      workspaceRoot: fixtureRoot,
-      outDir,
-      backend: 'auto',
-      aceLoaderPath: fakeAceRoot,
-    });
-    expect(r.backend).toBe('ace-loader');
-    runner.disposeAll();
+    try {
+      const r = await buildProject(createHostPlatform(), runner, {
+        workspaceRoot: helloliteRoot,
+        outDir,
+        backend: 'auto',
+        aceLoaderPath: fakeAceRoot,
+      });
+      expect(r.backend).toBe('ace-loader');
+    } finally {
+      if (prevRestool === undefined) delete process.env.OHJS_RESTOOL;
+      else process.env.OHJS_RESTOOL = prevRestool;
+      runner.disposeAll();
+    }
   });
 });

@@ -1,0 +1,11 @@
+<div class="container">
+    <text class="head">
+        TestHead
+    </text>
+    <text class="title">
+        {{ $t('strings.hello') }} {{ title }}
+    </text>
+    <text class="tail">
+        TestTail
+    </text>
+</div>

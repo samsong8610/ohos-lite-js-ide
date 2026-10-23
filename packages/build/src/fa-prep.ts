@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { OhjsError } from '@ohjs/core';
+import { parseFaModuleConfig } from './project-info';
 
 function copyDir(src: string, dst: string): void {
   fs.mkdirSync(dst, { recursive: true });
@@ -20,11 +21,17 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-/** FA lite JS sources live under `src/main/js/<profile>/` (default: `default`). */
-export function findJsSourceRoot(moduleRoot: string): string {
+/** FA lite JS sources live under `src/main/js/<srcPath>/` (DevEco `srcPath`, else `default`). */
+export function findJsSourceRoot(moduleRoot: string, configPath?: string): string {
   const jsRoot = path.join(moduleRoot, 'src', 'main', 'js');
   if (!fs.existsSync(jsRoot)) {
     throw new OhjsError('BLD-FAILED', `Missing src/main/js under ${moduleRoot}`);
+  }
+  if (configPath && fs.existsSync(configPath)) {
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8')) as Record<string, unknown>;
+    const layout = parseFaModuleConfig(config);
+    const fromSrcPath = path.join(jsRoot, layout.jsSrcPath);
+    if (fs.existsSync(fromSrcPath)) return fromSrcPath;
   }
   const preferred = path.join(jsRoot, 'default');
   if (fs.existsSync(preferred)) return preferred;
@@ -40,8 +47,8 @@ export function prepareAceModuleRoot(
   moduleRoot: string,
   configPath: string,
   outDir: string,
-): { aceModuleRoot: string; aceManifestPath: string } {
-  const srcJs = findJsSourceRoot(moduleRoot);
+): { aceModuleRoot: string; aceManifestPath: string; jsSrcPath: string } {
+  const srcJs = findJsSourceRoot(moduleRoot, configPath);
   const aceModuleRoot = path.join(outDir, 'ace-module-root');
   fs.rmSync(aceModuleRoot, { recursive: true, force: true });
   copyDir(srcJs, aceModuleRoot);
@@ -58,17 +65,20 @@ export function prepareAceModuleRoot(
         pages = js0['pages'] as string[];
       }
     }
+    const app = isObject(config['app']) ? config['app'] : {};
+    const version = isObject(app['version']) ? app['version'] : {};
+    const layout = parseFaModuleConfig(config);
     fs.writeFileSync(
       aceManifestPath,
-      JSON.stringify(
-        {
-          app: { bundleName: isObject(config['app']) ? config['app']['bundleName'] : undefined },
-          pages,
-          minPlatformVersion: 6,
-        },
-        null,
-        2,
-      ),
+      JSON.stringify({
+        appID: app['bundleName'],
+        versionName: version['name'] ?? '1.0.0',
+        versionCode: version['code'] ?? 1,
+        minPlatformVersion: 8,
+        appName: '$string:MainAbility_label',
+        deviceType: layout.deviceType,
+        pages,
+      }),
     );
   }
 
@@ -77,5 +87,8 @@ export function prepareAceModuleRoot(
     fs.writeFileSync(appJs, 'export default {\n  onCreate() {},\n  onDestroy() {},\n};\n');
   }
 
-  return { aceModuleRoot, aceManifestPath };
+  const layout = parseFaModuleConfig(
+    JSON.parse(fs.readFileSync(configPath, 'utf8')) as Record<string, unknown>,
+  );
+  return { aceModuleRoot, aceManifestPath, jsSrcPath: layout.jsSrcPath };
 }

@@ -11,13 +11,13 @@ Product requirements live in the external spec pack; this file tracks **G2** del
 
 ## G2 — build, deploy, logs (implemented)
 
-| Step          | VS Code command                      | Notes                                                                                                                           |
-| ------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Build         | `OHJS: Build` (`ohjs.project.build`) | `@ohjs/build` → `.ohjs/build/<module>.hap` (fixture zip in CI; ace-loader when `OHJS_ACE_LOADER_MAIN` / `.ohjs/toolchain.json`) |
-| Deploy        | `OHJS: Deploy`                       | `hdc file send …/app.hap`, `bm install` (stdout `resultMessage`)                                                                |
-| Launch / Stop | `OHJS: Launch` / `Stop`              | `aa start` / `aa terminate` (failure: `Failed to run the command.`)                                                             |
-| Logs          | `OHJS: Start Logs` / `Stop Logs`     | Device background `hilogcat` + pid file; host `tail -F` → OHJS output                                                           |
-| One-shot      | `OHJS: Build, Deploy and Launch`     | Chains the three steps                                                                                                          |
+| Step          | VS Code command                      | Notes                                                                                                                                 |
+| ------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Build         | `OHJS: Build` (`ohjs.project.build`) | `@ohjs/build` → ace-loader: `<module>/build/default/outputs/default/app/<module>-default.hap`; fixture zip under `.ohjs/build/` in CI |
+| Deploy        | `OHJS: Deploy`                       | `hdc file send …/app.hap`, `bm install` (stdout `resultMessage`)                                                                      |
+| Launch / Stop | `OHJS: Launch` / `Stop`              | `aa start` / `aa terminate` (failure: `Failed to run the command.`)                                                                   |
+| Logs          | `OHJS: Start Logs` / `Stop Logs`     | Device background `hilogcat` + pid file; host `tail -F` → OHJS output                                                                 |
+| One-shot      | `OHJS: Build, Deploy and Launch`     | Chains the three steps                                                                                                                |
 
 ### qemu-ide / hdc TCP
 

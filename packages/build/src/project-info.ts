@@ -13,6 +13,13 @@ export interface FaModuleInfo {
   moduleRoot: string;
 }
 
+export interface FaModuleLayout {
+  mainAbility: string;
+  /** Ability JS folder name under `assets/js/` (config `srcPath`). */
+  jsSrcPath: string;
+  deviceType: string[];
+}
+
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
@@ -52,4 +59,38 @@ export function parseFaConfigJson(text: string, configPath: string): FaModuleInf
     configPath,
     moduleRoot,
   };
+}
+
+/** Layout fields needed for DevEco-shaped HAP packaging. */
+export function parseFaModuleConfig(json: Record<string, unknown>): FaModuleLayout {
+  const module = json['module'];
+  if (!isObject(module)) throw new OhjsError('BLD-FAILED', 'config.json module object is required');
+
+  const deviceType = Array.isArray(module['deviceType'])
+    ? (module['deviceType'].filter((d) => typeof d === 'string') as string[])
+    : ['smartVision'];
+
+  let mainAbility = typeof module['mainAbility'] === 'string' ? module['mainAbility'] : undefined;
+
+  const jsArr = Array.isArray(module['js']) ? module['js'] : [];
+  const js0 = jsArr.find((j) => isObject(j));
+  if (!mainAbility && js0 && isObject(js0) && typeof js0['name'] === 'string') {
+    mainAbility = js0['name'];
+  }
+
+  const abilities = Array.isArray(module['abilities']) ? module['abilities'] : [];
+  const jsAbility = abilities.find((a) => isObject(a) && a['srcLanguage'] === 'js');
+  if (!mainAbility && jsAbility && isObject(jsAbility) && typeof jsAbility['name'] === 'string') {
+    mainAbility = jsAbility['name'];
+  }
+  if (!mainAbility) mainAbility = 'default';
+
+  let jsSrcPath = 'default';
+  if (jsAbility && isObject(jsAbility) && typeof jsAbility['srcPath'] === 'string') {
+    jsSrcPath = jsAbility['srcPath'];
+  } else {
+    jsSrcPath = mainAbility === 'default' ? 'default' : mainAbility;
+  }
+
+  return { mainAbility, jsSrcPath, deviceType };
 }

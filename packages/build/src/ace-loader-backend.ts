@@ -10,7 +10,8 @@ import {
   type AceLoaderDiscoveryOptions,
   type AceLoaderInstall,
 } from './ace-loader-config';
-import { prepareAceModuleRoot } from './fa-prep';
+import { findJsSourceRoot, prepareAceModuleRoot } from './fa-prep';
+import { devecoHapOutputPath, devecoPackInfoOutputPath } from './hap-paths';
 import { packFaHap } from './hap-packer';
 import type { FaModuleInfo } from './project-info';
 import type { BuildResult } from './types';
@@ -83,7 +84,7 @@ export async function runAceLoaderBuild(
   fs.rmSync(jsOutDir, { recursive: true, force: true });
   fs.mkdirSync(jsOutDir, { recursive: true });
 
-  const { aceModuleRoot, aceManifestPath } = prepareAceModuleRoot(
+  const { aceModuleRoot, aceManifestPath, jsSrcPath } = prepareAceModuleRoot(
     module.moduleRoot,
     module.configPath,
     opts.outDir,
@@ -97,6 +98,7 @@ export async function runAceLoaderBuild(
       aceModuleBuild: jsOutDir,
       buildMode,
       aceManifestPath,
+      aceAbilitySrcPath: jsSrcPath,
     },
     process.env as Record<string, string | undefined>,
   );
@@ -110,12 +112,17 @@ export async function runAceLoaderBuild(
     });
   }
 
-  const hapPath = path.join(opts.outDir, `${module.moduleName}.hap`);
+  const hapPath = devecoHapOutputPath(module);
+  const packInfoPath = devecoPackInfoOutputPath(module);
+  const jsSourceRoot = findJsSourceRoot(module.moduleRoot, module.configPath);
   await packFaHap({
     module,
     jsBuildDir: jsOutDir,
+    jsSourceRoot,
     stagingRoot: opts.outDir,
     hapPath,
+    packInfoPath,
+    runner,
   });
 
   if (!fs.existsSync(hapPath)) {
