@@ -28,6 +28,8 @@ jobs:
         run: pnpm run test:coverage
       - name: G3 host smoke (mock-hdc)
         run: SKIP_BUILD=1 pnpm run smoke:g3-mock
+      - name: G4 host smoke (mock debug)
+        run: SKIP_BUILD=1 pnpm run smoke:g4-mock
       - name: integration smoke (@vscode/test-electron under xvfb)
         run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libnss3 libasound2t64 libgbm1 || true; xvfb-run -a pnpm run test:integration
       - run: pnpm run ci:package

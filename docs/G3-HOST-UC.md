@@ -36,7 +36,7 @@ Prerequisites: Node 20+, `pnpm install`, `pnpm run ci:package`, mock hdc path co
 
 - Real USB enumeration, OTG cable, or 2K0300 hardware
 - Signed HAP / release firmware (`bm set -s disable` failure paths — covered in unit tests)
-- Jerry debug on device (G4); qemu-ide optional e2e remains separate
+- Jerry debug on device (G4 host gate: `pnpm run smoke:g4-mock`, [G4-HOST-UC.md](G4-HOST-UC.md)); qemu-ide optional e2e remains separate
 
 ### Related automation
 
