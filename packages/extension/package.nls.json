@@ -4,6 +4,7 @@
   "config.tools.hdcServer": "Host hdc server endpoint for `hdc -s` (e.g. `127.0.0.1:8711` when qemu-ide uses a non-default port). Empty uses the hdc default unless `OHOS_HDC_SERVER_PORT` is set.",
   "config.device.targetKey": "Hdc target key (from Refresh Devices). Empty = auto-select when exactly one device is connected.",
   "config.build.backend": "Build backend: fixture zip (CI), ace-loader when OHJS_ACE_LOADER_MAIN is set, or auto.",
+  "command.project.new": "New Project",
   "command.project.build": "Build",
   "command.app.deploy": "Deploy",
   "command.app.launch": "Launch",

@@ -7,8 +7,9 @@ logs (hilogcat) and JerryScript on-device debugging.
 Requirements, architecture and plan live in `SPEC.md`, `ARCHITECTURE.md` (v0.2+) and `PLAN.md`
 (kept outside this repository for now).
 
-> **Status:** M1 language + **G2** build/deploy/logs (one-click `.hap` build, hdc deploy/launch, hilog
-> streaming). JerryScript debug client (PR #2). See [PLAN.md](PLAN.md) for G2/qemu-ide notes.
+> **Status:** M1 language + **M1-9** new-project wizard (`OHJS: New Project`, `empty` / `list-demo`
+> templates) + **G2** build/deploy/logs (one-click `.hap` build, hdc deploy/launch, hilog streaming).
+> JerryScript debug (G4). See [PLAN.md](PLAN.md) for wizard and G2/qemu-ide notes.
 
 ## Layout
 
@@ -23,7 +24,8 @@ Requirements, architecture and plan live in `SPEC.md`, `ARCHITECTURE.md` (v0.2+)
 | `tools/schema-extractor`                                              | extracts schemas from OpenHarmony sources                                                          | implemented      |
 | `packages/debug-adapter`                                              | Jerry v9 → DAP; VS Code `type: ohjs`                                                               | implemented (G4) |
 | `packages/{language-server,ts-plugin,transport-ssh,transport-serial}` |                                                                                                    | partial / stub   |
-| `tools/{grammar,firmware-patches}`, `templates/`                      |                                                                                                    | placeholders     |
+| `templates/`                                                          | new-project wizard (`empty`, `list-demo`, shared `common/gitignore`)                               | M1-9 (P0)        |
+| `tools/{grammar,firmware-patches}`                                    |                                                                                                    | placeholders     |
 
 ## Getting started
 

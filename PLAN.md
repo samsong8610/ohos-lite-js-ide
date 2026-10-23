@@ -2,6 +2,13 @@
 
 Product requirements live in the external spec pack; this file tracks **G2** delivery in `ohos-lite-js-ide`.
 
+## M1-9 — new project wizard (implemented)
+
+| Step           | VS Code command                          | Notes                                                                                                  |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Scaffold       | `OHJS: New Project` (`ohjs.project.new`) | QuickPick: template → SDK (`5.0.3` / `6.1-lts`) → device profile → bundleName → vendor → target folder |
+| Templates (P0) | `templates/empty`, `templates/list-demo` | smartVision FA/JS; `.ohjs/project.json` records SDK + profile; builds with fixture backend             |
+
 ## G2 — build, deploy, logs (implemented)
 
 | Step          | VS Code command                      | Notes                                                                                                                           |

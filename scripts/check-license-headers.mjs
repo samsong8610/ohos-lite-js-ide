@@ -8,7 +8,7 @@ import { join, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const EXT = /\.(ts|mts|cts|js|mjs|cjs)$/;
-const SKIP = /(^|\/)(node_modules|out|out-test|dist|coverage|\.vscode-test|fixtures|\.git)(\/|$)/;
+const SKIP = /(^|\/)(node_modules|out|out-test|dist|coverage|\.vscode-test|fixtures|templates|\.git)(\/|$)/;
 const HEADER = /SPDX-License-Identifier: Apache-2\.0|Licensed under the Apache License, Version 2\.0/;
 
 function walk(dir, acc) {

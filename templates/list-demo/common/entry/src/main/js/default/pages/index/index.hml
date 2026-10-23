@@ -1,0 +1,8 @@
+<div class="page">
+  <text class="heading">{{ heading }}</text>
+  <list class="list">
+    <list-item class="list-item" for="{{ items }}" tid="id">
+      <text value="{{ $item.title }}"></text>
+    </list-item>
+  </list>
+</div>
