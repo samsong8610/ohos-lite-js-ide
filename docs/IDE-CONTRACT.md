@@ -6,11 +6,11 @@
 
 ## 1. 端口（勿混用）
 
-| 角色 | 端口 | 说明 |
-|---|---|---|
-| **设备 hdcd TCP** | **8710** | 板上 / `run-qemu-hdcd.sh start` 默认监听。主机 `hdc tconn <ip>:8710`。 |
-| **主机 hdc server** | **8711**（`OHOS_HDC_SERVER_PORT`） | 与设备 8710 同机时必须错开（qemu-ide）。`hdc -s 127.0.0.1:8711 …`。 |
-| **jsdebug 桥** | **18710**（`HOST_PORT`）或 veth `10.200.1.2:8710` | **仅** `run-qemu-hdcd.sh jsdebug`。**禁止**用于普通 G2 deploy/launch/log。 |
+| 角色                | 端口                                              | 说明                                                                       |
+| ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| **设备 hdcd TCP**   | **8710**                                          | 板上 / `run-qemu-hdcd.sh start` 默认监听。主机 `hdc tconn <ip>:8710`。     |
+| **主机 hdc server** | **8711**（`OHOS_HDC_SERVER_PORT`）                | 与设备 8710 同机时必须错开（qemu-ide）。`hdc -s 127.0.0.1:8711 …`。        |
+| **jsdebug 桥**      | **18710**（`HOST_PORT`）或 veth `10.200.1.2:8710` | **仅** `run-qemu-hdcd.sh jsdebug`。**禁止**用于普通 G2 deploy/launch/log。 |
 
 ```sh
 # G2 正常联调
@@ -24,13 +24,13 @@ hdc -s 127.0.0.1:8711 tconn 10.200.1.2:8710   # 或 127.0.0.1:18710 别名
 
 ## 2. 路径
 
-| 用途 | 路径 |
-|---|---|
-| IDE / ACE 调试目录 | `/data/ohjs/` |
-| 等待调试器标记 | `/data/ohjs/debug.<bundle>`（存在即 gate on；见 `JS-DEBUG.md` §E） |
-| HAP 推送 | `/tmp/ohjs/app.hap`（`tmpDir` + `/app.hap`） |
-| hilog 捕获 | `/tmp/ohjs/hilog.cap` + `/tmp/ohjs/hilogcat.pid`（也可用 `/data/ohjs/`） |
-| 临时目录 | `/tmp/ohjs/`（`mkdir -p` 后 `file send`） |
+| 用途               | 路径                                                                     |
+| ------------------ | ------------------------------------------------------------------------ |
+| IDE / ACE 调试目录 | `/data/ohjs/`                                                            |
+| 等待调试器标记     | `/data/ohjs/debug.<bundle>`（存在即 gate on；见 `JS-DEBUG.md` §E）       |
+| HAP 推送           | `/tmp/ohjs/app.hap`（`tmpDir` + `/app.hap`）                             |
+| hilog 捕获         | `/tmp/ohjs/hilog.cap` + `/tmp/ohjs/hilogcat.pid`（也可用 `/data/ohjs/`） |
+| 临时目录           | `/tmp/ohjs/`（`mkdir -p` 后 `file send`）                                |
 
 ```sh
 # 部署前清标记（防上次 debug 残留导致 aa start 卡 accept）
@@ -104,12 +104,12 @@ CONTRACT=1 lite/test/qemu-ide/verify.sh                  # 可选
 
 `verify-contract.sh` 断言：
 
-| 项 | 期望 |
-|---|---|
-| 主机 `hdc -v` | `Ver: 3.2.0c` |
-| `tconn 127.0.0.1:8710` + shell | **PASS** |
-| `tconn 127.0.0.1:18710`（仅 `start`、无 jsdebug） | **FAIL**（负例；若意外 Connect OK → 脚本 FAIL） |
-| `test -d /data/ohjs`（及 `/tmp/ohjs`） | **PASS** |
-| 种植 `/data/ohjs/debug.<bundle>` 后执行 `rm -f /data/ohjs/debug.*` | 标记清除；残留 → **FAIL / REFUSE** |
+| 项                                                                 | 期望                                            |
+| ------------------------------------------------------------------ | ----------------------------------------------- |
+| 主机 `hdc -v`                                                      | `Ver: 3.2.0c`                                   |
+| `tconn 127.0.0.1:8710` + shell                                     | **PASS**                                        |
+| `tconn 127.0.0.1:18710`（仅 `start`、无 jsdebug）                  | **FAIL**（负例；若意外 Connect OK → 脚本 FAIL） |
+| `test -d /data/ohjs`（及 `/tmp/ohjs`）                             | **PASS**                                        |
+| 种植 `/data/ohjs/debug.<bundle>` 后执行 `rm -f /data/ohjs/debug.*` | 标记清除；残留 → **FAIL / REFUSE**              |
 
 日志：`lite/test/qemu-ide-contract.log`。
