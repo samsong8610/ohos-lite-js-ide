@@ -9,6 +9,7 @@
     { "path": "packages/schemas" },
     { "path": "packages/language-server" },
     { "path": "packages/ts-plugin" },
+    { "path": "packages/jerry-debug-client" },
     { "path": "packages/debug-adapter" },
     { "path": "packages/test-kit" },
     { "path": "packages/extension" },
