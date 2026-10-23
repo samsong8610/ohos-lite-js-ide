@@ -86,7 +86,7 @@ export async function buildProject(
     );
   }
 
-  return runFixtureBuild(platform, runner, module, outDir);
+  return runFixtureBuild(platform, module, outDir);
 }
 
 function tryAceLoaderFromToolchain(workspaceRoot: string): string | undefined {

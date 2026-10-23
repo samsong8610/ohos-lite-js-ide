@@ -4,37 +4,42 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { OhjsError, type CommandSpec, type IProcessRunner } from '@ohjs/core';
+import { finished } from 'node:stream/promises';
+import { OhjsError } from '@ohjs/core';
+import yazl from 'yazl';
 
-async function listFiles(dir: string, base = dir): Promise<string[]> {
+async function listFiles(dir: string): Promise<string[]> {
   const out: string[] = [];
   for (const name of fs.readdirSync(dir)) {
     const full = path.join(dir, name);
-    if (fs.statSync(full).isDirectory()) out.push(...(await listFiles(full, base)));
+    if (fs.statSync(full).isDirectory()) out.push(...(await listFiles(full)));
     else out.push(full);
   }
   return out;
 }
 
-/** Creates a `.hap` zip from a staging directory (uses host `zip` when available). */
-export async function packStagingToHap(
-  runner: IProcessRunner,
-  stagingDir: string,
-  hapPath: string,
-  zipCommand: string,
-): Promise<void> {
+/** Zip entry paths always use `/` (PKZIP convention), including on Windows hosts. */
+function zipEntryName(stagingDir: string, filePath: string): string {
+  return path.relative(stagingDir, filePath).split(path.sep).join('/');
+}
+
+/** Creates a `.hap` (zip) from a staging directory using yazl (no host `zip` binary). */
+export async function packStagingToHap(stagingDir: string, hapPath: string): Promise<void> {
   fs.mkdirSync(path.dirname(hapPath), { recursive: true });
   const files = await listFiles(stagingDir);
   if (files.length === 0) throw new OhjsError('BLD-FAILED', 'Build staging directory is empty');
 
-  const rel = files.map((f) => path.relative(stagingDir, f));
-  const cmd: CommandSpec = {
-    file: zipCommand,
-    args: ['-r', '-q', path.resolve(hapPath), ...rel],
-    cwd: stagingDir,
-  };
-  const r = await runner.run(cmd);
-  if (r.exitCode !== 0) {
-    throw new OhjsError('BLD-FAILED', `zip failed: ${r.stderr || r.stdout}`, { exitCode: r.exitCode });
+  const zipfile = new yazl.ZipFile();
+  for (const full of files) {
+    zipfile.addFile(full, zipEntryName(stagingDir, full));
+  }
+  zipfile.end();
+
+  const out = fs.createWriteStream(hapPath);
+  zipfile.outputStream.pipe(out);
+  try {
+    await finished(out);
+  } catch (e) {
+    throw new OhjsError('BLD-FAILED', `failed to write HAP: ${(e as Error).message}`, { hint: hapPath });
   }
 }

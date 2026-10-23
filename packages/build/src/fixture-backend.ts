@@ -4,7 +4,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { OhjsError, type IPlatform, type IProcessRunner } from '@ohjs/core';
+import { OhjsError, type IPlatform } from '@ohjs/core';
 import { packStagingToHap } from './zip-hap';
 import type { FaModuleInfo } from './project-info';
 import type { BuildResult } from './types';
@@ -25,7 +25,6 @@ function copyDir(src: string, dst: string): void {
  */
 export async function runFixtureBuild(
   _platform: IPlatform,
-  runner: IProcessRunner,
   module: FaModuleInfo,
   outDir: string,
 ): Promise<BuildResult> {
@@ -43,6 +42,6 @@ export async function runFixtureBuild(
   );
 
   const hapPath = path.join(outDir, `${module.moduleName}.hap`);
-  await packStagingToHap(runner, staging, hapPath, 'zip');
+  await packStagingToHap(staging, hapPath);
   return { hapPath, module, backend: 'fixture' };
 }
