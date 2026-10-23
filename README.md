@@ -54,6 +54,21 @@ Use `IPlatform` / `IProcessRunner` from `@ohjs/core`. ESLint enforces this outsi
 
 CI only runs mocks. Real-device tests are run locally (`pnpm device:selftest`, `pnpm e2e:device`, planned).
 
+### IDE ↔ hdcd contract (anti-drift)
+
+Normative ports/paths/shell markers for qemu-ide and on-board G2/debug live in [`docs/IDE-CONTRACT.md`](docs/IDE-CONTRACT.md)
+(sync from `samsong8610/developtools_hdc` `lite/docs/IDE-CONTRACT.md`; do not fork semantics in the IDE repo).
+
+Machine-readable keys: [`docs/ide-contract.manifest.json`](docs/ide-contract.manifest.json) — vendored from developtools_hdc `@fd84af8`
+(`lite/docs/ide-contract.manifest.json`). Re-copy when upstream bumps the manifest.
+
+| Side                       | Check                                                             |
+| -------------------------- | ----------------------------------------------------------------- |
+| **IDE (this repo)**        | `pnpm run contract:check` → `scripts/check-ide-contract-drift.sh` |
+| **hdc (developtools_hdc)** | `lite/tools/board/check-ide-contract-drift.sh`                    |
+
+Override upstream fetch: `HDC_MANIFEST_REF=`, `HDC_MANIFEST_FILE=` (local clone path). `SKIP_UPSTREAM_MANIFEST=1` skips the hdc-repo diff.
+
 ## Host `hdc` and device OpenHarmony version
 
 Deploy uses a host `hdc` client that must match the board’s OpenHarmony line (at least **5.0.x** vs **6.1.x**).

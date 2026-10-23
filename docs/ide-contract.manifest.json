@@ -1,0 +1,40 @@
+{
+  "$schema_comment": "Machine-readable IDE↔device contract. Keys align with docs/IDE-CONTRACT.md tables (hdc fork + IDE repo baseline). 全栈 may diff IDE-side against this file or against docs/IDE-CONTRACT.md.",
+  "protocol": "Ver 3.2.0c",
+  "hdc_msg_hash": "7fdbc1aa8c5fefaa",
+  "source_md": "lite/docs/IDE-CONTRACT.md",
+  "ide_baseline_md": "docs/IDE-CONTRACT.md",
+  "ide_repo": "samsong8610/ohos-lite-js-ide",
+  "ports": {
+    "device_hdcd_tcp": 8710,
+    "host_hdc_server": 8711,
+    "host_hdc_server_env": "OHOS_HDC_SERVER_PORT",
+    "jsdebug_host_bridge": 18710,
+    "jsdebug_host_bridge_env": "HOST_PORT",
+    "jsdebug_veth_device": "10.200.1.2:8710",
+    "jsdebug_only": true
+  },
+  "paths": {
+    "ide_ace_dir": "/data/ohjs/",
+    "debug_marker": "/data/ohjs/debug.<bundle>",
+    "debug_marker_glob": "/data/ohjs/debug.*",
+    "hap_push": "/tmp/ohjs/app.hap",
+    "tmp_dir": "/tmp/ohjs/",
+    "hilog_cap": "/tmp/ohjs/hilog.cap",
+    "hilogcat_pid": "/tmp/ohjs/hilogcat.pid"
+  },
+  "markers": {
+    "pattern": "/data/ohjs/debug.<bundle>",
+    "example": "/data/ohjs/debug.com.example.app",
+    "clean_before_deploy": "rm -f /data/ohjs/debug.*"
+  },
+  "shell": {
+    "exit_code_marker": "__RC=$?",
+    "note": "hdc shell does not propagate process exit; parse __RC"
+  },
+  "forbidden": [
+    "use_jsdebug_port_18710_for_g2_deploy",
+    "trust_hdc_shell_process_exit_without__RC",
+    "leave_debug_markers_after_session"
+  ]
+}

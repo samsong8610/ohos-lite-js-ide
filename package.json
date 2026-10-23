@@ -20,7 +20,8 @@
     "schema:generate": "pnpm --filter @ohjs/schema-extractor run generate",
     "schema:check": "pnpm --filter @ohjs/schema-extractor run check",
     "ci:build": "pnpm run build",
-    "ci:test": "pnpm run lint && pnpm run test:coverage",
+    "contract:check": "bash scripts/check-ide-contract-drift.sh",
+    "ci:test": "pnpm run lint && pnpm run contract:check && pnpm run test:coverage",
     "ci:package": "pnpm --filter ohos-lite-js-ide run package",
     "test:grammar": "pnpm --filter ohos-lite-js-ide run test:grammar"
   },

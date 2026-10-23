@@ -20,6 +20,9 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: IDE↔hdcd contract anti-drift
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm run contract:check
       - run: pnpm run ci:build
       - name: lint (windows + ubuntu only)
         if: matrix.os != 'macos-latest'

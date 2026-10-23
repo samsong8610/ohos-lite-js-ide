@@ -17,6 +17,7 @@ jobs:
       - name: enable pnpm
         run: corepack enable && corepack prepare pnpm@10.34.6 --activate
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run contract:check
       - run: pnpm run lint
       - run: pnpm run ci:build
       - run: pnpm run typecheck
