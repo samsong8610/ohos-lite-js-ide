@@ -89,3 +89,7 @@ qemu-ide stub: see [PLAN.md](PLAN.md) and `packages/transport-hdc/test/e2e/qemu-
 ## License
 
 Apache-2.0, see [LICENSE](LICENSE).
+
+## Device protocol contract
+
+See [`docs/IDE-CONTRACT.md`](docs/IDE-CONTRACT.md) (synced from developtools_hdc `lite/docs/IDE-CONTRACT.md`).
