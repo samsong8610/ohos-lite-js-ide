@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
-import type { DeviceProfile } from '@ohjs/core';
+import { DEFAULT_TIMEOUTS, type DeviceProfile } from '@ohjs/core';
 import { runProjectWizardWithChoices, type ProjectWizardUi } from './wizard';
 
 const templatesRoot = path.resolve(__dirname, '../../../../templates');
@@ -47,13 +47,7 @@ const stubProfile: DeviceProfile = {
     requireDebugFirmware: true,
   },
   jerry: {},
-  timeouts: {
-    shellMs: 1,
-    fileSendMinMs: 1,
-    fileSendBytesPerSec: 1,
-    deployMs: 1,
-    logStartMs: 1,
-  },
+  timeouts: DEFAULT_TIMEOUTS,
   lineage: [],
 };
 
