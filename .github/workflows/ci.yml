@@ -23,6 +23,9 @@ jobs:
       - name: IDE↔hdcd contract anti-drift
         if: matrix.os == 'ubuntu-latest'
         run: pnpm run contract:check
+      - name: IDE error-codes anti-drift
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm run error-codes:check
       - run: pnpm run ci:build
       - name: lint (windows + ubuntu only)
         if: matrix.os != 'macos-latest'

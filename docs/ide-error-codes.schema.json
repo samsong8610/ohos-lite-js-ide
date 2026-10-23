@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/samsong8610/developtools_hdc/blob/ohjs/6.1-lite/lite/docs/ide-error-codes.schema.json",
+  "title": "hdc lite IDE channel error-code map",
+  "description": "Schema for lite/docs/ide-error-codes.json. Field names are STABLE for IDE vendor (#7); bump version on breaking renames only. After fields stabilize, notify 全栈 to vendor (post IDE #6/#7).",
+  "type": "object",
+  "required": ["version", "protocol", "hdc_msg_hash", "ide_contract", "channels"],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "description": "Semver of this error-code document (not hdc protocol). 1.x = stable field names for IDE vendor.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "protocol": { "type": "string" },
+    "hdc_msg_hash": { "type": "string" },
+    "ide_contract": { "type": "string" },
+    "host_version_gate": { "type": "object" },
+    "channels": {
+      "type": "object",
+      "required": ["tconn", "file", "bm", "aa", "fport"],
+      "additionalProperties": true,
+      "properties": {
+        "tconn": { "$ref": "#/$defs/channel" },
+        "file": { "$ref": "#/$defs/channel" },
+        "bm": { "$ref": "#/$defs/channel" },
+        "aa": { "$ref": "#/$defs/channel" },
+        "fport": { "$ref": "#/$defs/channel" },
+        "shell": { "$ref": "#/$defs/channel" }
+      }
+    }
+  },
+  "$defs": {
+    "channel": {
+      "type": "object",
+      "required": ["description", "success_patterns", "failures"],
+      "additionalProperties": true,
+      "properties": {
+        "description": { "type": "string" },
+        "success_patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "failures": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/failure" },
+          "minItems": 1
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "required": ["pattern", "when", "ide_hint"],
+      "additionalProperties": true,
+      "properties": {
+        "code": {
+          "description": "E00xxxx string or null when only stdout text applies",
+          "anyOf": [{ "type": "null" }, { "type": "string", "pattern": "^E[0-9]{6}$" }]
+        },
+        "pattern": { "type": "string", "minLength": 1 },
+        "when": { "type": "string", "minLength": 1 },
+        "ide_hint": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
