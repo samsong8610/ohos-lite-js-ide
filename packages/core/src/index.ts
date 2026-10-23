@@ -12,4 +12,5 @@ export * from './platform/tool-locator';
 export * from './platform/oh-version';
 export * from './platform/win32/escape';
 export * from './model/device-profile';
+export * from './model/project-template';
 export type * from './ports/transport';

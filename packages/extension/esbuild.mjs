@@ -5,6 +5,9 @@
 import * as esbuild from 'esbuild';
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const extensionDir = dirname(fileURLToPath(import.meta.url));
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -92,6 +95,14 @@ writeFileSync(
   'dist/schemas/device-profile.schema.json',
   JSON.stringify(DEVICE_PROFILE_JSON_SCHEMA, null, 2) + '\n',
 );
+
+// Project wizard templates (repo root templates/ → packaged under extension/templates/)
+const templatesSrc = join(extensionDir, '../../templates');
+const templatesDst = join(extensionDir, 'templates');
+rmSync(templatesDst, { recursive: true, force: true });
+if (existsSync(templatesSrc)) {
+  cpSync(templatesSrc, templatesDst, { recursive: true });
+}
 
 if (watch) {
   await Promise.all([ctx.watch(), clientCtx.watch(), serverCtx.watch(), debugAdapterCtx.watch()]);

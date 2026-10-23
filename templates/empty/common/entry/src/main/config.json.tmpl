@@ -1,0 +1,28 @@
+{
+  "app": {
+    "bundleName": "{{bundleName}}",
+    "vendor": "{{vendor}}",
+    "version": { "code": 1, "name": "1.0.0" }
+  },
+  "deviceConfig": {},
+  "module": {
+    "package": "{{bundleName}}",
+    "name": ".MyApplication",
+    "deviceType": ["smartVision"],
+    "distro": {
+      "deliveryWithInstall": true,
+      "moduleName": "entry",
+      "moduleType": "entry"
+    },
+    "abilities": [
+      {
+        "name": "default",
+        "label": "$string:app_name",
+        "type": "page",
+        "launchType": "standard",
+        "srcLanguage": "js"
+      }
+    ],
+    "js": [{ "name": "default", "pages": ["pages/index/index"] }]
+  }
+}

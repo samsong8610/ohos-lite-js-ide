@@ -1,0 +1,6 @@
+{
+  "id": "empty",
+  "displayName": "Empty",
+  "description": "Single home page at pages/index/index",
+  "moduleName": "entry"
+}

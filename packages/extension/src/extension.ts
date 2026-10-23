@@ -19,6 +19,7 @@ import { registerOhjsDebug } from './debug/register';
 // type-only: the client (vscode-languageclient, ~440 KB) lives in dist/client.js and is required on demand
 import type * as LanguageClientModule from './language-client';
 import { detectFromConfigJson } from './project-detector';
+import { registerProjectWizard } from './project-wizard/register';
 
 export interface OhjsExtensionApi {
   readonly isProject: boolean;
@@ -100,6 +101,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   const t0 = performance.now();
   const output = vscode.window.createOutputChannel('OHJS', { log: true });
   context.subscriptions.push(output);
+  registerProjectWizard(context);
 
   const files = await vscode.workspace.findFiles('**/src/main/config.json', '**/node_modules/**', 20);
   let result = { isProject: false, reason: 'no src/main/config.json found' };

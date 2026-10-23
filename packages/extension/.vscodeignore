@@ -13,6 +13,7 @@
 !package.nls.*.json
 !l10n/**
 !device-profiles/**
+!templates/**
 !README.md
 !CHANGELOG.md
 !LICENSE

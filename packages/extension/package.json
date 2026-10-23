@@ -30,7 +30,8 @@
   "activationEvents": [
     "workspaceContains:**/src/main/config.json",
     "onLanguage:hml",
-    "onDebugResolve:ohjs"
+    "onDebugResolve:ohjs",
+    "onCommand:ohjs.project.new"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -221,6 +222,11 @@
         "title": "%command.device.refresh%",
         "category": "OHJS",
         "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.project.new",
+        "title": "%command.project.new%",
+        "category": "OHJS"
       },
       {
         "command": "ohjs.project.build",
