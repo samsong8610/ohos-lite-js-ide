@@ -19,18 +19,18 @@ Optional env: `G3_MOCK_TCONN`, `G3_MOCK_HILOG_LINE`, `OHJS_FIXTURE_ROOT`, `SKIP_
 
 Prerequisites: Node 20+, `pnpm install`, `pnpm run ci:package`, mock hdc path configured.
 
-| Step | Action | Expected |
-| --- | --- | --- |
-| 1 | Install VSIX from `packages/extension/*.vsix` (Extensions → Install from VSIX…) | Extension **OHOS Lite JS IDE** appears; no activation error |
-| 2 | Set `ohjs.tools.hdcPath` to repo `packages/test-kit/mock-hdc/bin/hdc` (User or Workspace settings) | Setting saved |
-| 3 | Command palette → **OHJS: New Project** | Wizard: template → SDK → device profile → bundle → folder |
-| 4 | Choose template **empty** or **list-demo**; SDK **6.1-lts**; profile **2K0300…**; pick an empty folder | Project opens; `.ohjs/project.json` present |
-| 5 | **OHJS: Build** | Output channel: `build (fixture): …/entry.hap` (or `ace-loader` when toolchain configured) |
-| 6 | *(Optional host path)* Terminal: `hdc tconn 127.0.0.1:8710` against mock with `reachable` scenario — or skip and use USB-style mock target in automation only | For manual mock TCP, device list shows connected target after tconn |
-| 7 | **OHJS: Deploy** | Output: `deploy: installed /tmp/ohjs/app.hap` |
-| 8 | **OHJS: Launch** | Output: `launch: <bundle>/default`; toast **OHJS: app launched** |
-| 9 | **OHJS: Start Logs** / **Stop Logs** | Output shows parsed hilog lines (`… I A0/ACE: …`) while streaming; `logs: capture stopped` on stop |
-| 10 | **OHJS: Build, Deploy and Launch** (one-shot) | Chains steps 5–8 without error |
+| Step | Action                                                                                                                                                        | Expected                                                                                           |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 1    | Install VSIX from `packages/extension/*.vsix` (Extensions → Install from VSIX…)                                                                               | Extension **OHOS Lite JS IDE** appears; no activation error                                        |
+| 2    | Set `ohjs.tools.hdcPath` to repo `packages/test-kit/mock-hdc/bin/hdc` (User or Workspace settings)                                                            | Setting saved                                                                                      |
+| 3    | Command palette → **OHJS: New Project**                                                                                                                       | Wizard: template → SDK → device profile → bundle → folder                                          |
+| 4    | Choose template **empty** or **list-demo**; SDK **6.1-lts**; profile **2K0300…**; pick an empty folder                                                        | Project opens; `.ohjs/project.json` present                                                        |
+| 5    | **OHJS: Build**                                                                                                                                               | Output channel: `build (fixture): …/entry.hap` (or `ace-loader` when toolchain configured)         |
+| 6    | _(Optional host path)_ Terminal: `hdc tconn 127.0.0.1:8710` against mock with `reachable` scenario — or skip and use USB-style mock target in automation only | For manual mock TCP, device list shows connected target after tconn                                |
+| 7    | **OHJS: Deploy**                                                                                                                                              | Output: `deploy: installed /tmp/ohjs/app.hap`                                                      |
+| 8    | **OHJS: Launch**                                                                                                                                              | Output: `launch: <bundle>/default`; toast **OHJS: app launched**                                   |
+| 9    | **OHJS: Start Logs** / **Stop Logs**                                                                                                                          | Output shows parsed hilog lines (`… I A0/ACE: …`) while streaming; `logs: capture stopped` on stop |
+| 10   | **OHJS: Build, Deploy and Launch** (one-shot)                                                                                                                 | Chains steps 5–8 without error                                                                     |
 
 ### Out of scope for G3 host gate
 

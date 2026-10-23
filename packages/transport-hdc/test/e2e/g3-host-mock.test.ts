@@ -16,12 +16,10 @@ import { HdcTransport, LiteDeployService, formatHilogEntry, parseHilogLine } fro
 import { afterEach, describe, expect, it } from 'vitest';
 
 const TCONN = process.env.G3_MOCK_TCONN ?? '127.0.0.1:8710';
-const HILOG_LINE =
-  process.env.G3_MOCK_HILOG_LINE ?? '10-23 12:00:00.001 42 99 I A0/ACE: G3 host smoke ok';
+const HILOG_LINE = process.env.G3_MOCK_HILOG_LINE ?? '10-23 12:00:00.001 42 99 I A0/ACE: G3 host smoke ok';
 
 const fixtureRoot =
-  process.env.OHJS_FIXTURE_ROOT ??
-  path.join(__dirname, '../../../extension/test/fixtures/oh-project');
+  process.env.OHJS_FIXTURE_ROOT ?? path.join(__dirname, '../../../extension/test/fixtures/oh-project');
 
 function loadProfile() {
   const registry = new DeviceProfileRegistry();
@@ -93,12 +91,19 @@ describe('G3 host smoke (mock-hdc)', () => {
     await deploy.startApp(TCONN, { bundle: module.bundleName, ability: module.abilityName });
 
     const { output: logOut } = await transport.shell(TCONN, 'hilogcat');
-    const rawLine = logOut.trim().split(/\r?\n/).find((l) => l.includes('ACE')) ?? '';
+    const rawLine =
+      logOut
+        .trim()
+        .split(/\r?\n/)
+        .find((l) => l.includes('ACE')) ?? '';
     const parsed = parseHilogLine(rawLine);
     expect(parsed).toMatchObject({ tag: 'ACE', message: 'G3 host smoke ok' });
     expect(formatHilogEntry(parsed)).toBe(HILOG_LINE);
 
-    const joined = mock.calls().map((a) => a.join(' ')).join('\n');
+    const joined = mock
+      .calls()
+      .map((a) => a.join(' '))
+      .join('\n');
     expect(joined).toMatch(/file send/);
     expect(joined).toMatch(/bm install/);
     expect(joined).toMatch(/aa start/);
