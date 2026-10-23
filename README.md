@@ -12,17 +12,18 @@ Requirements, architecture and plan live in `SPEC.md`, `ARCHITECTURE.md` (v0.2+)
 
 ## Layout
 
-| Path                                                                                | Content                                                                                            | Status           |
-| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------- |
-| `packages/core`                                                                     | domain model, ports, `IPlatform` / `IProcessRunner` / `IToolLocator`, error model, device profiles | implemented      |
-| `packages/transport-hdc`                                                            | `HdcTransport`, hdc output parsers, error classification                                           | implemented      |
-| `packages/schemas`                                                                  | generated versioned component schemas (`v5.0.3`, `v6.1-lts`) + loader                              | implemented      |
-| `packages/test-kit`                                                                 | `mock-hdc` executable test double                                                                  | implemented (v1) |
-| `packages/extension`                                                                | VS Code extension: LSP, device refresh, **build/deploy/logs commands**                             | G2 slice         |
-| `packages/build`                                                                    | `@ohjs/build` — fixture HAP zip + optional ace-loader hook                                         | G2 slice         |
-| `tools/schema-extractor`                                                            | extracts schemas from OpenHarmony sources                                                          | implemented      |
-| `packages/{language-server,ts-plugin,debug-adapter,transport-ssh,transport-serial}` |                                                                                                    | partial / stub   |
-| `tools/{grammar,firmware-patches}`, `templates/`                                    |                                                                                                    | placeholders     |
+| Path                                                                  | Content                                                                                            | Status           |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------- |
+| `packages/core`                                                       | domain model, ports, `IPlatform` / `IProcessRunner` / `IToolLocator`, error model, device profiles | implemented      |
+| `packages/transport-hdc`                                              | `HdcTransport`, hdc output parsers, error classification                                           | implemented      |
+| `packages/schemas`                                                    | generated versioned component schemas (`v5.0.3`, `v6.1-lts`) + loader                              | implemented      |
+| `packages/test-kit`                                                   | `mock-hdc` executable test double                                                                  | implemented (v1) |
+| `packages/extension`                                                  | VS Code extension: LSP, device refresh, **build/deploy/logs commands**                             | G2 slice         |
+| `packages/build`                                                      | `@ohjs/build` — fixture HAP zip + optional ace-loader hook                                         | G2 slice         |
+| `tools/schema-extractor`                                              | extracts schemas from OpenHarmony sources                                                          | implemented      |
+| `packages/debug-adapter`                                              | Jerry v9 → DAP; VS Code `type: ohjs`                                                               | implemented (G4) |
+| `packages/{language-server,ts-plugin,transport-ssh,transport-serial}` |                                                                                                    | partial / stub   |
+| `tools/{grammar,firmware-patches}`, `templates/`                      |                                                                                                    | placeholders     |
 
 ## Getting started
 

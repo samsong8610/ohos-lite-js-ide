@@ -27,3 +27,14 @@ Product requirements live in the external spec pack; this file tracks **G2** del
 - **Debug markers**: clear `/data/ohjs/debug.*` before deploy and on install/start failure.
 
 Optional e2e (skip exit 77 when qemu absent): `node packages/transport-hdc/test/e2e/qemu-deploy.e2e.mjs`.
+
+## G4 — VS Code Jerry debug (implemented)
+
+| Step            | VS Code                                           | Notes                                                               |
+| --------------- | ------------------------------------------------- | ------------------------------------------------------------------- |
+| Debug launch    | Run and Debug → **Debug OHJS App** (`type: ohjs`) | Optional `preDeploy` uses G2 build/deploy                           |
+| Device contract | `@ohjs/debug-adapter` `launchJerryOnDevice`       | marker → `aa start` → `fport` → Jerry → delete marker               |
+| DAP             | `dist/debugAdapter.js`                            | breakpoints, step, stack, scopes, evaluate                          |
+| qemu jsdebug    | `skipAppStart` in e2e only                        | `run-qemu-hdcd.sh jsdebug` + tconn **18710** (not 8710 deploy port) |
+
+Optional e2e: `node packages/debug-adapter/test/e2e/qemu-jsdebug-dap.e2e.mjs` (after `tsc -b`).

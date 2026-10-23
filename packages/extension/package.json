@@ -29,7 +29,8 @@
   "l10n": "./l10n",
   "activationEvents": [
     "workspaceContains:**/src/main/config.json",
-    "onLanguage:hml"
+    "onLanguage:hml",
+    "onDebugResolve:ohjs"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -277,6 +278,67 @@
         "configuration": "./language-configuration.hml.json"
       }
     ],
+    "debuggers": [
+      {
+        "type": "ohjs",
+        "label": "%debuggers.ohjs.label%",
+        "program": "./dist/debugAdapter.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [],
+            "properties": {
+              "bundle": {
+                "type": "string",
+                "description": "%debuggers.ohjs.bundle%"
+              },
+              "ability": {
+                "type": "string",
+                "description": "%debuggers.ohjs.ability%"
+              },
+              "localPort": {
+                "type": "number",
+                "default": 19001,
+                "description": "%debuggers.ohjs.localPort%"
+              },
+              "preDeploy": {
+                "type": "boolean",
+                "default": true,
+                "description": "%debuggers.ohjs.preDeploy%"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "ohjs",
+            "request": "launch",
+            "name": "%debuggers.ohjs.initialName%",
+            "preDeploy": true,
+            "localPort": 19001,
+            "stopOnEntry": true
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "%debuggers.ohjs.snippetLabel%",
+            "description": "%debuggers.ohjs.snippetDesc%",
+            "body": {
+              "type": "ohjs",
+              "request": "launch",
+              "name": "${1:Debug OHJS App}",
+              "preDeploy": true,
+              "localPort": 19001,
+              "stopOnEntry": true
+            }
+          }
+        ]
+      }
+    ],
     "grammars": [
       {
         "language": "hml",
@@ -312,6 +374,7 @@
     "@ohjs/schemas": "workspace:*",
     "@ohjs/build": "workspace:*",
     "@ohjs/transport-hdc": "workspace:*",
+    "@ohjs/debug-adapter": "workspace:*",
     "vscode-languageclient": "^10.1.2"
   },
   "devDependencies": {

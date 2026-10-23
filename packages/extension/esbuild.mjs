@@ -59,6 +59,20 @@ const clientCtx = await esbuild.context({
   logLevel: 'info',
 });
 
+const debugAdapterEntry = require.resolve('@ohjs/debug-adapter/out/debug-main.js');
+
+const debugAdapterCtx = await esbuild.context({
+  entryPoints: [debugAdapterEntry],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/debugAdapter.js',
+  sourcemap: !production,
+  minify: production,
+  logLevel: 'info',
+});
+
 const ctx = await esbuild.context({
   entryPoints: ['src/extension.ts'],
   bundle: true,
@@ -80,8 +94,8 @@ writeFileSync(
 );
 
 if (watch) {
-  await Promise.all([ctx.watch(), clientCtx.watch(), serverCtx.watch()]);
+  await Promise.all([ctx.watch(), clientCtx.watch(), serverCtx.watch(), debugAdapterCtx.watch()]);
 } else {
-  await Promise.all([ctx.rebuild(), clientCtx.rebuild(), serverCtx.rebuild()]);
-  await Promise.all([ctx.dispose(), clientCtx.dispose(), serverCtx.dispose()]);
+  await Promise.all([ctx.rebuild(), clientCtx.rebuild(), serverCtx.rebuild(), debugAdapterCtx.rebuild()]);
+  await Promise.all([ctx.dispose(), clientCtx.dispose(), serverCtx.dispose(), debugAdapterCtx.dispose()]);
 }

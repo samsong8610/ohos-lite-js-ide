@@ -2,14 +2,24 @@
   "name": "@ohjs/debug-adapter",
   "version": "0.1.0",
   "private": true,
-  "description": "JerryScript debugger protocol v9 to DAP adapter (M3)",
+  "description": "JerryScript debugger protocol v9 to DAP adapter (G4)",
+  "bin": {
+    "ohjs-debug-adapter": "./out/debug-main.js"
+  },
   "license": "Apache-2.0",
   "main": "out/index.js",
   "types": "out/index.d.ts",
   "files": [
     "out"
   ],
+  "scripts": {
+    "test:e2e": "node test/e2e/qemu-jsdebug-dap.e2e.mjs"
+  },
   "dependencies": {
-    "@ohjs/core": "workspace:*"
+    "@ohjs/core": "workspace:*",
+    "@ohjs/jerry-debug-client": "workspace:*",
+    "@ohjs/transport-hdc": "workspace:*",
+    "@vscode/debugadapter": "^1.68.0",
+    "@vscode/debugprotocol": "^1.68.0"
   }
 }

@@ -23,6 +23,9 @@
     },
     {
       "path": "../build"
+    },
+    {
+      "path": "../debug-adapter"
     }
   ]
 }
