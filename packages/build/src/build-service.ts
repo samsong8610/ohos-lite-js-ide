@@ -4,7 +4,9 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { OhjsError, ToolLocator, type CommandSpec, type IPlatform, type IProcessRunner } from '@ohjs/core';
+import { OhjsError, type IPlatform, type IProcessRunner } from '@ohjs/core';
+import { aceLoaderConfigured } from './ace-loader-config';
+import { runAceLoaderBuild } from './ace-loader-backend';
 import { runFixtureBuild } from './fixture-backend';
 import { parseFaConfigJson } from './project-info';
 import type { BuildResult } from './types';
@@ -15,8 +17,10 @@ export interface BuildOptions {
   workspaceRoot: string;
   outDir?: string;
   backend?: BuildBackendKind;
-  /** When set, run `node <aceLoaderMain>` with module root as cwd (upstream ace-loader CLI). */
+  /** Legacy marker / path into ace-loader checkout (see toolchain `aceLoaderRoot`). */
   aceLoaderMain?: string;
+  /** VS Code `ohjs.build.aceLoaderPath` — ace-loader root with webpack.lite.config.js */
+  aceLoaderPath?: string;
 }
 
 export function findConfigJson(workspaceRoot: string): string | undefined {
@@ -56,46 +60,31 @@ export async function buildProject(
   const module = parseFaConfigJson(text, configPath);
   const outDir = opts.outDir ?? path.join(opts.workspaceRoot, '.ohjs', 'build');
   const backend = opts.backend ?? (process.env.OHJS_BUILD_BACKEND as BuildBackendKind | undefined) ?? 'auto';
-  const aceMain =
-    opts.aceLoaderMain ?? process.env.OHJS_ACE_LOADER_MAIN ?? tryAceLoaderFromToolchain(opts.workspaceRoot);
 
-  if ((backend === 'ace-loader' || backend === 'auto') && aceMain && fs.existsSync(aceMain)) {
-    const hapPath = path.join(outDir, `${module.moduleName}.hap`);
-    fs.mkdirSync(outDir, { recursive: true });
-    const node = new ToolLocator(platform).locate('node').path;
-    const cmd: CommandSpec = {
-      file: node,
-      args: [aceMain, '--module', module.moduleRoot, '--output', hapPath],
-    };
-    const r = await runner.run({ ...cmd, cwd: module.moduleRoot }, { timeoutMs: 600000 });
-    if (r.exitCode !== 0 || !fs.existsSync(hapPath)) {
-      if (backend === 'ace-loader') {
-        throw new OhjsError('BLD-FAILED', `ace-loader failed: ${r.stderr || r.stdout}`, {
-          exitCode: r.exitCode,
-        });
+  const discovery = {
+    workspaceRoot: opts.workspaceRoot,
+    aceLoaderMain: opts.aceLoaderMain,
+    aceLoaderPath: opts.aceLoaderPath,
+  };
+
+  if (backend === 'ace-loader' || backend === 'auto') {
+    if (aceLoaderConfigured(discovery)) {
+      try {
+        return await runAceLoaderBuild(platform, runner, module, { ...discovery, outDir });
+      } catch (e) {
+        if (backend === 'ace-loader') throw e;
+        if (e instanceof OhjsError && e.code === 'BLD-TOOL-MISSING') throw e;
+        // auto: fall back to fixture when webpack/pack fails (same as legacy ace-loader CLI stub).
       }
-    } else {
-      return { hapPath, module, backend: 'ace-loader' };
     }
   }
 
   if (backend === 'ace-loader') {
     throw new OhjsError(
       'BLD-TOOL-MISSING',
-      'ace-loader backend requested but OHJS_ACE_LOADER_MAIN is not set',
+      'ace-loader backend requested but ace-loader was not found (set OHJS_ACE_LOADER_MAIN, .ohjs/toolchain.json, or ohjs.build.aceLoaderPath)',
     );
   }
 
   return runFixtureBuild(platform, module, outDir);
-}
-
-function tryAceLoaderFromToolchain(workspaceRoot: string): string | undefined {
-  const tc = path.join(workspaceRoot, '.ohjs', 'toolchain.json');
-  if (!fs.existsSync(tc)) return undefined;
-  try {
-    const j = JSON.parse(fs.readFileSync(tc, 'utf8')) as { aceLoaderMain?: string };
-    return j.aceLoaderMain;
-  } catch {
-    return undefined;
-  }
 }

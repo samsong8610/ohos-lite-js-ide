@@ -90,6 +90,12 @@
           "scope": "resource",
           "description": "%config.build.backend%"
         },
+        "ohjs.build.aceLoaderPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "%config.build.aceLoaderPath%"
+        },
         "ohjs.device.profile": {
           "type": "string",
           "default": "2k0300-1024x768",
