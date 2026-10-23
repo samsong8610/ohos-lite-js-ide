@@ -68,9 +68,6 @@ export function prepareAceModuleRoot(
     const app = isObject(config['app']) ? config['app'] : {};
     const version = isObject(app['version']) ? app['version'] : {};
     const layout = parseFaModuleConfig(config);
-    const js0 = isObject(module) && Array.isArray(module['js']) ? module['js'][0] : undefined;
-    const abilityName =
-      js0 && isObject(js0) && typeof js0['name'] === 'string' ? js0['name'] : layout.mainAbility;
     fs.writeFileSync(
       aceManifestPath,
       JSON.stringify({
