@@ -16,9 +16,11 @@ import {
 } from './workspace-session';
 
 function logError(output: vscode.LogOutputChannel, e: unknown): void {
-  const msg = isOhjsError(e) ? `[${e.code}] ${e.message}` : (e as Error).message;
+  const base = isOhjsError(e) ? `[${e.code}] ${e.message}` : (e as Error).message;
+  const hint = isOhjsError(e) ? e.detail.hint : undefined;
+  const msg = hint ? `${base}\nHint: ${hint}` : base;
   output.error(msg);
-  void vscode.window.showErrorMessage(msg);
+  void vscode.window.showErrorMessage(hint ? `${base} — ${hint}` : base);
 }
 
 export function registerDeployCommands(

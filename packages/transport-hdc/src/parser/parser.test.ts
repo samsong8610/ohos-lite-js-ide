@@ -116,6 +116,12 @@ describe('version / tconn', () => {
     expect(r.ok).toBe(ok);
     expect(r.failure?.code).toBe(code);
   });
+
+  it('parseTconn attaches vendored ide_hint for Connect failed', () => {
+    const r = parseTconn('[Fail]Connect failed\r\n');
+    expect(r.ok).toBe(false);
+    expect(r.failure?.hint).toMatch(/8710/);
+  });
 });
 
 describe('file transfer', () => {

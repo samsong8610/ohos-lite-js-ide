@@ -9,6 +9,7 @@ import {
   type DeviceProfile,
   type IStreamingProcess,
 } from '@ohjs/core';
+import { deployFailureHint } from '../ide-error-codes/match';
 import type { HdcTransport } from '../hdc-transport';
 import {
   parseAaStartOutput,
@@ -97,7 +98,10 @@ export class LiteDeployService {
     const r = parseBmInstallOutput(output);
     if (!r.ok) {
       await this.clearDebugMarkers(target, token);
-      throw new OhjsError('DEP-INSTALL-FAILED', r.message, { raw: output });
+      throw new OhjsError('DEP-INSTALL-FAILED', r.message, {
+        raw: output,
+        hint: deployFailureHint('bm', output),
+      });
     }
   }
 
@@ -117,7 +121,10 @@ export class LiteDeployService {
     const r = parseAaStartOutput(output);
     if (!r.ok) {
       await this.clearDebugMarkers(target, token);
-      throw new OhjsError('DEP-START-FAILED', r.message, { raw: output });
+      throw new OhjsError('DEP-START-FAILED', r.message, {
+        raw: output,
+        hint: deployFailureHint('aa', output),
+      });
     }
   }
 

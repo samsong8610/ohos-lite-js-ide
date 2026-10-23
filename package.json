@@ -9,7 +9,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "build": "tsc -b && pnpm -r --if-present run bundle",
+    "build": "node scripts/sync-transport-ide-error-codes.mjs && tsc -b && pnpm -r --if-present run bundle",
     "typecheck": "tsc -b && tsc -p tsconfig.test.json",
     "clean": "tsc -b --clean && pnpm -r --if-present run clean",
     "lint": "eslint . --max-warnings=0 && prettier --check . && node scripts/check-license-headers.mjs",

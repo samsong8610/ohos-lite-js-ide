@@ -128,6 +128,15 @@ PY
   rm -f "$UP_TMP"
 fi
 
+RUNTIME_JSON=$ROOT/packages/transport-hdc/src/vendor/ide-error-codes.json
+if [ ! -f "$RUNTIME_JSON" ]; then
+  fail "missing transport runtime copy ($RUNTIME_JSON); run: node scripts/sync-transport-ide-error-codes.mjs"
+elif ! cmp -s "$JSON" "$RUNTIME_JSON"; then
+  fail "docs/ide-error-codes.json ≠ packages/transport-hdc/src/vendor/ide-error-codes.json (run sync script)"
+else
+  pass "docs ↔ @ohjs/transport-hdc runtime bundle"
+fi
+
 echo "Hdc-side validator: developtools_hdc lite/ci/validate-ide-error-codes.sh"
 echo "RESULT=$R"
 exit $R

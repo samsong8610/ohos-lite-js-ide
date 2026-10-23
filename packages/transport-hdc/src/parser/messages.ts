@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { ErrorCode } from '@ohjs/core';
+import { enrichHdcFailure } from '../ide-error-codes/match';
 import { MESSAGE_FAIL, MESSAGE_INFO, lines } from './common';
 
 export interface HdcFailure {
@@ -96,5 +97,6 @@ export function parseVersion(output: string): string | undefined {
 export function parseTconn(output: string): { ok: boolean; failure?: HdcFailure } {
   if (/Connect OK/.test(output)) return { ok: true };
   if (/Target is connected|already connected/i.test(output)) return { ok: true };
-  return { ok: false, failure: findFailure(output) ?? classifyFailure(output.trim() || 'Connect failed') };
+  const raw = findFailure(output) ?? classifyFailure(output.trim() || 'Connect failed');
+  return { ok: false, failure: enrichHdcFailure(raw, 'tconn', output) };
 }

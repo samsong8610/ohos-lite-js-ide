@@ -80,6 +80,11 @@ Machine-readable hdc failure map: [`docs/ide-error-codes.json`](docs/ide-error-c
 
 Override upstream fetch: `HDC_ERROR_CODES_REF=`, `HDC_ERROR_CODES_FILE=`. `SKIP_UPSTREAM_ERROR_CODES=1` skips the hdc-repo diff (local schema validation still runs).
 
+**Runtime (IDE):** `@ohjs/transport-hdc` loads a bundled copy at
+`packages/transport-hdc/src/vendor/ide-error-codes.json` (synced from `docs/` on `pnpm run build`).
+To bump the upstream pin: re-vendor into `docs/` per developtools_hdc `lite/docs/IDE-ERROR-CODES-PIN-SYNC.md`,
+then `node scripts/sync-transport-ide-error-codes.mjs` and `pnpm run error-codes:check`.
+
 ## Host `hdc` and device OpenHarmony version
 
 Deploy uses a host `hdc` client that must match the board’s OpenHarmony line (at least **5.0.x** vs **6.1.x**).

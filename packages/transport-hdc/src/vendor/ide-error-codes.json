@@ -1,0 +1,196 @@
+{
+  "$schema": "ide-error-codes.schema.json",
+  "version": "1.0.0",
+  "description": "Machine-readable IDE↔hdc common failure map. Aligns with lite/docs/IDE-CONTRACT.md channels (tconn/file/bm/aa/fport). Codes from host/daemon MSG_FAIL strings (Ver 3.2.0c).",
+  "protocol": "Ver 3.2.0c",
+  "hdc_msg_hash": "7fdbc1aa8c5fefaa",
+  "ide_contract": "lite/docs/IDE-CONTRACT.md",
+  "channels": {
+    "tconn": {
+      "description": "TCP connect host hdc server → device hdcd",
+      "success_patterns": ["Connect OK", "already connected", "is connected"],
+      "failures": [
+        {
+          "code": null,
+          "pattern": "Connect failed",
+          "when": "Wrong port/IP, hdcd down, firewall, or using jsdebug alias 18710 for G2",
+          "ide_hint": "Use device :8710 (not 18710). export OHOS_HDC_SERVER_PORT=8711; hdc -s 127.0.0.1:8711 tconn <ip>:8710"
+        },
+        {
+          "code": "E001005",
+          "pattern": "[E001005] Device not found or connected",
+          "when": "No target selected / tconn never succeeded / target removed",
+          "ide_hint": "Re-tconn; pass -t <ip>:8710 on subsequent commands"
+        },
+        {
+          "code": "E001104",
+          "pattern": "[E001104]:IP address incorrect",
+          "when": "Malformed tconn address",
+          "ide_hint": "Use host:port form, e.g. 192.168.1.10:8710"
+        },
+        {
+          "code": "E001100",
+          "pattern": "[E001100]Invalid port",
+          "when": "Port out of range / invalid",
+          "ide_hint": "Device listen port is 8710 (IDE-CONTRACT)"
+        },
+        {
+          "code": "E000001",
+          "pattern": "[E000001]:The sdk hdc.exe version is too low",
+          "when": "Host hdc protocol older than device",
+          "ide_hint": "Upgrade host to Ver 3.2.0c — see host/README.md / check-host-hdc-ver.sh"
+        },
+        {
+          "code": "E000010",
+          "pattern": "[E000010]:Auth failed",
+          "when": "Auth/login rejected",
+          "ide_hint": "Lite TCP lab usually auth-open; check secure mode / keys"
+        }
+      ]
+    },
+    "file": {
+      "description": "hdc file send/recv",
+      "success_patterns": ["FileTransfer finish"],
+      "failures": [
+        {
+          "code": "E005102",
+          "pattern": "[E005102] Remote path:",
+          "when": "Remote path missing / not a dir / out of allowed tree",
+          "ide_hint": "mkdir -p /tmp/ohjs first; HAP push path /tmp/ohjs/app.hap"
+        },
+        {
+          "code": "E005005",
+          "pattern": "[E005005] Error create directory",
+          "when": "Cannot create remote parent dirs",
+          "ide_hint": "Ensure /tmp/ohjs or /data/ohjs exists and is writable"
+        },
+        {
+          "code": "E005008",
+          "pattern": "[E005008] Operation not allowed",
+          "when": "Path/operation blocked",
+          "ide_hint": "Stay under /tmp/ohjs or /data/ohjs per IDE-CONTRACT"
+        },
+        {
+          "code": "E005003",
+          "pattern": "[E005003] The parameter is missing",
+          "when": "file send/recv argv incomplete",
+          "ide_hint": "hdc file send <local> <remote>"
+        },
+        {
+          "code": "E005200",
+          "pattern": "[E005200] Unsupport file command",
+          "when": "Unknown file subcommand",
+          "ide_hint": "Use send / recv only"
+        },
+        {
+          "code": "E001005",
+          "pattern": "[E001005] Device not found or connected",
+          "when": "Lost target mid-transfer",
+          "ide_hint": "Re-tconn then retry send"
+        }
+      ]
+    },
+    "bm": {
+      "description": "Bundle manager via hdc shell bm … (stdout text; __RC often 0 even on fail)",
+      "success_patterns": [
+        "resultMessage is install success !",
+        "resultMessage is uninstall success !",
+        "success"
+      ],
+      "failures": [
+        {
+          "code": null,
+          "pattern": "install failed|uninstall failed|error",
+          "when": "bm rejected package / name (device policy)",
+          "ide_hint": "Parse stdout; do not trust hdc process exit. Append '; echo __RC=$?'. Check HAP at /tmp/ohjs/app.hap"
+        },
+        {
+          "code": null,
+          "pattern": "not found|No such file",
+          "when": "bm binary missing on image",
+          "ide_hint": "Board image must ship bm; qemu-ide uses stubs"
+        },
+        {
+          "code": "E003001",
+          "pattern": "[E003001] Invalid bundle name",
+          "when": "Bundle name rejected by daemon helpers",
+          "ide_hint": "Use reverse-DNS bundle id matching HAP"
+        }
+      ],
+      "note": "IDE-CONTRACT §3: success is stdout matchers, not exit code."
+    },
+    "aa": {
+      "description": "Ability manager via hdc shell aa …",
+      "success_patterns": ["receive command: start", "[bundle][ability]"],
+      "failures": [
+        {
+          "code": null,
+          "pattern": "Failed to run the command.",
+          "when": "aa start after uninstall / ability missing / not installed",
+          "ide_hint": "Treat this stdout as failure even if __RC=0. Install HAP then aa start -p <bundle> -n <ability>"
+        },
+        {
+          "code": null,
+          "pattern": "not found|No such file",
+          "when": "aa binary missing",
+          "ide_hint": "Board must ship aa; qemu-ide stubs"
+        }
+      ],
+      "note": "IDE-CONTRACT §3: aa start failure text is normative."
+    },
+    "fport": {
+      "description": "hdc fport / rport forward (jsdebug uses fport to jerry :5001)",
+      "success_patterns": ["Forwardport result:OK", "OK"],
+      "failures": [
+        {
+          "code": null,
+          "pattern": "Forwardport result:Failed",
+          "when": "Local/remote bind failed or task rejected",
+          "ide_hint": "fport ls; fport rm <task>; ensure remote port listening (jerry --debug-port 5001). Do not use 18710 for G2 deploy"
+        },
+        {
+          "code": null,
+          "pattern": "Forward parament failed",
+          "when": "Bad fport argv",
+          "ide_hint": "hdc fport tcp:<hostPort> tcp:<devicePort>"
+        },
+        {
+          "code": "E001005",
+          "pattern": "[E001005] Device not found or connected",
+          "when": "No target for fport",
+          "ide_hint": "tconn first on :8710 (jsdebug bridge is separate)"
+        }
+      ]
+    },
+    "shell": {
+      "description": "hdc shell (exit code not propagated)",
+      "success_patterns": ["__RC=0"],
+      "failures": [
+        {
+          "code": "E003004",
+          "pattern": "[E003004] Device does not support this shell option",
+          "when": "Unsupported shell flag",
+          "ide_hint": "Use plain shell 'cmd; echo __RC=$?'"
+        },
+        {
+          "code": "E003003",
+          "pattern": "[E003003] Unsupport shell option",
+          "when": "Unknown option",
+          "ide_hint": "Drop interactive/unsupported flags on lite"
+        },
+        {
+          "code": "E002106",
+          "pattern": "[E002106] Failed to communicate with daemon",
+          "when": "Daemon channel broke",
+          "ide_hint": "Re-tconn; check hdcd still listening :8710"
+        }
+      ],
+      "note": "Always append '; echo __RC=$?' and parse last __RC= line (IDE-CONTRACT)."
+    }
+  },
+  "host_version_gate": {
+    "required": "Ver: 3.2.0c",
+    "check_script": "lite/tools/board/check-host-hdc-ver.sh",
+    "mismatch_hint_doc": "lite/tools/board/host/README.md"
+  }
+}
