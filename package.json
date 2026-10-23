@@ -24,7 +24,8 @@
     "error-codes:check": "bash scripts/check-ide-error-codes-drift.sh",
     "ci:test": "pnpm run lint && pnpm run contract:check && pnpm run error-codes:check && pnpm run test:coverage",
     "ci:package": "pnpm --filter ohos-lite-js-ide run package && node scripts/check-vsix-debug-adapter.mjs packages/extension",
-    "test:grammar": "pnpm --filter ohos-lite-js-ide run test:grammar"
+    "test:grammar": "pnpm --filter ohos-lite-js-ide run test:grammar",
+    "smoke:g3-mock": "bash scripts/smoke-g3-mock.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

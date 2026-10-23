@@ -36,6 +36,7 @@ pnpm run build           # tsc -b + esbuild bundle of the extension
 pnpm run lint            # eslint + prettier --check + license headers
 pnpm run test:coverage   # vitest + v8 coverage gates
 pnpm run test:integration  # @vscode/test-electron smoke test (Linux: wrap with xvfb-run -a)
+pnpm run smoke:g3-mock     # G3 host gate: mock-hdc build → deploy → hilog parse (see docs/G3-HOST-UC.md)
 pnpm run ci:package      # vsce package
 ```
 

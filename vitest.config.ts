@@ -30,6 +30,7 @@ export default defineConfig({
       'tools/*/src/**/*.test.ts',
       'tools/*/test/**/*.test.ts',
       'scripts/**/*.test.ts',
+      'packages/*/test/e2e/**/*.test.ts',
     ],
     exclude: ['**/node_modules/**', '**/out/**', '**/dist/**'],
     testTimeout: 20000,
