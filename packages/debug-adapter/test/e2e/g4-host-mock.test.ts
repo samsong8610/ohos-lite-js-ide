@@ -167,8 +167,11 @@ describe('G4 host smoke (mock-hdc + mock Jerry)', () => {
     expect(joined).toMatch(/rm -f \/data\/ohjs\/debug\.\*/);
 
     await teardownJerryOnDevice({ deploy }, TCONN, client, forward);
-    expect(mock.calls().map((a) => a.join(' ')).some((s) => s.includes('fport') && s.includes('rm'))).toBe(
-      true,
-    );
+    expect(
+      mock
+        .calls()
+        .map((a) => a.join(' '))
+        .some((s) => s.includes('fport') && s.includes('rm')),
+    ).toBe(true);
   });
 });
