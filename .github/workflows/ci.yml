@@ -37,6 +37,9 @@ jobs:
       - name: G3 host smoke (mock-hdc)
         if: matrix.os == 'ubuntu-latest'
         run: SKIP_BUILD=1 pnpm run smoke:g3-mock
+      - name: G4 host smoke (mock debug)
+        if: matrix.os == 'ubuntu-latest'
+        run: SKIP_BUILD=1 pnpm run smoke:g4-mock
       - name: TextMate grammar tests (vscode-tmgrammar-test)
         run: pnpm run test:grammar
       - name: integration smoke (xvfb on linux)

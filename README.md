@@ -37,6 +37,7 @@ pnpm run lint            # eslint + prettier --check + license headers
 pnpm run test:coverage   # vitest + v8 coverage gates
 pnpm run test:integration  # @vscode/test-electron smoke test (Linux: wrap with xvfb-run -a)
 pnpm run smoke:g3-mock     # G3 host gate: mock-hdc build → deploy → hilog parse (see docs/G3-HOST-UC.md)
+pnpm run smoke:g4-mock     # G4 host gate: mock-hdc Jerry launch → breakpoint / pause / continue (see docs/G4-HOST-UC.md)
 pnpm run ci:package      # vsce package
 ```
 
