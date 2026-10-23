@@ -82,6 +82,21 @@ describe('LiteDeployService (mock-hdc)', () => {
     runner.disposeAll();
   });
 
+  it('start failure surfaces aa ide_hint from vendored catalog', async () => {
+    mock = createMockHdc({
+      targets: [{ key: USB, state: 'Connected' }],
+      shell: [{ match: '^aa start', stdout: 'Failed to run the command.' }],
+    });
+    const runner = new NodeProcessRunner(createHostPlatform());
+    const transport = new HdcTransport({ hdcPath: mock.hdcPath, runner, env: mock.env });
+    const svc = new LiteDeployService({ transport, profile: loadProfile() });
+    await expect(svc.startApp(USB, { bundle: 'com.example.app', ability: 'default' })).rejects.toMatchObject({
+      code: 'DEP-START-FAILED',
+      detail: { hint: expect.stringMatching(/aa start|HAP/i) },
+    });
+    runner.disposeAll();
+  });
+
   it('rejects non-.hap deploy path', async () => {
     mock = createMockHdc({ targets: [{ key: USB, state: 'Connected' }] });
     const runner = new NodeProcessRunner(createHostPlatform());

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 export * from './parser';
+export * from './ide-error-codes';
 export * from './hdc-transport';
 export * from './device-oh-probe';
 export * from './hdc-toolchain';

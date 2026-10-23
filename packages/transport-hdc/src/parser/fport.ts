@@ -4,6 +4,7 @@
  */
 import type { ForwardRule } from '@ohjs/core';
 import { EMPTY_ECHO, lines } from './common';
+import { enrichHdcFailure } from '../ide-error-codes/match';
 import { findFailure, type HdcFailure } from './messages';
 
 /**
@@ -29,10 +30,11 @@ export function parseFportList(output: string): ForwardRule[] {
 /** `hdc fport tcp:L tcp:R` → "Forwardport result:OK" (common/forward.cpp). */
 export function parseFportAdd(output: string): { ok: boolean; failure?: HdcFailure } {
   if (/Forwardport result:\s*OK/.test(output) && !findFailure(output)) return { ok: true };
-  return {
-    ok: false,
-    failure: findFailure(output) ?? { code: 'TRN-HDC-FPORT', message: output.trim() || 'no fport result' },
+  const base: HdcFailure = findFailure(output) ?? {
+    code: 'TRN-HDC-FPORT',
+    message: output.trim() || 'no fport result',
   };
+  return { ok: false, failure: enrichHdcFailure(base, 'fport', output) };
 }
 
 /** `hdc fport rm …` → "Remove forward ruler success, ruler:…" */

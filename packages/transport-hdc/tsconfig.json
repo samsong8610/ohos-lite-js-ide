@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "rootDir": "src", "outDir": "out", "tsBuildInfoFile": "out/.tsbuildinfo" },
-  "include": ["src"],
+  "include": ["src", "src/vendor/ide-error-codes.json"],
   "exclude": ["src/**/*.test.ts"],
   "references": [{ "path": "../core" }]
 }

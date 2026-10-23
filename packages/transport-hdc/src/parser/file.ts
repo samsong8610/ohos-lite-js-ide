@@ -2,6 +2,7 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { enrichHdcFailure } from '../ide-error-codes/match';
 import { findFailure, type HdcFailure } from './messages';
 
 export interface FileTransferStats {
@@ -33,11 +34,9 @@ export function parseFileTransfer(
       },
     };
   }
-  return {
-    ok: false,
-    failure: failure ?? {
-      code: 'TRN-HDC-FILE-TRANSFER',
-      message: output.trim() || 'no FileTransfer result from hdc',
-    },
+  const base: HdcFailure = failure ?? {
+    code: 'TRN-HDC-FILE-TRANSFER',
+    message: output.trim() || 'no FileTransfer result from hdc',
   };
+  return { ok: false, failure: enrichHdcFailure(base, 'file', output) };
 }
