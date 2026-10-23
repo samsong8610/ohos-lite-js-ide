@@ -34,6 +34,9 @@ jobs:
       - name: schema --check (skips with a warning when OpenHarmony sources are absent)
         run: pnpm run schema:check
       - run: pnpm run test:coverage
+      - name: G3 host smoke (mock-hdc)
+        if: matrix.os == 'ubuntu-latest'
+        run: SKIP_BUILD=1 pnpm run smoke:g3-mock
       - name: TextMate grammar tests (vscode-tmgrammar-test)
         run: pnpm run test:grammar
       - name: integration smoke (xvfb on linux)

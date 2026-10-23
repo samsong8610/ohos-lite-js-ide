@@ -21,6 +21,8 @@ export interface MockHdcScenario {
   tcpDeviceName?: string;
   /** device shell rules, checked before the builtin commands (bm / aa / hilogcat …) */
   shell?: Array<{ match: string; stdout?: string; exitCode?: number }>;
+  /** single line written by mock device `hilogcat` / background capture */
+  hilogcatLine?: string;
   /** 'gbk-hex': raw.<sub> values are hex-encoded bytes written verbatim */
   outputEncoding?: 'gbk-hex';
   faults?: {
