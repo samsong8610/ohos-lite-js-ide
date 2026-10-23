@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * Minimal ace-loader stand-in for CI: reads aceModuleRoot / aceModuleBuild env and
- * writes compiled JS under `<aceModuleBuild>/<ability>/` (DevEco loader_out_lite layout).
+ * CI fake ace-loader: replays DevEco `loader_out_lite` output (real Jerry `.bc` + compiled JS).
+ * Production builds must use upstream webpack + lite-snapshot-plugin (OHJS_ACE_LOADER_*).
  */
 const fs = require('fs');
 const path = require('path');
@@ -16,62 +16,50 @@ function copyDir(src, dst) {
     const s = path.join(src, name);
     const d = path.join(dst, name);
     if (fs.statSync(s).isDirectory()) copyDir(s, d);
-    else if (name.endsWith('.js') || name.endsWith('.json')) fs.copyFileSync(s, d);
-  }
-}
-
-function walk(dir, fn) {
-  for (const name of fs.readdirSync(dir)) {
-    const full = path.join(dir, name);
-    if (fs.statSync(full).isDirectory()) walk(full, fn);
-    else fn(full);
+    else fs.copyFileSync(s, d);
   }
 }
 
 const root = process.env.aceModuleRoot;
 const out = process.env.aceModuleBuild;
-const manifestPath = process.env.aceManifestPath;
 if (!root || !out) {
   console.error('fake-ace-loader: aceModuleRoot and aceModuleBuild env required');
   process.exit(2);
 }
 
-const abilityName = process.env.aceAbilitySrcPath || path.basename(root.replace(/[/\\]+$/, '')) || 'default';
+const abilityName = process.env.aceAbilitySrcPath || 'MainAbility';
 const abilityOut = path.join(out, abilityName);
-fs.mkdirSync(abilityOut, { recursive: true });
-copyDir(root, abilityOut);
+const fixtureRoot =
+  process.env.aceDevecoLoaderFixture ||
+  path.join(__dirname, '../hellolite-deveco-loader-out');
 
-if (manifestPath && fs.existsSync(manifestPath)) {
-  fs.copyFileSync(manifestPath, path.join(abilityOut, 'manifest.json'));
+if (!fs.existsSync(fixtureRoot)) {
+  console.error(`fake-ace-loader: missing DevEco loader fixture at ${fixtureRoot}`);
+  process.exit(2);
 }
 
-const stubAppBc = path.join(__dirname, '../gold-hap/stub-app.bc');
-const stubIndexBc = path.join(__dirname, '../gold-hap/stub-index.bc');
-walk(abilityOut, (file) => {
-  if (!file.endsWith('.js')) return;
-  const bc = file.replace(/\.js$/, '.bc');
-  if (fs.existsSync(bc)) return;
-  if (file.endsWith(`${path.sep}app.js`) && fs.existsSync(stubAppBc)) {
-    fs.copyFileSync(stubAppBc, bc);
-  } else if (file.endsWith(`${path.sep}index.js`) && fs.existsSync(stubIndexBc)) {
-    fs.copyFileSync(stubIndexBc, bc);
+fs.rmSync(abilityOut, { recursive: true, force: true });
+copyDir(fixtureRoot, abilityOut);
+
+const jerryMagic = Buffer.from('4a52525931000000', 'hex');
+for (const file of walkFiles(abilityOut)) {
+  if (!file.endsWith('.bc')) continue;
+  const head = fs.readFileSync(file).subarray(0, 8);
+  if (!head.equals(jerryMagic)) {
+    console.error(`fake-ace-loader: ${file} is not Jerry bytecode (JRRY1)`);
+    process.exit(3);
   }
-});
-
-const preview = path.join(abilityOut, 'preview_css.json');
-if (!fs.existsSync(preview)) {
-  const cssEntries = {};
-  walk(root, (file) => {
-    if (!file.endsWith('.css')) return;
-    cssEntries[file.replace(/\\/g, '/')] = true;
-  });
-  fs.writeFileSync(preview, JSON.stringify({ entry: cssEntries }));
 }
 
-const imageConvert = path.join(abilityOut, 'image_convert_result.txt');
-if (!fs.existsSync(imageConvert)) {
-  fs.writeFileSync(imageConvert, '{exitCode:0}');
-}
-
-console.log(`fake-ace-loader: wrote JS tree to ${abilityOut}`);
+console.log(`fake-ace-loader: replayed DevEco loader output to ${abilityOut}`);
 process.exit(0);
+
+function walkFiles(dir) {
+  const out = [];
+  for (const name of fs.readdirSync(dir)) {
+    const full = path.join(dir, name);
+    if (fs.statSync(full).isDirectory()) out.push(...walkFiles(full));
+    else out.push(full);
+  }
+  return out;
+}

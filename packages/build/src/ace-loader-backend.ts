@@ -122,6 +122,7 @@ export async function runAceLoaderBuild(
     stagingRoot: opts.outDir,
     hapPath,
     packInfoPath,
+    runner,
   });
 
   if (!fs.existsSync(hapPath)) {

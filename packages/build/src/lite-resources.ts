@@ -4,7 +4,8 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { OhjsError } from '@ohjs/core';
+import { OhjsError, type IProcessRunner } from '@ohjs/core';
+import { runRestoolCompile } from './lite-restool';
 
 export type FaResourceKind = 'string' | 'media';
 
@@ -14,10 +15,6 @@ export interface FaResourceEntry {
   /** DevEco-style id (e.g. 0x01000000). */
   id: number;
 }
-
-const HELLolite_INDEX_FIXTURE = path.join(__dirname, '../test/fixtures/gold-hap/resources.index');
-const HELLolite_TABLE_FINGERPRINT =
-  'string:MainAbility_desc|string:MainAbility_label|string:module_desc|media:icon|media:icon_small';
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -140,30 +137,26 @@ export function stageEntryResources(moduleRoot: string, entryAssetsRoot: string)
   return table;
 }
 
-export function writeResourcesIndex(destPath: string, table: FaResourceEntry[]): void {
-  fs.mkdirSync(path.dirname(destPath), { recursive: true });
-  const fingerprint = resourceTableFingerprint(table);
-  if (fingerprint === HELLolite_TABLE_FINGERPRINT && fs.existsSync(HELLolite_INDEX_FIXTURE)) {
-    fs.copyFileSync(HELLolite_INDEX_FIXTURE, destPath);
-    return;
-  }
-  const restool = process.env.OHJS_RESTOOL;
-  if (restool && fs.existsSync(restool)) {
-    throw new OhjsError(
-      'BLD-FAILED',
-      'OHJS_RESTOOL is set but restool invocation is not wired yet; use a known resource table or add restool args',
-      { hint: restool },
-    );
-  }
+export async function compileEntryResourcesIndex(input: {
+  moduleRoot: string;
+  configPath: string;
+  bundleName: string;
+  entryAssetsDir: string;
+  runner: IProcessRunner;
+}): Promise<void> {
+  const table = collectFaResourceTable(input.moduleRoot);
   if (table.length === 0) {
-    fs.writeFileSync(destPath, Buffer.alloc(0));
-    return;
+    throw new OhjsError('BLD-FAILED', 'Cannot compile resources.index: module has no lite resources', {
+      hint: input.moduleRoot,
+    });
   }
-  throw new OhjsError(
-    'BLD-FAILED',
-    `No bundled resources.index for resource table ${fingerprint}; add OHJS_RESTOOL or extend lite-resources fixtures`,
-    { hint: destPath },
-  );
+  await runRestoolCompile({
+    moduleRoot: input.moduleRoot,
+    configPath: input.configPath,
+    bundleName: input.bundleName,
+    entryAssetsDir: input.entryAssetsDir,
+    runner: input.runner,
+  });
 }
 
 function copyDir(src: string, dst: string): void {

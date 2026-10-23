@@ -1,15 +1,14 @@
 # DevEco Studio 3.1 Lite JS HAP 金样（Sam 2026-10-23）
 
-## 安装产物路径
+## 优先级
 
-实际安装的 HAP：`entry/build/default/outputs/default/app/*.hap`  
-旁路：`entry/build/default/outputs/default/pack.info`
+**首要**：HAP **zip 内成员路径 + 文件体**（与 DevEco 安装包一致）。  
+**次要**：主机侧输出目录（`entry/build/default/outputs/default/app/*.hap` 等）便于对齐 DevEco，但不替代内容验收。
 
-金样文件：`/workspace/deveco-ref/entry-default.gold.hap`  
-完整工程：`/workspace/deveco-ref/hellolite/`  
-原始 zip：`/workspace/deveco-ref/hellolite-deveco31-ref.zip`
+金样文件：`packages/build/test/fixtures/gold-hap/entry-default.gold.hap`  
+DevEco 工程参考：`hellolite-deveco31-ref.zip`（`loader_out_lite` / `restool` 产物）
 
-## 金样 HAP 内布局（必须对齐）
+## 金样 HAP 内布局（路径集合）
 
 ```
 config.json
@@ -28,14 +27,27 @@ assets/js/MainAbility/preview_css.json
 assets/js/MainAbility/image_convert_result.txt
 ```
 
-## 与当前 IDE ace-loader HAP 的主要差距（G2 UAT 样例）
+## 内容级魔数与约束
 
-- JS 落在 `assets/js/` 扁平树，缺 `MainAbility/` 能力目录
-- 缺 `.bc`、`manifest.json`、`preview_css.json`、`assets/entry/resources.index`、icon 资源
-- `config.json` 缺 `app.apiVersion`、ability `srcPath`/`mainAbility`/资源 id；ability/js name 为 `default` 而非与 srcPath 对齐
-- `pack.info` 结构与 DevEco（deviceType/apiVersion/packages）不一致
-- 输出路径应为模块下 `…/outputs/default/app/<module>-default.hap`（或等价可部署路径），部署应指向该文件
+| 成员 | 要求 |
+| --- | --- |
+| `*.bc` | 以 Jerry lite 快照 magic **`JRRY1`** 开头（hex `4a52525931000000`），非占位 stub |
+| `assets/entry/resources.index` | 以 **`Restool `** 开头（hex `526573746f6f6c20`），由 SDK `restool` 编译；IDE 通过 `OHJS_RESTOOL` 调用 |
+| `*.png` | 标准 PNG magic `89504e47…` |
+| `config.json` / `pack.info` | 字段与金样一致（apiVersion、mainAbility、资源 id、packages 等） |
+| `app.js` / `index.js` | 与 DevEco ace-loader 产物一致（CI 用 `hellolite-deveco-loader-out` 快照对照金样） |
+| `preview_css.json` | `entry` 键规范化后形状一致（路径/host 差异可忽略） |
 
-## 验收
+## IDE 构建链
 
-对照金样：目录集合 + 关键 config/pack 字段；主机侧 zip 清单 diff 测试；再请 Sam 装板/试用确认。
+1. **ace-loader**（upstream webpack + lite snapshot）→ 真实 `.bc` + 编译 JS；打包阶段**不再**注入 stub bytecode。
+2. **restool**（`OHJS_RESTOOL` → SDK `toolchains/restool`）→ 真实 `resources.index`。
+3. CI：`restool-shim` 仅用于 hellolite 金样表；fake ace-loader **重放** DevEco `loader_out_lite` 目录（真实 JRRY1）。
+
+## 自动化验收
+
+`packages/build/src/hap-gold.test.ts`：路径集合、魔数、尺寸区间、hellolite 与金样逐字节对比（JS/bc/index/图标等），以及 config/pack 结构对比。
+
+## 人工验收
+
+Sam 装板 / 试用确认。

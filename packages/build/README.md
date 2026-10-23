@@ -41,6 +41,21 @@ With environment (also merged into the process env):
 | `aceModuleBuild`  | `.ohjs/build/ace-js`                                 | Compiled JS output                        |
 | `buildMode`       | `debug`                                              | `debug` or `release`                      |
 | `aceManifestPath` | `<aceModuleRoot>/manifest.json`                      | Generated from `config.json` when missing |
+| `aceAbilitySrcPath` | ability `srcPath` from `config.json`               | FA JS folder under `assets/js/`           |
+
+## HAP content (primary acceptance)
+
+Pack step validates **real** Jerry bytecode (`JRRY1` magic on every `.bc`) and **Restool** `resources.index` (`Restool ` header). The packer does **not** synthesize placeholder `.bc` or index files.
+
+Set **`OHJS_RESTOOL`** to the OpenHarmony SDK `toolchains/restool` binary (same invocation as DevEco: `-i src/main -j config.json -p bundleName -o … -r ResourceTable.txt -f`).
+
+Example:
+
+```bash
+export OHJS_RESTOOL=/path/to/openharmony/sdk/toolchains/restool
+```
+
+See `docs/GOLD-HAP-ACCEPTANCE.md` for gold zip member paths and content checks.
 
 Example toolchain (workspace `.ohjs/toolchain.json`):
 
@@ -59,6 +74,6 @@ export OHJS_BUILD_BACKEND=ace-loader
 
 ## CI fake ace-loader
 
-Unit tests use `packages/build/test/fixtures/fake-ace-loader/` (stub webpack CLI). Optional integration: set **`OHJS_ACE_LOADER_MAIN`** to your real checkout root in local/CI matrix jobs.
+Unit tests use `packages/build/test/fixtures/fake-ace-loader/`, which **replays** DevEco `loader_out_lite` output (`hellolite-deveco-loader-out`, real `JRRY1` `.bc`). **`OHJS_RESTOOL`** in CI points at `test/fixtures/restool-shim/restool.cjs` (hellolite gold table only). Optional integration: set **`OHJS_ACE_LOADER_MAIN`** to a real ace-loader root with lite snapshot plugin.
 
 Output (ace-loader): `<module>/build/default/outputs/default/app/<module>-default.hap`, with `pack.info` in `<module>/build/default/outputs/default/pack.info`. Staging under `.ohjs/build/` when using the extension default out dir.

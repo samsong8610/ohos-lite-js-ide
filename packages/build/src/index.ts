@@ -11,5 +11,7 @@ export * from './fa-prep';
 export * from './hap-packer';
 export * from './hap-paths';
 export * from './lite-resources';
+export * from './lite-restool';
+export * from './hap-content';
 export * from './fixture-backend';
 export * from './zip-hap';

@@ -4,12 +4,14 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import { OhjsError, type IProcessRunner } from '@ohjs/core';
 import type { FaModuleInfo } from './project-info';
 import { parseFaModuleConfig } from './project-info';
+import { assertJerryBytecode } from './hap-content';
 import {
+  compileEntryResourcesIndex,
   enrichPackagedConfig,
   stageEntryResources,
-  writeResourcesIndex,
   type FaResourceEntry,
 } from './lite-resources';
 import { packStagingToHap } from './zip-hap';
@@ -28,59 +30,40 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-const STUB_BC_APP = path.join(__dirname, '../test/fixtures/gold-hap/stub-app.bc');
-const STUB_BC_INDEX = path.join(__dirname, '../test/fixtures/gold-hap/stub-index.bc');
+function validateJerryBytecodeTree(jsAbilityDir: string): void {
+  const walk = (dir: string) => {
+    for (const name of fs.readdirSync(dir)) {
+      const full = path.join(dir, name);
+      if (fs.statSync(full).isDirectory()) walk(full);
+      else if (name.endsWith('.js')) {
+        const bc = full.replace(/\.js$/, '.bc');
+        if (!fs.existsSync(bc)) {
+          throw new OhjsError('BLD-FAILED', `ace-loader output missing bytecode for ${full}`, { hint: bc });
+        }
+        assertJerryBytecode(fs.readFileSync(bc), bc);
+      }
+    }
+  };
+  walk(jsAbilityDir);
+}
 
-function ensureJsAbilityArtifacts(jsAbilityDir: string, jsSourceRoot: string): void {
+function ensureJsAbilitySidecars(jsAbilityDir: string, jsSourceRoot: string): void {
   const manifest = path.join(jsAbilityDir, 'manifest.json');
   if (!fs.existsSync(manifest)) {
     const srcManifest = path.join(jsSourceRoot, 'manifest.json');
     if (fs.existsSync(srcManifest)) fs.copyFileSync(srcManifest, manifest);
+    else throw new OhjsError('BLD-FAILED', 'manifest.json missing from ace-loader output', { hint: jsAbilityDir });
   }
 
   const preview = path.join(jsAbilityDir, 'preview_css.json');
   if (!fs.existsSync(preview)) {
-    const cssEntries: Record<string, boolean> = {};
-    const walkCss = (dir: string, prefix: string) => {
-      if (!fs.existsSync(dir)) return;
-      for (const name of fs.readdirSync(dir)) {
-        const full = path.join(dir, name);
-        if (fs.statSync(full).isDirectory()) walkCss(full, `${prefix}/${name}`);
-        else if (name.endsWith('.css')) {
-          const rel = `${prefix}/${name}`.replace(/^\//, '');
-          cssEntries[rel] = true;
-        }
-      }
-    };
-    walkCss(jsSourceRoot, '');
-    fs.writeFileSync(preview, JSON.stringify({ entry: cssEntries }));
+    throw new OhjsError('BLD-FAILED', 'preview_css.json missing from ace-loader output', { hint: jsAbilityDir });
   }
 
   const imageConvert = path.join(jsAbilityDir, 'image_convert_result.txt');
   if (!fs.existsSync(imageConvert)) {
     fs.writeFileSync(imageConvert, '{exitCode:0}');
   }
-
-  const ensureBc = (jsFile: string, stubPath: string) => {
-    const bc = jsFile.replace(/\.js$/, '.bc');
-    if (fs.existsSync(bc)) return;
-    if (jsFile.endsWith('app.js') && fs.existsSync(STUB_BC_APP)) {
-      fs.copyFileSync(STUB_BC_APP, bc);
-    } else if (jsFile.endsWith('index.js') && fs.existsSync(STUB_BC_INDEX)) {
-      fs.copyFileSync(STUB_BC_INDEX, bc);
-    } else if (fs.existsSync(stubPath)) {
-      fs.copyFileSync(stubPath, bc);
-    }
-  };
-
-  const walkJs = (dir: string) => {
-    for (const name of fs.readdirSync(dir)) {
-      const full = path.join(dir, name);
-      if (fs.statSync(full).isDirectory()) walkJs(full);
-      else if (name.endsWith('.js')) ensureBc(full, STUB_BC_APP);
-    }
-  };
-  walkJs(jsAbilityDir);
 }
 
 /** Resolve webpack output to `assets/js/<srcPath>/…`. */
@@ -105,7 +88,8 @@ export function stageJsAbilityTree(
     copyDir(jsBuildDir, destAbilityDir);
   }
 
-  ensureJsAbilityArtifacts(destAbilityDir, jsSourceRoot);
+  ensureJsAbilitySidecars(destAbilityDir, jsSourceRoot);
+  validateJerryBytecodeTree(destAbilityDir);
 }
 
 /** DevEco-shaped `pack.info` beside the install HAP. */
@@ -169,6 +153,7 @@ export interface FaHapPackInput {
   stagingRoot: string;
   hapPath: string;
   packInfoPath?: string;
+  runner: IProcessRunner;
 }
 
 /**
@@ -186,7 +171,13 @@ export async function packFaHap(input: FaHapPackInput): Promise<void> {
   const layout = parseFaModuleConfig(sourceConfig);
   const entryAssets = path.join(staging, 'assets', 'entry');
   const resourceTable: FaResourceEntry[] = stageEntryResources(input.module.moduleRoot, entryAssets);
-  writeResourcesIndex(path.join(entryAssets, 'resources.index'), resourceTable);
+  await compileEntryResourcesIndex({
+    moduleRoot: input.module.moduleRoot,
+    configPath: input.module.configPath,
+    bundleName: input.module.bundleName,
+    entryAssetsDir: entryAssets,
+    runner: input.runner,
+  });
 
   const packaged = enrichPackagedConfig(sourceConfig, {
     mainAbility: layout.mainAbility,
