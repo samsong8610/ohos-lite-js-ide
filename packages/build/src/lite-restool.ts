@@ -62,7 +62,19 @@ export async function runRestoolCompile(input: RestoolCompileInput): Promise<voi
   fs.mkdirSync(workDir, { recursive: true });
   const tablePath = path.join(workDir, 'ResourceTable.txt');
 
-  const args = ['-i', mainSrc, '-j', input.configPath, '-p', input.bundleName, '-o', workDir, '-r', tablePath, '-f'];
+  const args = [
+    '-i',
+    mainSrc,
+    '-j',
+    input.configPath,
+    '-p',
+    input.bundleName,
+    '-o',
+    workDir,
+    '-r',
+    tablePath,
+    '-f',
+  ];
   const cmd = restool.endsWith('.cjs')
     ? { file: process.execPath, args: [restool, ...args] }
     : { file: restool, args };

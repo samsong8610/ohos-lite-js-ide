@@ -29,14 +29,14 @@ assets/js/MainAbility/image_convert_result.txt
 
 ## 内容级魔数与约束
 
-| 成员 | 要求 |
-| --- | --- |
-| `*.bc` | 以 Jerry lite 快照 magic **`JRRY1`** 开头（hex `4a52525931000000`），非占位 stub |
+| 成员                           | 要求                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `*.bc`                         | 以 Jerry lite 快照 magic **`JRRY1`** 开头（hex `4a52525931000000`），非占位 stub                      |
 | `assets/entry/resources.index` | 以 **`Restool `** 开头（hex `526573746f6f6c20`），由 SDK `restool` 编译；IDE 通过 `OHJS_RESTOOL` 调用 |
-| `*.png` | 标准 PNG magic `89504e47…` |
-| `config.json` / `pack.info` | 字段与金样一致（apiVersion、mainAbility、资源 id、packages 等） |
-| `app.js` / `index.js` | 与 DevEco ace-loader 产物一致（CI 用 `hellolite-deveco-loader-out` 快照对照金样） |
-| `preview_css.json` | `entry` 键规范化后形状一致（路径/host 差异可忽略） |
+| `*.png`                        | 标准 PNG magic `89504e47…`                                                                            |
+| `config.json` / `pack.info`    | 字段与金样一致（apiVersion、mainAbility、资源 id、packages 等）                                       |
+| `app.js` / `index.js`          | 与 DevEco ace-loader 产物一致（CI 用 `hellolite-deveco-loader-out` 快照对照金样）                     |
+| `preview_css.json`             | `entry` 键规范化后形状一致（路径/host 差异可忽略）                                                    |
 
 ## IDE 构建链
 

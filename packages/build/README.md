@@ -33,15 +33,15 @@ node node_modules/webpack/bin/webpack.js \
 
 With environment (also merged into the process env):
 
-| Variable          | Default                                              | Purpose                                   |
-| ----------------- | ---------------------------------------------------- | ----------------------------------------- |
-| `DEVICE_LEVEL`    | `lite`                                               | Lite device pipeline                      |
-| `DEVICE_TYPE`     | `smartVision`                                        | Device profile                            |
-| `aceModuleRoot`   | prepared JS tree under `.ohjs/build/ace-module-root` | ace-loader source root                    |
-| `aceModuleBuild`  | `.ohjs/build/ace-js`                                 | Compiled JS output                        |
-| `buildMode`       | `debug`                                              | `debug` or `release`                      |
-| `aceManifestPath` | `<aceModuleRoot>/manifest.json`                      | Generated from `config.json` when missing |
-| `aceAbilitySrcPath` | ability `srcPath` from `config.json`               | FA JS folder under `assets/js/`           |
+| Variable            | Default                                              | Purpose                                   |
+| ------------------- | ---------------------------------------------------- | ----------------------------------------- |
+| `DEVICE_LEVEL`      | `lite`                                               | Lite device pipeline                      |
+| `DEVICE_TYPE`       | `smartVision`                                        | Device profile                            |
+| `aceModuleRoot`     | prepared JS tree under `.ohjs/build/ace-module-root` | ace-loader source root                    |
+| `aceModuleBuild`    | `.ohjs/build/ace-js`                                 | Compiled JS output                        |
+| `buildMode`         | `debug`                                              | `debug` or `release`                      |
+| `aceManifestPath`   | `<aceModuleRoot>/manifest.json`                      | Generated from `config.json` when missing |
+| `aceAbilitySrcPath` | ability `srcPath` from `config.json`                 | FA JS folder under `assets/js/`           |
 
 ## HAP content (primary acceptance)
 

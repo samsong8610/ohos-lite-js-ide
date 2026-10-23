@@ -10,12 +10,7 @@ import { createHostPlatform } from '@ohjs/core';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildProject } from './build-service';
 import { devecoHapOutputPath } from './hap-paths';
-import {
-  JERRY_BC_MAGIC,
-  PNG_MAGIC,
-  RESTOOL_INDEX_MAGIC,
-  normalizePreviewCssEntry,
-} from './hap-content';
+import { JERRY_BC_MAGIC, PNG_MAGIC, RESTOOL_INDEX_MAGIC, normalizePreviewCssEntry } from './hap-content';
 import { parseFaConfigJson } from './project-info';
 
 const helloliteFixtureRoot = path.join(__dirname, '../test/fixtures/hellolite-lite');

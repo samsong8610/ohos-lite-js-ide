@@ -52,12 +52,17 @@ function ensureJsAbilitySidecars(jsAbilityDir: string, jsSourceRoot: string): vo
   if (!fs.existsSync(manifest)) {
     const srcManifest = path.join(jsSourceRoot, 'manifest.json');
     if (fs.existsSync(srcManifest)) fs.copyFileSync(srcManifest, manifest);
-    else throw new OhjsError('BLD-FAILED', 'manifest.json missing from ace-loader output', { hint: jsAbilityDir });
+    else
+      throw new OhjsError('BLD-FAILED', 'manifest.json missing from ace-loader output', {
+        hint: jsAbilityDir,
+      });
   }
 
   const preview = path.join(jsAbilityDir, 'preview_css.json');
   if (!fs.existsSync(preview)) {
-    throw new OhjsError('BLD-FAILED', 'preview_css.json missing from ace-loader output', { hint: jsAbilityDir });
+    throw new OhjsError('BLD-FAILED', 'preview_css.json missing from ace-loader output', {
+      hint: jsAbilityDir,
+    });
   }
 
   const imageConvert = path.join(jsAbilityDir, 'image_convert_result.txt');
