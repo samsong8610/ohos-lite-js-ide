@@ -7,21 +7,22 @@ logs (hilogcat) and JerryScript on-device debugging.
 Requirements, architecture and plan live in `SPEC.md`, `ARCHITECTURE.md` (v0.2+) and `PLAN.md`
 (kept outside this repository for now).
 
-> **Status:** M1, batch 1 — repository skeleton, platform abstraction + device profiles (I-2),
-> hdc transport + mock-hdc (I-1), component schema extractor (M1-5). No end-user features yet.
+> **Status:** M1 language + **G2** build/deploy/logs (one-click `.hap` build, hdc deploy/launch, hilog
+> streaming). JerryScript debug client (PR #2). See [PLAN.md](PLAN.md) for G2/qemu-ide notes.
 
 ## Layout
 
-| Path                                                                                      | Content                                                                                            | Status           |
-| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------- |
-| `packages/core`                                                                           | domain model, ports, `IPlatform` / `IProcessRunner` / `IToolLocator`, error model, device profiles | implemented      |
-| `packages/transport-hdc`                                                                  | `HdcTransport`, hdc output parsers, error classification                                           | implemented      |
-| `packages/schemas`                                                                        | generated versioned component schemas (`v5.0.3`, `v6.1-lts`) + loader                              | implemented      |
-| `packages/test-kit`                                                                       | `mock-hdc` executable test double                                                                  | implemented (v1) |
-| `packages/extension`                                                                      | VS Code extension entry, manifest, built-in device profiles                                        | skeleton         |
-| `tools/schema-extractor`                                                                  | extracts schemas from OpenHarmony sources                                                          | implemented      |
-| `packages/{build,language-server,ts-plugin,debug-adapter,transport-ssh,transport-serial}` |                                                                                                    | placeholders     |
-| `tools/{grammar,firmware-patches}`, `templates/`                                          |                                                                                                    | placeholders     |
+| Path                                                                                | Content                                                                                            | Status           |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------- |
+| `packages/core`                                                                     | domain model, ports, `IPlatform` / `IProcessRunner` / `IToolLocator`, error model, device profiles | implemented      |
+| `packages/transport-hdc`                                                            | `HdcTransport`, hdc output parsers, error classification                                           | implemented      |
+| `packages/schemas`                                                                  | generated versioned component schemas (`v5.0.3`, `v6.1-lts`) + loader                              | implemented      |
+| `packages/test-kit`                                                                 | `mock-hdc` executable test double                                                                  | implemented (v1) |
+| `packages/extension`                                                                | VS Code extension: LSP, device refresh, **build/deploy/logs commands**                             | G2 slice         |
+| `packages/build`                                                                    | `@ohjs/build` — fixture HAP zip + optional ace-loader hook                                         | G2 slice         |
+| `tools/schema-extractor`                                                            | extracts schemas from OpenHarmony sources                                                          | implemented      |
+| `packages/{language-server,ts-plugin,debug-adapter,transport-ssh,transport-serial}` |                                                                                                    | partial / stub   |
+| `tools/{grammar,firmware-patches}`, `templates/`                                    |                                                                                                    | placeholders     |
 
 ## Getting started
 
@@ -70,6 +71,19 @@ Resolution order:
 Verify: run **OHJS: Refresh devices**, check the OHJS output channel for
 `hdc (…) … [toolchain 5.0.3]` or `[device OH … → toolchain …]`. With mock-hdc, set `ohjs.tools.hdcPath`
 to `packages/test-kit/mock-hdc/bin/hdc` and use a scenario `shell` rule for `param get`.
+
+### G2 build / deploy / logs
+
+Commands (OHJS category): **Build**, **Deploy**, **Launch**, **Stop**, **Start Logs**, **Stop Logs**, and
+**Build, Deploy and Launch**. Settings: `ohjs.tools.hdcServer` (e.g. `127.0.0.1:8711` for qemu-ide),
+`ohjs.device.targetKey`, `ohjs.build.backend` (`fixture` | `ace-loader` | `auto`).
+
+- Shell exit codes: hdc wraps commands with `; echo __RC=$?` (see `@ohjs/transport-hdc`); bm/aa success is
+  parsed from stdout, not exit code.
+- Deploy sends the HAP to `/tmp/ohjs/app.hap`, clears `/data/ohjs/debug.*`, then `bm install`.
+- Logs: device-side `hilogcat` background + pid file under `/tmp/ohjs/hilogcat.pid`; host tails the capture file.
+
+qemu-ide stub: see [PLAN.md](PLAN.md) and `packages/transport-hdc/test/e2e/qemu-deploy.e2e.mjs` (exit 77 when absent).
 
 ## License
 

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/** hdc shell does not reliably propagate exit codes; we append an rc marker and strip it again. */
-export const RC_MARKER = '__OHJS_RC=';
+/** hdc shell does not reliably propagate exit codes; append an rc marker and strip it again (G2 / hdcd 3.2.0c). */
+export const RC_MARKER = '__RC=';
 
 export function wrapWithRc(cmd: string): string {
   return `${cmd}; echo ${RC_MARKER}$?`;
