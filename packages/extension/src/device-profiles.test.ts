@@ -19,7 +19,7 @@ describe('built-in device profiles (I-2, FR-PRJ-008)', () => {
     expect(p.deviceType).toBe('smartVision');
     expect(p.display).toMatchObject({ width: 1024, height: 768 });
     expect(p.connection.tcpPort).toBe(8710);
-    expect(p.paths.snapshotFlag).toBe('/user/data/js_snapshot_enable');
+    expect(p.paths.snapshotFlag).toBe('/data/ohjs/js_snapshot_enable');
     expect(renderCommand(p.commands.install, { hap: '/tmp/ohjs/a.hap' })).toBe(
       'bm install -p /tmp/ohjs/a.hap',
     );

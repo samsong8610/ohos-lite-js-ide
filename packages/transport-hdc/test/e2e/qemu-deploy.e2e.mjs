@@ -3,9 +3,14 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-// Optional G2 smoke against developtools_hdc qemu-ide (run-qemu-hdcd.sh).
+// Optional G2 smoke against developtools_hdc qemu-ide (`run-qemu-hdcd.sh start`).
 //   pnpm run build && node packages/transport-hdc/test/e2e/qemu-deploy.e2e.mjs
-// Env: RUN_QEMU_HDCD, HDC, OHOS_HDC_SERVER_PORT (8711), HOST_PORT (18710). Exit 77 when skipped.
+//
+// qemu-ide contract: host hdc server OHOS_HDC_SERVER_PORT=8711 (`hdc -s 127.0.0.1:8711`),
+// then `hdc tconn 127.0.0.1:8710` (hdcd TCP forwarded by `start`; match the port the script prints).
+// Jerry jsdebug uses a different tconn forward (18710) — see qemu-jsdebug.e2e.mjs, not this script.
+//
+// Env: RUN_QEMU_HDCD, HDC, OHOS_HDC_SERVER_PORT (default 8711), TCONN_PORT (default 8710). Exit 77 when skipped.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -14,7 +19,7 @@ import { join } from 'node:path';
 const RUN = process.env.RUN_QEMU_HDCD ?? '/workspace/hdcd-port/tools/run-qemu-hdcd.sh';
 const HDC = process.env.HDC ?? '/workspace/hdcd-port/hdc-host';
 const SERVER_PORT = process.env.OHOS_HDC_SERVER_PORT ?? '8711';
-const HOST_PORT = process.env.HOST_PORT ?? '18710';
+const TCONN_PORT = process.env.TCONN_PORT ?? '8710';
 
 if (!existsSync(RUN) || !existsSync(HDC)) {
   console.log('[SKIP] qemu-ide / hdc not available');
@@ -34,12 +39,12 @@ try {
   process.exit(77);
 }
 
-console.log(hdc('tconn', `127.0.0.1:${HOST_PORT}`));
+console.log(hdc('tconn', `127.0.0.1:${TCONN_PORT}`));
 const dir = mkdtempSync(join(tmpdir(), 'ohjs-qemu-'));
 const hap = join(dir, 'app.hap');
 writeFileSync(hap, 'qemu-smoke');
-console.log(hdc('-t', `127.0.0.1:${HOST_PORT}`, 'file', 'send', hap, '/tmp/ohjs/app.hap'));
-console.log(hdc('-t', `127.0.0.1:${HOST_PORT}`, 'shell', 'ls /tmp/ohjs/app.hap; echo __RC=$?'));
+console.log(hdc('-t', `127.0.0.1:${TCONN_PORT}`, 'file', 'send', hap, '/tmp/ohjs/app.hap'));
+console.log(hdc('-t', `127.0.0.1:${TCONN_PORT}`, 'shell', 'ls /tmp/ohjs/app.hap; echo __RC=$?'));
 hdc('kill');
 spawnSync(RUN, ['stop'], { stdio: 'ignore' });
 rmSync(dir, { recursive: true, force: true });

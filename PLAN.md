@@ -16,7 +16,7 @@ Product requirements live in the external spec pack; this file tracks **G2** del
 
 1. Start stub: `developtools_hdc` `run-qemu-hdcd.sh` (see jerry e2e for env names).
 2. Host server on non-default port: `OHOS_HDC_SERVER_PORT=8711` **or** `ohjs.tools.hdcServer` = `127.0.0.1:8711`.
-3. Connect target: `hdc tconn 127.0.0.1:18710` (or profile `tcpPort` / `HOST_PORT` from handoff).
+3. Connect target: `hdc tconn 127.0.0.1:8710` (profile `connection.tcpPort`; confirm against `run-qemu-hdcd.sh start` output). Jerry **jsdebug** qemu mode may forward a different host port (18710) — see `packages/jerry-debug-client/test/e2e/qemu-jsdebug.e2e.mjs`.
 4. Use 6.1-LTS host `hdc` (Ver 3.2.0c) — version-aware selection from PR #1.
 
 ### Result detection
