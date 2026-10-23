@@ -18,6 +18,7 @@ export default defineConfig({
       '@ohjs/jerry-debug-client': r('./packages/jerry-debug-client/src/index.ts'),
       '@ohjs/test-kit': r('./packages/test-kit/src/index.ts'),
       '@ohjs/build': r('./packages/build/src/index.ts'),
+      '@ohjs/debug-adapter': r('./packages/debug-adapter/src/index.ts'),
       '@ohjs/schema-extractor': r('./tools/schema-extractor/src/index.ts'),
     },
   },
