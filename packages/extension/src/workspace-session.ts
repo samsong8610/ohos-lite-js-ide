@@ -133,6 +133,7 @@ export async function runBuild(
   const toolsCfg = vscode.workspace.getConfiguration('ohjs.tools');
   const backend = buildCfg.get<'auto' | 'fixture' | 'ace-loader'>('backend', 'auto');
   const aceLoaderPath = buildCfg.get<string>('aceLoaderPath', '').trim() || undefined;
+  const buildMode = buildCfg.get<'debug' | 'release'>('buildMode', 'release');
   const restoolPath = toolsCfg.get<string>('restoolPath', '').trim() || undefined;
   const platform = createHostPlatform();
   const autoProvision = backend === 'auto' || backend === 'ace-loader';
@@ -147,6 +148,7 @@ export async function runBuild(
         workspaceRoot: root,
         backend,
         aceLoaderPath,
+        buildMode,
         restoolPath,
         aceLoaderStorageRoot: context.globalStorageUri.fsPath,
         aceLoaderAutoProvision: autoProvision,

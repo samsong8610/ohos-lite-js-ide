@@ -24,6 +24,8 @@ When **`ohjs.build.aceLoaderPath`**, **`ohjs.tools.restoolPath`**, or env ace-lo
 
 Valid install: `<root>/webpack.lite.config.js` and `<root>/node_modules/webpack/bin/webpack.js` (run `npm install` in upstream `ace-loader`).
 
+**Lite Jerry snapshot (`.bc`):** OHJS sets `DEVICE_LEVEL=lite` and runs `webpack.lite.config.js` with **`buildMode=release`** by default (`ohjs.build.buildMode`). Upstream attaches **SnapshotPlugin** only in release (calls `bin/jerry-snapshot` → sibling `.bc` with `JRRY1` magic); **debug** emits `.js` only and cannot gold-pack. If release webpack succeeds but `.bc` is still missing, check that `bin/jerry-snapshot` exists under your ace-loader root (SDK installs often ship the binary; sparse source checkouts may not). The packer never invents stub bytecode.
+
 ### Auto-provision (VS Code extension)
 
 When backend is **`auto`** or **`ace-loader`**, no manual path/env/toolchain entry is set, and globalStorage has no
@@ -42,27 +44,27 @@ From ace-loader root, OHJS runs:
 ```bash
 node node_modules/webpack/bin/webpack.js \
   --config webpack.lite.config.js \
-  --env buildMode=debug
+  --env buildMode=release
 ```
 
 With environment (also merged into the process env):
 
-| Variable            | Default                                              | Purpose                                   |
-| ------------------- | ---------------------------------------------------- | ----------------------------------------- |
-| `DEVICE_LEVEL`      | `lite`                                               | Lite device pipeline                      |
-| `DEVICE_TYPE`       | `smartVision`                                        | Device profile                            |
-| `aceModuleRoot`     | prepared JS tree under `.ohjs/build/ace-module-root` | ace-loader source root                    |
-| `aceModuleBuild`    | `.ohjs/build/ace-js`                                 | Compiled JS output                        |
-| `buildMode`         | `debug`                                              | `debug` or `release`                      |
-| `aceManifestPath`   | `<aceModuleRoot>/manifest.json`                      | Generated from `config.json` when missing |
-| `aceAbilitySrcPath` | ability `srcPath` from `config.json`                 | FA JS folder under `assets/js/`           |
+| Variable            | Default                                                            | Purpose                                       |
+| ------------------- | ------------------------------------------------------------------ | --------------------------------------------- |
+| `DEVICE_LEVEL`      | `lite`                                                             | Lite device pipeline                          |
+| `DEVICE_TYPE`       | `smartVision`                                                      | Device profile                                |
+| `aceModuleRoot`     | prepared JS tree under `.ohjs/build/ace-module-root`               | ace-loader source root                        |
+| `aceModuleBuild`    | `.ohjs/build/ace-js`                                               | Compiled JS output                            |
+| `buildMode`         | `release` (VS Code `ohjs.build.buildMode` / env `OHJS_BUILD_MODE`) | `release` for Jerry `.bc`; `debug` is JS-only |
+| `aceManifestPath`   | `<aceModuleRoot>/manifest.json`                                    | Generated from `config.json` when missing     |
+| `aceAbilitySrcPath` | ability `srcPath` from `config.json`                               | FA JS folder under `assets/js/`               |
 
 ## HAP content (primary acceptance)
 
 Pack step validates **real** Jerry bytecode (`JRRY1` magic on every `.bc`) and **Restool** `resources.index` (`Restool ` header). The packer does **not** synthesize placeholder `.bc` or index files.
 
 Set VS Code **`ohjs.tools.restoolPath`** or env **`OHJS_RESTOOL`** to the OpenHarmony SDK `toolchains/restool`
-binary (setting wins when both are set; same invocation as DevEco: `-i src/main -j config.json -p bundleName -o … -r ResourceTable.txt -f`). **restool is not auto-downloaded.**
+binary (setting wins when both are set; same invocation as DevEco: `-i src/main -j config.json -p bundleName -o … -r ResourceTable.txt -f`). On **Windows**, you may configure `…/restool` without `.exe`; OHJS tries appending `.exe` when the bare path is missing. **restool is not auto-downloaded.**
 
 Example:
 

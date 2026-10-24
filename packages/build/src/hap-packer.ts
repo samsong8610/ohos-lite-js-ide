@@ -30,7 +30,19 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-function validateJerryBytecodeTree(jsAbilityDir: string): void {
+export const JERRY_LITE_SNAPSHOT_BC_HINT =
+  'Upstream webpack.lite.config.js runs SnapshotPlugin (ace-loader `bin/jerry-snapshot` → sibling `.bc` with JRRY1 magic) ' +
+  'only when buildMode=release; debug emits `.js` only. OHJS defaults ohjs.build.buildMode to release for gold HAP. ' +
+  'If `.bc` is still missing in release, ensure `bin/jerry-snapshot` (or `jerry-snapshot.exe` on Windows) exists under ' +
+  'your ace-loader install — SnapshotPlugin only console.errors when the tool is missing. OHJS does not synthesize stub `.bc`.';
+
+export function jerryBytecodeMissingError(jsPath: string, expectedBcPath: string): OhjsError {
+  return new OhjsError('BLD-FAILED', `ace-loader output missing Jerry lite snapshot bytecode for ${jsPath}`, {
+    hint: `${JERRY_LITE_SNAPSHOT_BC_HINT} Expected sibling: ${expectedBcPath}`,
+  });
+}
+
+export function validateJerryBytecodeTree(jsAbilityDir: string): void {
   const walk = (dir: string) => {
     for (const name of fs.readdirSync(dir)) {
       const full = path.join(dir, name);
@@ -38,13 +50,32 @@ function validateJerryBytecodeTree(jsAbilityDir: string): void {
       else if (name.endsWith('.js')) {
         const bc = full.replace(/\.js$/, '.bc');
         if (!fs.existsSync(bc)) {
-          throw new OhjsError('BLD-FAILED', `ace-loader output missing bytecode for ${full}`, { hint: bc });
+          throw jerryBytecodeMissingError(full, bc);
         }
         assertJerryBytecode(fs.readFileSync(bc), bc);
       }
     }
   };
   walk(jsAbilityDir);
+}
+
+/** Webpack `aceModuleBuild` layout before FA HAP staging (matches {@link stageJsAbilityTree}). */
+export function resolveWebpackJsAbilityDir(jsBuildDir: string, srcPath: string): string {
+  const nested = path.join(jsBuildDir, srcPath);
+  if (fs.existsSync(path.join(nested, 'app.js')) || fs.existsSync(path.join(nested, 'pages'))) {
+    return nested;
+  }
+  if (fs.existsSync(path.join(jsBuildDir, 'app.js')) || fs.existsSync(path.join(jsBuildDir, 'pages'))) {
+    return jsBuildDir;
+  }
+  return jsBuildDir;
+}
+
+/** Fail before restool/HAP staging when webpack produced `.js` without lite snapshot `.bc`. */
+export function preflightWebpackJerryBytecode(jsBuildDir: string, srcPath: string): void {
+  const abilityDir = resolveWebpackJsAbilityDir(jsBuildDir, srcPath);
+  if (!fs.existsSync(abilityDir)) return;
+  validateJerryBytecodeTree(abilityDir);
 }
 
 function ensureJsAbilitySidecars(jsAbilityDir: string, jsSourceRoot: string): void {
@@ -81,16 +112,9 @@ export function stageJsAbilityTree(
   fs.rmSync(destAbilityDir, { recursive: true, force: true });
   fs.mkdirSync(destAbilityDir, { recursive: true });
 
-  const nested = path.join(jsBuildDir, srcPath);
-  if (fs.existsSync(path.join(nested, 'app.js')) || fs.existsSync(path.join(nested, 'pages'))) {
-    copyDir(nested, destAbilityDir);
-  } else if (
-    fs.existsSync(path.join(jsBuildDir, 'app.js')) ||
-    fs.existsSync(path.join(jsBuildDir, 'pages'))
-  ) {
-    copyDir(jsBuildDir, destAbilityDir);
-  } else if (fs.existsSync(jsBuildDir)) {
-    copyDir(jsBuildDir, destAbilityDir);
+  const webpackAbilityDir = resolveWebpackJsAbilityDir(jsBuildDir, srcPath);
+  if (fs.existsSync(webpackAbilityDir)) {
+    copyDir(webpackAbilityDir, destAbilityDir);
   }
 
   ensureJsAbilitySidecars(destAbilityDir, jsSourceRoot);

@@ -6,6 +6,7 @@
   "config.device.targetKey": "Hdc target key (from Refresh Devices). Empty = auto-select when exactly one device is connected.",
   "config.build.backend": "Build backend: fixture zip (CI), ace-loader when toolchain/env/path is set, or auto.",
   "config.build.aceLoaderPath": "developtools_ace_js2bundle ace-loader root (webpack.lite.config.js); run npm install in that checkout.",
+  "config.build.buildMode": "ace-loader webpack `buildMode` for **OHJS: Build**. Use **release** (default) so SnapshotPlugin emits Jerry `.bc` for gold HAP; **debug** is JS-only and will fail gold pack.",
   "command.project.new": "New Project",
   "command.project.build": "Build",
   "command.project.clean": "Clean",

@@ -102,6 +102,16 @@
           "scope": "machine-overridable",
           "description": "%config.build.aceLoaderPath%"
         },
+        "ohjs.build.buildMode": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "release"
+          ],
+          "default": "release",
+          "scope": "resource",
+          "markdownDescription": "%config.build.buildMode%"
+        },
         "ohjs.device.profile": {
           "type": "string",
           "default": "2k0300-1024x768",

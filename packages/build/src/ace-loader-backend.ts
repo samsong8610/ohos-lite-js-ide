@@ -12,12 +12,22 @@ import {
 } from './ace-loader-config';
 import { findJsSourceRoot, prepareAceModuleRoot } from './fa-prep';
 import { devecoHapOutputPath, devecoPackInfoOutputPath } from './hap-paths';
-import { packFaHap } from './hap-packer';
+import { packFaHap, preflightWebpackJerryBytecode } from './hap-packer';
 import type { FaModuleInfo } from './project-info';
 import type { BuildResult } from './types';
 
 export type AceBuildMode = 'debug' | 'release';
 export type AceDeviceType = 'smartVision' | 'liteWearable';
+
+/** Gold HAP / Jerry lite snapshot requires ace-loader `buildMode=release` (SnapshotPlugin). */
+export const DEFAULT_ACE_BUILD_MODE: AceBuildMode = 'release';
+
+export function resolveAceBuildMode(explicit?: AceBuildMode): AceBuildMode {
+  if (explicit) return explicit;
+  const env = process.env.OHJS_BUILD_MODE?.trim();
+  if (env === 'debug' || env === 'release') return env;
+  return DEFAULT_ACE_BUILD_MODE;
+}
 
 export interface AceLoaderBuildOptions extends AceLoaderDiscoveryOptions {
   outDir: string;
@@ -79,7 +89,7 @@ export async function runAceLoaderBuild(
     );
   }
 
-  const buildMode = opts.buildMode ?? 'debug';
+  const buildMode = resolveAceBuildMode(opts.buildMode);
   const deviceType = opts.deviceType ?? 'smartVision';
   const jsOutDir = path.join(opts.outDir, 'ace-js');
   fs.rmSync(jsOutDir, { recursive: true, force: true });
@@ -112,6 +122,8 @@ export async function runAceLoaderBuild(
       cmd,
     });
   }
+
+  preflightWebpackJerryBytecode(jsOutDir, jsSrcPath);
 
   const hapPath = devecoHapOutputPath(module);
   const packInfoPath = devecoPackInfoOutputPath(module);
