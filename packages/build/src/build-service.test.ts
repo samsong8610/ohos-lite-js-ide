@@ -7,7 +7,8 @@ import * as os from 'os';
 import * as path from 'path';
 import { NodeProcessRunner, createHostPlatform, isOhjsError } from '@ohjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { buildProject, findConfigJson, parseFaConfigJson } from './index';
+import { execFileSync } from 'child_process';
+import { buildProject, findConfigJson, isFixtureSourceTreeHapLayout, parseFaConfigJson } from './index';
 
 const fixtureRoot = path.join(__dirname, '../../extension/test/fixtures/oh-project');
 const fakeAceRoot = path.join(__dirname, '../test/fixtures/fake-ace-loader');
@@ -55,6 +56,40 @@ describe('buildProject (fixture backend)', () => {
     runner.disposeAll();
   });
 
+  it('does not fall back to fixture when aceLoaderPath is set but install is invalid', async () => {
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-bld-'));
+    outDirs.push(outDir);
+    const runner = new NodeProcessRunner(createHostPlatform());
+    await expect(
+      buildProject(createHostPlatform(), runner, {
+        workspaceRoot: fixtureRoot,
+        outDir,
+        backend: 'auto',
+        aceLoaderPath: '/nonexistent/ohos-sdk/ace-loader',
+      }),
+    ).rejects.toSatisfy((e) => isOhjsError(e, 'BLD-TOOL-MISSING'));
+    runner.disposeAll();
+  });
+
+  it('does not fall back to fixture when ace pack fails with explicit restoolPath', async () => {
+    const helloliteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-hellolite-'));
+    fs.cpSync(path.join(__dirname, '../test/fixtures/hellolite-lite'), helloliteRoot, { recursive: true });
+    outDirs.push(helloliteRoot);
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-bld-'));
+    outDirs.push(outDir);
+    const runner = new NodeProcessRunner(createHostPlatform());
+    await expect(
+      buildProject(createHostPlatform(), runner, {
+        workspaceRoot: helloliteRoot,
+        outDir,
+        backend: 'auto',
+        aceLoaderPath: fakeAceRoot,
+        restoolPath: '/nonexistent/restool',
+      }),
+    ).rejects.toSatisfy((e) => isOhjsError(e, 'BLD-TOOL-MISSING') || isOhjsError(e, 'BLD-FAILED'));
+    runner.disposeAll();
+  });
+
   it('auto uses fake ace-loader when path is set', async () => {
     const prevRestool = process.env.OHJS_RESTOOL;
     process.env.OHJS_RESTOOL = path.join(__dirname, '../test/fixtures/restool-shim/restool.cjs');
@@ -72,6 +107,11 @@ describe('buildProject (fixture backend)', () => {
         aceLoaderPath: fakeAceRoot,
       });
       expect(r.backend).toBe('ace-loader');
+      const zipPaths = execFileSync('unzip', ['-Z1', r.hapPath], { encoding: 'utf8' })
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+      expect(isFixtureSourceTreeHapLayout(zipPaths)).toBe(false);
     } finally {
       if (prevRestool === undefined) delete process.env.OHJS_RESTOOL;
       else process.env.OHJS_RESTOOL = prevRestool;
