@@ -114,6 +114,19 @@ Commands (OHJS category): **Build**, **Deploy**, **Launch**, **Stop**, **Start L
 **Build, Deploy and Launch**. Settings: `ohjs.tools.hdcServer` (e.g. `127.0.0.1:8711` for qemu-ide),
 `ohjs.device.targetKey`, `ohjs.build.backend` (`fixture` | `ace-loader` | `auto`).
 
+**Gold HAP content** (real Jerry `JRRY1` `.bc`, Restool `resources.index` — not CI fixture stubs) needs both
+toolchain paths configured on the host:
+
+- **ace-loader** — set VS Code **`ohjs.build.aceLoaderPath`** or env **`OHJS_ACE_LOADER_ROOT`** to the root of
+  an upstream checkout of OpenHarmony **`developtools_ace_js2bundle/ace-loader`** (see
+  [samsong8610/developtools_ace_js2bundle](https://github.com/samsong8610/developtools_ace_js2bundle)); run
+  **`npm install`** in that directory (the IDE does not ship ace-loader). With **`auto`**, a missing install falls
+  back to the **fixture** backend and will not pass gold content checks.
+- **restool** — set env **`OHJS_RESTOOL`** to the OpenHarmony SDK **`toolchains/restool`** binary (same role as
+  DevEco). Without it, pack fails or `resources.index` is not Restool-backed.
+
+See [`packages/build/README.md`](packages/build/README.md) and [`docs/GOLD-HAP-ACCEPTANCE.md`](docs/GOLD-HAP-ACCEPTANCE.md).
+
 - Shell exit codes: hdc wraps commands with `; echo __RC=$?` (see `@ohjs/transport-hdc`); bm/aa success is
   parsed from stdout, not exit code.
 - Deploy sends the HAP to `/tmp/ohjs/app.hap`, clears `/data/ohjs/debug.*`, then `bm install`.

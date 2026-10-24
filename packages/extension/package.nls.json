@@ -4,7 +4,7 @@
   "config.tools.hdcServer": "Host hdc server endpoint for `hdc -s` (e.g. `127.0.0.1:8711` when qemu-ide uses a non-default port). Empty uses the hdc default unless `OHOS_HDC_SERVER_PORT` is set.",
   "config.device.targetKey": "Hdc target key (from Refresh Devices). Empty = auto-select when exactly one device is connected.",
   "config.build.backend": "Build backend: fixture zip (CI), ace-loader when toolchain/env/path is set, or auto.",
-  "config.build.aceLoaderPath": "Path to upstream ace-loader root (directory containing webpack.lite.config.js).",
+  "config.build.aceLoaderPath": "developtools_ace_js2bundle ace-loader root (webpack.lite.config.js); run npm install in that checkout.",
   "command.project.new": "New Project",
   "command.project.build": "Build",
   "command.app.deploy": "Deploy",
