@@ -72,6 +72,14 @@ describe('renderProjectTemplate', () => {
     expect(paths).toContain('.gitignore');
     expect(paths).toContain('.ohjs/project.json');
     expect(paths).toContain('entry/src/main/config.json');
+    expect(paths).toContain('entry/src/main/resources/base/element/string.json');
+    expect(paths).toContain('entry/src/main/resources/base/media/icon.png');
+    const stringJson = JSON.parse(
+      new TextDecoder().decode(
+        files.find((f) => f.relativePath === 'entry/src/main/resources/base/element/string.json')!.content,
+      ),
+    );
+    expect(stringJson.string.some((s: { name: string }) => s.name === 'app_name')).toBe(true);
     const config = JSON.parse(
       new TextDecoder().decode(files.find((f) => f.relativePath.endsWith('config.json'))!.content),
     );

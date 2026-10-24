@@ -8,6 +8,7 @@ import * as path from 'path';
 import { NodeProcessRunner, createHostPlatform, renderProjectTemplate } from '@ohjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildProject, findConfigJson } from './index';
+import { collectFaResourceTable } from './lite-resources';
 
 const templatesRoot = path.resolve(__dirname, '../../../templates');
 
@@ -35,6 +36,8 @@ describe('wizard scaffold (fixture build)', () => {
       fs.writeFileSync(dest, f.content);
     }
     expect(findConfigJson(root)).toBeTruthy();
+    const entryRoot = path.join(root, 'entry');
+    expect(collectFaResourceTable(entryRoot).length).toBeGreaterThan(0);
     const outDir = path.join(root, '.ohjs', 'build');
     fs.mkdirSync(outDir, { recursive: true });
     const runner = new NodeProcessRunner(createHostPlatform());
