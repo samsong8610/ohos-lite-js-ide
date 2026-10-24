@@ -116,7 +116,7 @@ export interface AceLoaderProvisionerDeps {
 const FS_RETRY_ATTEMPTS = 8;
 const FS_RETRY_DELAY_MS = 250;
 
-type AceLoaderFsOps = Pick<typeof fs, 'existsSync' | 'rmSync' | 'renameSync'>;
+type AceLoaderFsOps = Pick<typeof fs, 'existsSync' | 'rmSync' | 'renameSync' | 'cpSync'>;
 
 let fsOpsOverride: AceLoaderFsOps | undefined;
 
@@ -170,6 +170,25 @@ export async function renamePathWithRetry(
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       fsOps().renameSync(from, to);
+      return;
+    } catch (e) {
+      if (!isRetryableFsError(e) || attempt >= maxAttempts - 1) throw e;
+      await sleepMs(delayMs);
+    }
+  }
+}
+
+/** Recursive copy with retries (Windows-safe alternative to renaming out of a git worktree). */
+export async function copyPathWithRetry(
+  from: string,
+  to: string,
+  opts: { maxAttempts?: number; delayMs?: number } = {},
+): Promise<void> {
+  const maxAttempts = opts.maxAttempts ?? FS_RETRY_ATTEMPTS;
+  const delayMs = opts.delayMs ?? FS_RETRY_DELAY_MS;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      fsOps().cpSync(from, to, { recursive: true, force: true, errorOnExist: false });
       return;
     } catch (e) {
       if (!isRetryableFsError(e) || attempt >= maxAttempts - 1) throw e;
@@ -244,7 +263,9 @@ async function defaultCloneSparse(
       },
     );
   }
-  await renamePathWithRetry(extracted, params.destRoot);
+  // Windows often returns EPERM when renameSync moves a subdirectory out of a live git worktree.
+  await rmPathWithRetry(path.join(cloneDir, '.git'));
+  await copyPathWithRetry(extracted, params.destRoot);
   await rmPathWithRetry(cloneDir);
 }
 

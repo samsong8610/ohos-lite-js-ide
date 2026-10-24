@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   aceLoaderCloneStagingDir,
   aceLoaderProvisionRoot,
+  copyPathWithRetry,
   defaultCloneSparseForTests,
   ensureAceLoaderInstall,
   isProvisionedAceLoaderReady,
@@ -155,6 +156,7 @@ describe('ace-loader clone fs (Windows EPERM mitigation)', () => {
     let epermHits = 0;
     setAceLoaderFsOpsForTests({
       existsSync: fs.existsSync,
+      cpSync: fs.cpSync,
       renameSync: fs.renameSync,
       rmSync(p, opts) {
         if (p === target && epermHits < 2) {
@@ -183,6 +185,7 @@ describe('ace-loader clone fs (Windows EPERM mitigation)', () => {
     let epermHits = 0;
     setAceLoaderFsOpsForTests({
       existsSync: fs.existsSync,
+      cpSync: fs.cpSync,
       rmSync: fs.rmSync,
       renameSync(a, b) {
         if (a === from && b === to && epermHits < 2) {
@@ -196,6 +199,35 @@ describe('ace-loader clone fs (Windows EPERM mitigation)', () => {
     });
 
     await renamePathWithRetry(from, to, { maxAttempts: 5, delayMs: 1 });
+    expect(epermHits).toBe(2);
+    expect(fs.existsSync(path.join(to, 'webpack.lite.config.js'))).toBe(true);
+  });
+
+  it('copyPathWithRetry succeeds after transient EPERM', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-cp-retry-'));
+    cleanup.push(dir);
+    const from = path.join(dir, 'from');
+    const to = path.join(dir, 'to');
+    fs.mkdirSync(from);
+    fs.writeFileSync(path.join(from, 'webpack.lite.config.js'), '// x');
+
+    let epermHits = 0;
+    setAceLoaderFsOpsForTests({
+      existsSync: fs.existsSync,
+      rmSync: fs.rmSync,
+      renameSync: fs.renameSync,
+      cpSync(src, dest, opts) {
+        if (src === from && dest === to && epermHits < 2) {
+          epermHits++;
+          const err = new Error('EPERM') as NodeJS.ErrnoException;
+          err.code = 'EPERM';
+          throw err;
+        }
+        return fs.cpSync(src, dest, opts);
+      },
+    });
+
+    await copyPathWithRetry(from, to, { maxAttempts: 5, delayMs: 1 });
     expect(epermHits).toBe(2);
     expect(fs.existsSync(path.join(to, 'webpack.lite.config.js'))).toBe(true);
   });
@@ -239,6 +271,35 @@ describe('ace-loader clone fs (Windows EPERM mitigation)', () => {
     expect(fs.existsSync(cloneOutDir)).toBe(false);
   });
 
+  it('defaultCloneSparse promotes ace-loader via copy when rename would fail (Windows git worktree)', async () => {
+    const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ace-store-'));
+    cleanup.push(storageRoot);
+    const destRoot = aceLoaderProvisionRoot(storageRoot);
+
+    let renameCalls = 0;
+    setAceLoaderFsOpsForTests({
+      existsSync: fs.existsSync,
+      rmSync: fs.rmSync,
+      cpSync: fs.cpSync,
+      renameSync(_from, _to) {
+        renameCalls++;
+        const err = new Error('EPERM') as NodeJS.ErrnoException;
+        err.code = 'EPERM';
+        throw err;
+      },
+    });
+
+    await defaultCloneSparseForTests(createHostPlatform(), mockGitRunner(), {
+      repoUrl: 'https://example.invalid/repo.git',
+      tag: 'OpenHarmony-v5.0.3-Release',
+      subdir: 'ace-loader',
+      destRoot,
+    });
+
+    expect(renameCalls).toBe(0);
+    expect(fs.existsSync(path.join(destRoot, 'webpack.lite.config.js'))).toBe(true);
+  });
+
   it('defaultCloneSparse retries rm of destRoot when EPERM is transient', async () => {
     const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ace-store-'));
     cleanup.push(storageRoot);
@@ -249,6 +310,7 @@ describe('ace-loader clone fs (Windows EPERM mitigation)', () => {
     let destRmEperm = 0;
     setAceLoaderFsOpsForTests({
       existsSync: fs.existsSync,
+      cpSync: fs.cpSync,
       renameSync: fs.renameSync,
       rmSync(p, opts) {
         if (p === destRoot && destRmEperm < 1) {
