@@ -19,11 +19,12 @@ describe('validateJerryBytecodeTree', () => {
   });
 
   it('reports Jerry lite snapshot hint when .bc sibling is missing', () => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-jerry-bc-'));
-    const jsPath = path.join(tmpDir, 'app.js');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-jerry-bc-'));
+    tmpDir = dir;
+    const jsPath = path.join(dir, 'app.js');
     fs.writeFileSync(jsPath, 'export default {}');
     try {
-      validateJerryBytecodeTree(tmpDir);
+      validateJerryBytecodeTree(dir);
       expect.unreachable('expected BLD-FAILED');
     } catch (e) {
       expect(isOhjsError(e, 'BLD-FAILED')).toBe(true);
@@ -39,10 +40,11 @@ describe('validateJerryBytecodeTree', () => {
   });
 
   it('accepts real JRRY1 bytecode beside .js', () => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-jerry-bc-'));
-    fs.writeFileSync(path.join(tmpDir, 'app.js'), '');
-    fs.writeFileSync(path.join(tmpDir, 'app.bc'), Buffer.concat([JERRY_BC_MAGIC, Buffer.alloc(32)]));
-    expect(() => validateJerryBytecodeTree(tmpDir)).not.toThrow();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-jerry-bc-'));
+    tmpDir = dir;
+    fs.writeFileSync(path.join(dir, 'app.js'), '');
+    fs.writeFileSync(path.join(dir, 'app.bc'), Buffer.concat([JERRY_BC_MAGIC, Buffer.alloc(32)]));
+    expect(() => validateJerryBytecodeTree(dir)).not.toThrow();
   });
 
   it('jerryBytecodeMissingError names the expected .bc path', () => {
