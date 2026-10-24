@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import * as vscode from 'vscode';
+import { RESTOOL_MISSING_HINT } from '@ohjs/build';
 import { NodeProcessRunner, createHostPlatform, isOhjsError, type OutputEncoding } from '@ohjs/core';
 import { cleanBuildOutputs } from '@ohjs/build';
 import { formatHilogEntry, parseHilogLine } from '@ohjs/transport-hdc';
@@ -19,10 +20,19 @@ import {
 
 function logError(output: vscode.LogOutputChannel, e: unknown): void {
   const base = isOhjsError(e) ? `[${e.code}] ${e.message}` : (e as Error).message;
-  const hint = isOhjsError(e) ? e.detail.hint : undefined;
+  let hint = isOhjsError(e) ? e.detail.hint : undefined;
+  if (isOhjsError(e, 'BLD-TOOL-MISSING') && e.message.toLowerCase().includes('restool')) {
+    hint = RESTOOL_MISSING_HINT;
+  }
   const msg = hint ? `${base}\nHint: ${hint}` : base;
   output.error(msg);
-  void vscode.window.showErrorMessage(hint ? `${base} — ${hint}` : base);
+  const ui =
+    isOhjsError(e, 'BLD-TOOL-MISSING') && e.message.toLowerCase().includes('restool')
+      ? `OHJS build: restool is missing. ${RESTOOL_MISSING_HINT}`
+      : hint
+        ? `${base} — ${hint}`
+        : base;
+  void vscode.window.showErrorMessage(ui);
 }
 
 export function registerDeployCommands(
@@ -72,7 +82,7 @@ export function registerDeployCommands(
   context.subscriptions.push(
     vscode.commands.registerCommand('ohjs.project.build', async () => {
       try {
-        await withSession(async (s) => runBuild(output, s));
+        await withSession(async (s) => runBuild(context, output, s));
         void vscode.window.showInformationMessage('OHJS: build finished');
       } catch (e) {
         logError(output, e);
@@ -87,7 +97,7 @@ export function registerDeployCommands(
           const target = await resolveDeviceTarget(output, s.transport);
           const build = getLastBuild();
           if (!build) {
-            await runBuild(output, s);
+            await runBuild(context, output, s);
           }
           const hap = getLastBuild()?.hapPath;
           if (!hap) throw new Error('No HAP artifact; run OHJS: Build first');

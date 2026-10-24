@@ -57,6 +57,12 @@
           "markdownDescription": "%config.tools.hdcServer%",
           "pattern": "^$|^([0-9.\\[\\]:a-fA-F]+:)?\\d{1,5}$"
         },
+        "ohjs.tools.restoolPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "%config.tools.restoolPath%"
+        },
         "ohjs.tools.hdcOhVersion": {
           "type": "string",
           "enum": [

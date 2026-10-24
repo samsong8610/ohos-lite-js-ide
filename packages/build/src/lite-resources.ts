@@ -143,6 +143,7 @@ export async function compileEntryResourcesIndex(input: {
   bundleName: string;
   entryAssetsDir: string;
   runner: IProcessRunner;
+  restoolPath?: string;
 }): Promise<void> {
   const table = collectFaResourceTable(input.moduleRoot);
   if (table.length === 0) {
@@ -156,6 +157,7 @@ export async function compileEntryResourcesIndex(input: {
     bundleName: input.bundleName,
     entryAssetsDir: input.entryAssetsDir,
     runner: input.runner,
+    restoolPath: input.restoolPath,
   });
 }
 

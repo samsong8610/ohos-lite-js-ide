@@ -14,6 +14,7 @@ import {
 import { HdcToolchainResolver, HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
 import { buildHdcToolchainContext } from './hdc-context';
+import { startAceLoaderPrefetch } from './ace-loader-provision';
 import { registerDeployCommands } from './deploy-commands';
 import { registerOhjsDebug } from './debug/register';
 // type-only: the client (vscode-languageclient, ~440 KB) lives in dist/client.js and is required on demand
@@ -153,6 +154,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   registerDeviceCommands(context, output, deviceProfile?.paths.firmwareManifest);
   registerDeployCommands(context, output);
   registerOhjsDebug(context);
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (workspaceRoot) startAceLoaderPrefetch(context, output, workspaceRoot);
   const activationMs = performance.now() - t0;
   output.info(`activated in ${Math.round(activationMs)} ms`);
   return {

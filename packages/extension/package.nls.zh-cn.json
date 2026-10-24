@@ -1,6 +1,7 @@
 {
   "capabilities.untrusted": "在受限工作区中禁用设备部署和外部工具。",
   "config.tools.hdcPath": "hdc 可执行文件路径，留空则自动定位（设置后将跳过按设备版本选择）。",
+  "config.tools.restoolPath": "OpenHarmony SDK 的 `toolchains/restool` 路径（生成 gold HAP 的 resources.index）。设置后优先于环境变量 `OHJS_RESTOOL`。restool 不会自动下载。",
   "config.tools.hdcServer": "主机 hdc 服务地址（`hdc -s`），例如 qemu-ide 使用非默认端口时填 `127.0.0.1:8711`。留空则使用 hdc 默认端口，或读取环境变量 `OHOS_HDC_SERVER_PORT`。",
   "config.device.targetKey": "Hdc 设备 key（先执行刷新设备）。留空且仅连接一台设备时自动选择。",
   "config.build.backend": "构建后端：fixture（CI zip）、ace-loader（toolchain/环境变量/路径）或 auto。",

@@ -23,6 +23,7 @@ export interface AceLoaderBuildOptions extends AceLoaderDiscoveryOptions {
   outDir: string;
   buildMode?: AceBuildMode;
   deviceType?: AceDeviceType;
+  restoolPath?: string;
 }
 
 export function webpackLiteCommand(
@@ -123,6 +124,7 @@ export async function runAceLoaderBuild(
     hapPath,
     packInfoPath,
     runner,
+    restoolPath: opts.restoolPath,
   });
 
   if (!fs.existsSync(hapPath)) {

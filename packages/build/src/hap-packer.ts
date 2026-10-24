@@ -159,6 +159,7 @@ export interface FaHapPackInput {
   hapPath: string;
   packInfoPath?: string;
   runner: IProcessRunner;
+  restoolPath?: string;
 }
 
 /**
@@ -182,6 +183,7 @@ export async function packFaHap(input: FaHapPackInput): Promise<void> {
     bundleName: input.module.bundleName,
     entryAssetsDir: entryAssets,
     runner: input.runner,
+    restoolPath: input.restoolPath,
   });
 
   const packaged = enrichPackagedConfig(sourceConfig, {
