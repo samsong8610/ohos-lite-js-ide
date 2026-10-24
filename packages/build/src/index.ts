@@ -15,3 +15,4 @@ export * from './lite-restool';
 export * from './hap-content';
 export * from './fixture-backend';
 export * from './zip-hap';
+export * from './clean-build-outputs';

@@ -241,6 +241,12 @@
         "enablement": "ohjs.isProject"
       },
       {
+        "command": "ohjs.project.clean",
+        "title": "%command.project.clean%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
         "command": "ohjs.app.deploy",
         "title": "%command.app.deploy%",
         "category": "OHJS",

@@ -7,6 +7,7 @@
   "config.build.aceLoaderPath": "developtools_ace_js2bundle 的 ace-loader 根目录（含 webpack.lite.config.js）；在该目录执行 npm install。",
   "command.project.new": "新建项目",
   "command.project.build": "构建",
+  "command.project.clean": "清理",
   "command.app.deploy": "部署",
   "command.app.launch": "启动",
   "command.app.stop": "停止",

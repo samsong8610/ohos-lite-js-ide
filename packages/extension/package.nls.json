@@ -7,6 +7,7 @@
   "config.build.aceLoaderPath": "developtools_ace_js2bundle ace-loader root (webpack.lite.config.js); run npm install in that checkout.",
   "command.project.new": "New Project",
   "command.project.build": "Build",
+  "command.project.clean": "Clean",
   "command.app.deploy": "Deploy",
   "command.app.launch": "Launch",
   "command.app.stop": "Stop",

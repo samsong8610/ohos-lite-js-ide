@@ -4,9 +4,11 @@
  */
 import * as vscode from 'vscode';
 import { NodeProcessRunner, createHostPlatform, isOhjsError, type OutputEncoding } from '@ohjs/core';
+import { cleanBuildOutputs } from '@ohjs/build';
 import { formatHilogEntry, parseHilogLine } from '@ohjs/transport-hdc';
 import {
   createWorkspaceSession,
+  clearLastBuild,
   getLastBuild,
   readModuleInfo,
   resolveDeviceTarget,
@@ -45,6 +47,27 @@ export function registerDeployCommands(
   };
 
   context.subscriptions.push({ dispose: () => void stopLogTail() });
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ohjs.project.clean', async () => {
+      try {
+        const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (!root) throw new Error('No workspace folder');
+        const { removed } = cleanBuildOutputs(root);
+        clearLastBuild();
+        if (removed.length === 0) {
+          output.info('clean: no build outputs to remove');
+        } else {
+          for (const p of removed) output.info(`clean: removed ${p}`);
+        }
+        void vscode.window.showInformationMessage(
+          removed.length === 0 ? 'OHJS: nothing to clean' : `OHJS: cleaned ${removed.length} path(s)`,
+        );
+      } catch (e) {
+        logError(output, e);
+      }
+    }),
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ohjs.project.build', async () => {
