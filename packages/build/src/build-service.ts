@@ -11,7 +11,7 @@ import {
   ensureAceLoaderInstall,
   type AceLoaderProvisionerDeps,
 } from './ace-loader-provision';
-import { runAceLoaderBuild } from './ace-loader-backend';
+import { runAceLoaderBuild, type AceBuildMode } from './ace-loader-backend';
 import { buildIntentFromOptions } from './build-intent';
 import { runFixtureBuild } from './fixture-backend';
 import { parseFaConfigJson } from './project-info';
@@ -30,6 +30,8 @@ export interface BuildOptions {
   aceLoaderPath?: string;
   /** VS Code `ohjs.tools.restoolPath` — OpenHarmony SDK restool (overrides OHJS_RESTOOL when set). */
   restoolPath?: string;
+  /** VS Code `ohjs.build.buildMode` — ace-loader webpack `--env buildMode=` (default release for Jerry `.bc`). */
+  buildMode?: AceBuildMode;
   /** When set, auto-download pinned ace-loader into this directory (extension globalStorage). */
   aceLoaderStorageRoot?: string;
   aceLoaderAutoProvision?: boolean;
@@ -101,6 +103,7 @@ export async function buildProject(
           ...discovery,
           outDir,
           restoolPath: opts.restoolPath,
+          buildMode: opts.buildMode,
         });
       } catch (e) {
         if (intent.requiresAceLoaderGoldPack) throw e;

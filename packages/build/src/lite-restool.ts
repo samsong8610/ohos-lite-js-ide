@@ -4,7 +4,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { OhjsError, type IProcessRunner } from '@ohjs/core';
+import { OhjsError, createHostPlatform, type IPlatform, type IProcessRunner } from '@ohjs/core';
 import { assertRestoolIndex } from './hap-content';
 
 function findResourcesIndex(outDir: string): string | undefined {
@@ -32,17 +32,44 @@ export interface RestoolPathOptions {
   restoolPath?: string;
 }
 
+/** Resolve a configured restool path when the file exists (Windows: try `.exe` / strip `.exe`). */
+export function resolveExistingRestoolCandidate(
+  configured: string,
+  platform: IPlatform = createHostPlatform(),
+): string | undefined {
+  const trimmed = configured.trim();
+  if (!trimmed) return undefined;
+  if (fs.existsSync(trimmed)) return trimmed;
+  if (platform.kind !== 'win32') return undefined;
+  const lower = trimmed.toLowerCase();
+  if (!lower.endsWith('.exe')) {
+    const withExe = `${trimmed}.exe`;
+    if (fs.existsSync(withExe)) return withExe;
+    return undefined;
+  }
+  const withoutExe = trimmed.slice(0, -4);
+  if (withoutExe && fs.existsSync(withoutExe)) return withoutExe;
+  return undefined;
+}
+
 export function resolveRestoolPath(opts?: RestoolPathOptions): string | undefined {
   const setting = opts?.restoolPath?.trim();
-  if (setting && fs.existsSync(setting)) return setting;
+  if (setting) {
+    const hit = resolveExistingRestoolCandidate(setting);
+    if (hit) return hit;
+  }
   const env = process.env.OHJS_RESTOOL?.trim();
-  if (env && fs.existsSync(env)) return env;
+  if (env) {
+    const hit = resolveExistingRestoolCandidate(env);
+    if (hit) return hit;
+  }
   return undefined;
 }
 
 export const RESTOOL_MISSING_HINT =
   'Set VS Code ohjs.tools.restoolPath or env OHJS_RESTOOL to your OpenHarmony SDK toolchains/restool ' +
   '(e.g. C:\\OpenHarmony\\Sdk\\11\\toolchains\\restool.exe or …/ohos-sdk-…/toolchains/restool). ' +
+  'On Windows you may omit `.exe`; OHJS will try appending it when the bare path is missing. ' +
   'restool cannot be downloaded automatically — see README G2.';
 
 export interface RestoolCompileInput {

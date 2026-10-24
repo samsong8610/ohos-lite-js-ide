@@ -8,7 +8,13 @@ import * as path from 'path';
 import { createHostPlatform } from '@ohjs/core';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { resolveAceLoaderInstall } from './ace-loader-config';
-import { aceLoaderWebpackEnv, runAceLoaderBuild, webpackLiteCommand } from './ace-loader-backend';
+import {
+  aceLoaderWebpackEnv,
+  DEFAULT_ACE_BUILD_MODE,
+  resolveAceBuildMode,
+  runAceLoaderBuild,
+  webpackLiteCommand,
+} from './ace-loader-backend';
 import { buildProject, parseFaConfigJson } from './index';
 
 const fixtureRoot = path.join(__dirname, '../../extension/test/fixtures/oh-project');
@@ -42,6 +48,12 @@ describe('ace-loader backend', () => {
     outDirs.length = 0;
   });
 
+  it('defaults webpack buildMode to release for Jerry snapshot', () => {
+    expect(DEFAULT_ACE_BUILD_MODE).toBe('release');
+    expect(resolveAceBuildMode()).toBe('release');
+    expect(resolveAceBuildMode('debug')).toBe('debug');
+  });
+
   it('resolveAceLoaderInstall finds fake fixture root', () => {
     const install = resolveAceLoaderInstall({
       workspaceRoot: fixtureRoot,
@@ -50,6 +62,73 @@ describe('ace-loader backend', () => {
     expect(install?.webpackConfig).toMatch(/webpack\.lite\.config\.js$/);
     expect(install?.webpackCli).toMatch(/webpack\.js$/);
     expect(fs.existsSync(install!.webpackCli)).toBe(true);
+  });
+
+  it('runAceLoaderBuild passes release buildMode to webpack by default', async () => {
+    const platform = createHostPlatform();
+    const webpackBuildModes: string[] = [];
+    const runner = {
+      run: async (cmd: { args?: string[]; file?: string }) => {
+        const args = cmd.args ?? [];
+        if (args.some((a) => a.includes('webpack'))) {
+          const envIdx = args.indexOf('--env');
+          if (envIdx >= 0) webpackBuildModes.push(args[envIdx + 1] ?? '');
+        }
+        return { exitCode: 0, stdout: '', stderr: '' };
+      },
+      disposeAll: () => {},
+    };
+    const helloliteRoot = copyHelloliteWorkspace();
+    outDirs.push(helloliteRoot);
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ace-'));
+    outDirs.push(outDir);
+    const cfg = path.join(helloliteRoot, 'entry/src/main/config.json');
+    const module = parseFaConfigJson(fs.readFileSync(cfg, 'utf8'), cfg);
+    try {
+      await runAceLoaderBuild(platform, runner as never, module, {
+        workspaceRoot: helloliteRoot,
+        aceLoaderPath: fakeAceRoot,
+        outDir,
+        restoolPath: restoolShim,
+      });
+    } catch {
+      // mock webpack does not populate ace-js; restool/pack may fail after webpack invoke
+    }
+    expect(webpackBuildModes[0]).toBe('buildMode=release');
+  });
+
+  it('runAceLoaderBuild honors buildMode=debug override', async () => {
+    const platform = createHostPlatform();
+    const webpackBuildModes: string[] = [];
+    const runner = {
+      run: async (cmd: { args?: string[] }) => {
+        const args = cmd.args ?? [];
+        if (args.some((a) => a.includes('webpack'))) {
+          const envIdx = args.indexOf('--env');
+          if (envIdx >= 0) webpackBuildModes.push(args[envIdx + 1] ?? '');
+        }
+        return { exitCode: 0, stdout: '', stderr: '' };
+      },
+      disposeAll: () => {},
+    };
+    const helloliteRoot = copyHelloliteWorkspace();
+    outDirs.push(helloliteRoot);
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-ace-'));
+    outDirs.push(outDir);
+    const cfg = path.join(helloliteRoot, 'entry/src/main/config.json');
+    const module = parseFaConfigJson(fs.readFileSync(cfg, 'utf8'), cfg);
+    try {
+      await runAceLoaderBuild(platform, runner as never, module, {
+        workspaceRoot: helloliteRoot,
+        aceLoaderPath: fakeAceRoot,
+        outDir,
+        restoolPath: restoolShim,
+        buildMode: 'debug',
+      });
+    } catch {
+      //
+    }
+    expect(webpackBuildModes[0]).toBe('buildMode=debug');
   });
 
   it('webpackLiteCommand passes webpack config and buildMode env', () => {
