@@ -6,6 +6,7 @@ export * from './project-info';
 export * from './types';
 export * from './build-service';
 export * from './ace-loader-config';
+export * from './ace-loader-provision';
 export * from './ace-loader-backend';
 export * from './fa-prep';
 export * from './hap-packer';

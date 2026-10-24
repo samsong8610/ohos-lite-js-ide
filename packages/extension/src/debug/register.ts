@@ -83,7 +83,7 @@ class OhjsDebugConfigurationProvider implements vscode.DebugConfigurationProvide
     if (cfg.preDeploy) {
       let build = getLastBuild();
       if (!build) {
-        await runBuild(output, session);
+        await runBuild(this.context, output, session);
         build = getLastBuild();
       }
       if (build?.hapPath) cfg.hapPath = build.hapPath;

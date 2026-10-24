@@ -123,16 +123,36 @@ export async function createWorkspaceSession(
 }
 
 export async function runBuild(
+  context: vscode.ExtensionContext,
   output: vscode.LogOutputChannel,
   session: WorkspaceSession,
 ): Promise<BuildResult> {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!root) throw new OhjsError('BLD-NO-PROJECT', 'No workspace folder');
   const buildCfg = vscode.workspace.getConfiguration('ohjs.build');
+  const toolsCfg = vscode.workspace.getConfiguration('ohjs.tools');
   const backend = buildCfg.get<'auto' | 'fixture' | 'ace-loader'>('backend', 'auto');
   const aceLoaderPath = buildCfg.get<string>('aceLoaderPath', '').trim() || undefined;
+  const restoolPath = toolsCfg.get<string>('restoolPath', '').trim() || undefined;
   const platform = createHostPlatform();
-  const r = await buildProject(platform, session.runner, { workspaceRoot: root, backend, aceLoaderPath });
+  const autoProvision = backend === 'auto' || backend === 'ace-loader';
+  const r = await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: 'OHJS: Build',
+      cancellable: false,
+    },
+    async () =>
+      buildProject(platform, session.runner, {
+        workspaceRoot: root,
+        backend,
+        aceLoaderPath,
+        restoolPath,
+        aceLoaderStorageRoot: context.globalStorageUri.fsPath,
+        aceLoaderAutoProvision: autoProvision,
+        onBuildProgress: (msg) => output.info(msg),
+      }),
+  );
   lastBuild = r;
   session.lastBuild = r;
   session.moduleInfo = r.module;

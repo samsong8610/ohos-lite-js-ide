@@ -114,16 +114,19 @@ Commands (OHJS category): **Build**, **Deploy**, **Launch**, **Stop**, **Start L
 **Build, Deploy and Launch**. Settings: `ohjs.tools.hdcServer` (e.g. `127.0.0.1:8711` for qemu-ide),
 `ohjs.device.targetKey`, `ohjs.build.backend` (`fixture` | `ace-loader` | `auto`).
 
-**Gold HAP content** (real Jerry `JRRY1` `.bc`, Restool `resources.index` — not CI fixture stubs) needs both
-toolchain paths configured on the host:
+**Gold HAP content** (real Jerry `JRRY1` `.bc`, Restool `resources.index` — not CI fixture stubs) needs ace-loader
+and restool on the host:
 
-- **ace-loader** — set VS Code **`ohjs.build.aceLoaderPath`** or env **`OHJS_ACE_LOADER_ROOT`** to the root of
-  an upstream checkout of OpenHarmony **`developtools_ace_js2bundle/ace-loader`** (see
-  [samsong8610/developtools_ace_js2bundle](https://github.com/samsong8610/developtools_ace_js2bundle)); run
-  **`npm install`** in that directory (the IDE does not ship ace-loader). With **`auto`**, a missing install falls
-  back to the **fixture** backend and will not pass gold content checks.
-- **restool** — set env **`OHJS_RESTOOL`** to the OpenHarmony SDK **`toolchains/restool`** binary (same role as
-  DevEco). Without it, pack fails or `resources.index` is not Restool-backed.
+- **ace-loader** — with **`ohjs.build.backend`** `auto` or `ace-loader` and no manual path, the extension
+  **auto-downloads** pinned **`OpenHarmony-v5.0.3-Release`** / ace-loader **1.0.11** from
+  [samsong8610/developtools_ace_js2bundle](https://github.com/samsong8610/developtools_ace_js2bundle) into VS Code
+  **globalStorage**, runs **`npm install --omit=dev` once**, and uses that checkout (~107MB; **not** bundled in the
+  vsix). Manual overrides still win: **`ohjs.build.aceLoaderPath`**, env **`OHJS_ACE_LOADER_ROOT`**, or
+  `.ohjs/toolchain.json` `aceLoaderRoot` / `aceLoaderMain`. On download/npm failure, set a manual path (see
+  [`packages/build/README.md`](packages/build/README.md)).
+- **restool** — set VS Code **`ohjs.tools.restoolPath`** or env **`OHJS_RESTOOL`** to the OpenHarmony SDK
+  **`toolchains/restool`** binary (setting wins when both are set). **restool is not auto-downloaded**; without it,
+  ace-loader builds fail at pack with a visible error pointing here.
 
 See [`packages/build/README.md`](packages/build/README.md) and [`docs/GOLD-HAP-ACCEPTANCE.md`](docs/GOLD-HAP-ACCEPTANCE.md).
 

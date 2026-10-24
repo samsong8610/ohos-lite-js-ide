@@ -27,11 +27,23 @@ function findResourcesIndex(outDir: string): string | undefined {
   return walk(outDir, 0);
 }
 
-export function resolveRestoolPath(): string | undefined {
-  const env = process.env.OHJS_RESTOOL;
+export interface RestoolPathOptions {
+  /** VS Code `ohjs.tools.restoolPath` (wins over env when set and path exists). */
+  restoolPath?: string;
+}
+
+export function resolveRestoolPath(opts?: RestoolPathOptions): string | undefined {
+  const setting = opts?.restoolPath?.trim();
+  if (setting && fs.existsSync(setting)) return setting;
+  const env = process.env.OHJS_RESTOOL?.trim();
   if (env && fs.existsSync(env)) return env;
   return undefined;
 }
+
+export const RESTOOL_MISSING_HINT =
+  'Set VS Code ohjs.tools.restoolPath or env OHJS_RESTOOL to your OpenHarmony SDK toolchains/restool ' +
+  '(e.g. C:\\OpenHarmony\\Sdk\\11\\toolchains\\restool.exe or …/ohos-sdk-…/toolchains/restool). ' +
+  'restool cannot be downloaded automatically — see README G2.';
 
 export interface RestoolCompileInput {
   moduleRoot: string;
@@ -40,6 +52,7 @@ export interface RestoolCompileInput {
   /** Directory that will contain `resources.index` (e.g. HAP `assets/entry/`). */
   entryAssetsDir: string;
   runner: IProcessRunner;
+  restoolPath?: string;
 }
 
 /**
@@ -47,12 +60,12 @@ export interface RestoolCompileInput {
  * Requires {@link OHJS_RESTOOL} pointing at the host toolchains binary.
  */
 export async function runRestoolCompile(input: RestoolCompileInput): Promise<void> {
-  const restool = resolveRestoolPath();
+  const restool = resolveRestoolPath({ restoolPath: input.restoolPath });
   if (!restool) {
     throw new OhjsError(
       'BLD-TOOL-MISSING',
-      'resources.index requires OpenHarmony restool; set OHJS_RESTOOL to SDK toolchains/restool',
-      { hint: input.entryAssetsDir },
+      'Gold HAP pack requires OpenHarmony SDK restool (resources.index)',
+      { hint: RESTOOL_MISSING_HINT },
     );
   }
 

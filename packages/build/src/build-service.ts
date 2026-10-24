@@ -6,6 +6,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { OhjsError, type IPlatform, type IProcessRunner } from '@ohjs/core';
 import { aceLoaderConfigured } from './ace-loader-config';
+import {
+  aceLoaderProvisionRoot,
+  ensureAceLoaderInstall,
+  type AceLoaderProvisionerDeps,
+} from './ace-loader-provision';
 import { runAceLoaderBuild } from './ace-loader-backend';
 import { runFixtureBuild } from './fixture-backend';
 import { parseFaConfigJson } from './project-info';
@@ -21,6 +26,13 @@ export interface BuildOptions {
   aceLoaderMain?: string;
   /** VS Code `ohjs.build.aceLoaderPath` — ace-loader root with webpack.lite.config.js */
   aceLoaderPath?: string;
+  /** VS Code `ohjs.tools.restoolPath` — OpenHarmony SDK restool (overrides OHJS_RESTOOL when set). */
+  restoolPath?: string;
+  /** When set, auto-download pinned ace-loader into this directory (extension globalStorage). */
+  aceLoaderStorageRoot?: string;
+  aceLoaderAutoProvision?: boolean;
+  onBuildProgress?: (message: string) => void;
+  aceLoaderProvisionDeps?: AceLoaderProvisionerDeps;
 }
 
 export function findConfigJson(workspaceRoot: string): string | undefined {
@@ -65,12 +77,28 @@ export async function buildProject(
     workspaceRoot: opts.workspaceRoot,
     aceLoaderMain: opts.aceLoaderMain,
     aceLoaderPath: opts.aceLoaderPath,
+    aceLoaderAutoRoot: opts.aceLoaderStorageRoot
+      ? aceLoaderProvisionRoot(opts.aceLoaderStorageRoot)
+      : undefined,
   };
 
   if (backend === 'ace-loader' || backend === 'auto') {
+    if (opts.aceLoaderAutoProvision && opts.aceLoaderStorageRoot) {
+      await ensureAceLoaderInstall(platform, runner, {
+        ...discovery,
+        storageRoot: opts.aceLoaderStorageRoot,
+        provision: true,
+        onProgress: opts.onBuildProgress,
+        deps: opts.aceLoaderProvisionDeps,
+      });
+    }
     if (aceLoaderConfigured(discovery)) {
       try {
-        return await runAceLoaderBuild(platform, runner, module, { ...discovery, outDir });
+        return await runAceLoaderBuild(platform, runner, module, {
+          ...discovery,
+          outDir,
+          restoolPath: opts.restoolPath,
+        });
       } catch (e) {
         if (backend === 'ace-loader') throw e;
         if (e instanceof OhjsError && e.code === 'BLD-TOOL-MISSING') throw e;

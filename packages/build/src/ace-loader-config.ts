@@ -16,6 +16,8 @@ export interface AceLoaderDiscoveryOptions {
   workspaceRoot: string;
   aceLoaderMain?: string;
   aceLoaderPath?: string;
+  /** Extension globalStorage auto-provision root (lowest priority). */
+  aceLoaderAutoRoot?: string;
 }
 
 function existsFile(p: string | undefined): p is string {
@@ -57,7 +59,7 @@ function resolveRoot(candidates: (string | undefined)[]): string | undefined {
   return undefined;
 }
 
-/** FR-BLD-002 discovery: opts → env → toolchain → workspace setting path. */
+/** FR-BLD-002 discovery: opts → env → toolchain → workspace setting → env root → auto-provision root. */
 export function resolveAceLoaderInstall(opts: AceLoaderDiscoveryOptions): AceLoaderInstall | undefined {
   const tc = readToolchain(opts.workspaceRoot);
   const root = resolveRoot([
@@ -67,6 +69,7 @@ export function resolveAceLoaderInstall(opts: AceLoaderDiscoveryOptions): AceLoa
     tc.aceLoaderRoot,
     opts.aceLoaderPath,
     process.env.OHJS_ACE_LOADER_ROOT,
+    opts.aceLoaderAutoRoot,
   ]);
   if (!root) return undefined;
 

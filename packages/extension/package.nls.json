@@ -1,6 +1,7 @@
 {
   "capabilities.untrusted": "Device deployment and external tools are disabled in untrusted workspaces.",
   "config.tools.hdcPath": "Path to the hdc executable. Empty = auto-detect (overrides version-aware selection).",
+  "config.tools.restoolPath": "Path to the OpenHarmony SDK `toolchains/restool` binary for gold HAP `resources.index`. Overrides `OHJS_RESTOOL` when set. restool is not auto-downloaded.",
   "config.tools.hdcServer": "Host hdc server endpoint for `hdc -s` (e.g. `127.0.0.1:8711` when qemu-ide uses a non-default port). Empty uses the hdc default unless `OHOS_HDC_SERVER_PORT` is set.",
   "config.device.targetKey": "Hdc target key (from Refresh Devices). Empty = auto-select when exactly one device is connected.",
   "config.build.backend": "Build backend: fixture zip (CI), ace-loader when toolchain/env/path is set, or auto.",

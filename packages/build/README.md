@@ -18,10 +18,20 @@ The VS Code command **OHJS: Clean** calls `cleanBuildOutputs(workspaceRoot)` to 
 2. `.ohjs/toolchain.json`: `{ "aceLoaderMain": "…", "aceLoaderRoot": "…" }`
 3. VS Code **`ohjs.build.aceLoaderPath`** (ace-loader checkout root)
 4. Env **`OHJS_ACE_LOADER_ROOT`** (optional root override)
+5. **Auto-provisioned** install under extension globalStorage (`OpenHarmony-v5.0.3-Release` tag, ace-loader **1.0.11**)
 
 Valid install: `<root>/webpack.lite.config.js` and `<root>/node_modules/webpack/bin/webpack.js` (run `npm install` in upstream `ace-loader`).
 
-Upstream checkout: [samsong8610/developtools_ace_js2bundle](https://github.com/samsong8610/developtools_ace_js2bundle) or OpenHarmony `developtools_ace_js2bundle` → `ace-loader/`.
+### Auto-provision (VS Code extension)
+
+When backend is **`auto`** or **`ace-loader`**, no manual path/env/toolchain entry is set, and globalStorage has no
+ready install, OHJS **git sparse-clones** tag **`OpenHarmony-v5.0.3-Release`** from
+[samsong8610/developtools_ace_js2bundle](https://github.com/samsong8610/developtools_ace_js2bundle) (`ace-loader/`
+only), runs **`npm install --omit=dev`**, and reuses the result. Progress goes to the OHJS output channel /
+notification. Failures surface a clear error; set **`ohjs.build.aceLoaderPath`** or **`OHJS_ACE_LOADER_ROOT`** to
+override. The vsix does **not** bundle ace-loader.
+
+Upstream manual checkout: same repo or OpenHarmony `developtools_ace_js2bundle` → `ace-loader/`.
 
 ## Webpack invocation
 
@@ -49,12 +59,14 @@ With environment (also merged into the process env):
 
 Pack step validates **real** Jerry bytecode (`JRRY1` magic on every `.bc`) and **Restool** `resources.index` (`Restool ` header). The packer does **not** synthesize placeholder `.bc` or index files.
 
-Set **`OHJS_RESTOOL`** to the OpenHarmony SDK `toolchains/restool` binary (same invocation as DevEco: `-i src/main -j config.json -p bundleName -o … -r ResourceTable.txt -f`).
+Set VS Code **`ohjs.tools.restoolPath`** or env **`OHJS_RESTOOL`** to the OpenHarmony SDK `toolchains/restool`
+binary (setting wins when both are set; same invocation as DevEco: `-i src/main -j config.json -p bundleName -o … -r ResourceTable.txt -f`). **restool is not auto-downloaded.**
 
 Example:
 
 ```bash
 export OHJS_RESTOOL=/path/to/openharmony/sdk/toolchains/restool
+# Windows example: C:\OpenHarmony\Sdk\11\toolchains\restool.exe
 ```
 
 See `docs/GOLD-HAP-ACCEPTANCE.md` for gold zip member paths and content checks.
