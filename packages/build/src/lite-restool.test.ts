@@ -5,11 +5,13 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { HostPlatform } from '@ohjs/core';
+import { HostPlatform, createHostPlatform } from '@ohjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolveExistingRestoolCandidate, resolveRestoolPath } from './lite-restool';
 
 const win32 = new HostPlatform({ kind: 'win32' });
+const linux = new HostPlatform({ kind: 'linux' });
+const host = createHostPlatform();
 
 describe('resolveRestoolPath', () => {
   let tmpDir: string | undefined;
@@ -55,11 +57,25 @@ describe('resolveRestoolPath', () => {
     expect(resolveExistingRestoolCandidate(`${bare}.exe`, win32)).toBe(bare);
   });
 
-  it('does not append .exe on non-win32', () => {
+  it('does not append .exe when platform kind is not win32', () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-restool-'));
     const bare = path.join(tmpDir, 'restool');
     fs.writeFileSync(`${bare}.exe`, '');
-    expect(resolveExistingRestoolCandidate(bare)).toBeUndefined();
+    expect(resolveExistingRestoolCandidate(bare, linux)).toBeUndefined();
+  });
+
+  it.runIf(host.kind === 'win32')('resolveRestoolPath on win32 host appends .exe', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-restool-'));
+    const bare = path.join(tmpDir, 'restool');
+    const withExe = `${bare}.exe`;
+    fs.writeFileSync(withExe, '');
+    expect(resolveRestoolPath({ restoolPath: bare })).toBe(withExe);
+  });
+
+  it.runIf(host.kind !== 'win32')('resolveRestoolPath on non-win32 host ignores .exe-only sibling', () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-restool-'));
+    const bare = path.join(tmpDir, 'restool');
+    fs.writeFileSync(`${bare}.exe`, '');
     expect(resolveRestoolPath({ restoolPath: bare })).toBeUndefined();
   });
 });
