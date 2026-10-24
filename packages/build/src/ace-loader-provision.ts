@@ -113,6 +113,77 @@ export interface AceLoaderProvisionerDeps {
   npmInstall?: (platform: IPlatform, runner: IProcessRunner, aceRoot: string) => Promise<void>;
 }
 
+const FS_RETRY_ATTEMPTS = 8;
+const FS_RETRY_DELAY_MS = 250;
+
+type AceLoaderFsOps = Pick<typeof fs, 'existsSync' | 'rmSync' | 'renameSync'>;
+
+let fsOpsOverride: AceLoaderFsOps | undefined;
+
+function fsOps(): AceLoaderFsOps {
+  return fsOpsOverride ?? fs;
+}
+
+/** Unit tests: simulate transient EPERM on rm/rename without mocking ESM fs. */
+export function setAceLoaderFsOpsForTests(ops: AceLoaderFsOps | undefined): void {
+  fsOpsOverride = ops;
+}
+
+function isRetryableFsError(e: unknown): boolean {
+  if (!e || typeof e !== 'object' || !('code' in e)) return false;
+  const code = (e as NodeJS.ErrnoException).code;
+  return code === 'EPERM' || code === 'EBUSY' || code === 'EACCES';
+}
+
+async function sleepMs(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Remove a path with retries for transient Windows EPERM/EBUSY (AV locks, stale handles). */
+export async function rmPathWithRetry(
+  target: string,
+  opts: { maxAttempts?: number; delayMs?: number } = {},
+): Promise<void> {
+  const maxAttempts = opts.maxAttempts ?? FS_RETRY_ATTEMPTS;
+  const delayMs = opts.delayMs ?? FS_RETRY_DELAY_MS;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      if (fsOps().existsSync(target)) {
+        fsOps().rmSync(target, { recursive: true, force: true });
+      }
+      return;
+    } catch (e) {
+      if (!isRetryableFsError(e) || attempt >= maxAttempts - 1) throw e;
+      await sleepMs(delayMs);
+    }
+  }
+}
+
+/** Rename with retries for transient Windows EPERM/EBUSY under AppData. */
+export async function renamePathWithRetry(
+  from: string,
+  to: string,
+  opts: { maxAttempts?: number; delayMs?: number } = {},
+): Promise<void> {
+  const maxAttempts = opts.maxAttempts ?? FS_RETRY_ATTEMPTS;
+  const delayMs = opts.delayMs ?? FS_RETRY_DELAY_MS;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      fsOps().renameSync(from, to);
+      return;
+    } catch (e) {
+      if (!isRetryableFsError(e) || attempt >= maxAttempts - 1) throw e;
+      await sleepMs(delayMs);
+    }
+  }
+}
+
+/** Git clone staging dir under the OS temp folder (avoids EPERM under VS Code globalStorage on Windows). */
+export function aceLoaderCloneStagingDir(platform: IPlatform, tag: string): string {
+  const safeTag = tag.replace(/[^\w.-]+/g, '_');
+  return path.join(platform.tempDir(), `ohjs-ace-clone-${safeTag}-${process.pid}-${Date.now()}`);
+}
+
 async function defaultCloneSparse(
   platform: IPlatform,
   runner: IProcessRunner,
@@ -121,9 +192,11 @@ async function defaultCloneSparse(
   const git = requireOnPath(platform, 'git');
   const parent = path.dirname(params.destRoot);
   fs.mkdirSync(parent, { recursive: true });
-  const cloneDir = `${params.destRoot}.clone-tmp`;
-  fs.rmSync(cloneDir, { recursive: true, force: true });
-  fs.rmSync(params.destRoot, { recursive: true, force: true });
+  const cloneDir = aceLoaderCloneStagingDir(platform, params.tag);
+  const legacyCloneTmp = `${params.destRoot}.clone-tmp`;
+  await rmPathWithRetry(cloneDir);
+  await rmPathWithRetry(legacyCloneTmp);
+  await rmPathWithRetry(params.destRoot);
 
   const clone = await runner.run(
     {
@@ -171,9 +244,12 @@ async function defaultCloneSparse(
       },
     );
   }
-  fs.renameSync(extracted, params.destRoot);
-  fs.rmSync(cloneDir, { recursive: true, force: true });
+  await renamePathWithRetry(extracted, params.destRoot);
+  await rmPathWithRetry(cloneDir);
 }
+
+/** Unit tests: exercise default sparse clone (git/npm mocked via runner). */
+export const defaultCloneSparseForTests = defaultCloneSparse;
 
 async function defaultNpmInstall(
   platform: IPlatform,
