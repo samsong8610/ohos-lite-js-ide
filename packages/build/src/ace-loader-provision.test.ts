@@ -5,12 +5,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import {
-  NodeProcessRunner,
-  createHostPlatform,
-  type IProcessRunner,
-  type ProcessResult,
-} from '@ohjs/core';
+import { NodeProcessRunner, createHostPlatform, type IProcessRunner, type ProcessResult } from '@ohjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   aceLoaderCloneStagingDir,
