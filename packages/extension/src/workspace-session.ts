@@ -40,6 +40,10 @@ export function getLastBuild(): BuildResult | undefined {
   return lastBuild;
 }
 
+export function clearLastBuild(): void {
+  lastBuild = undefined;
+}
+
 export async function resolveDeviceTarget(
   output: vscode.LogOutputChannel,
   transport: HdcTransport,

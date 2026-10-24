@@ -5,8 +5,8 @@ VS Code extension for ArkUI.Lite (JS) applications on OpenHarmony small-system d
 
 **Status: pre-release skeleton (M1 batch 1).** The extension activates only in OpenHarmony JS (FA) projects
 (`entry/src/main/config.json` with `abilities[].srcLanguage = "js"` or a `module.js[]` section).
-G2: **Build**, **Deploy**, **Launch**, **Stop**, and **Start/Stop Logs** commands are available for OHJS
-projects. **Debug** (`type: ohjs`): deploy (optional), device marker handshake, `hdc fport` to Jerry port 5001, then `@ohjs/debug-adapter` + `@ohjs/jerry-debug-client`.
+G2: **Build**, **Clean**, **Deploy**, **Launch**, **Stop**, and **Start/Stop Logs** commands are available for OHJS
+projects. **Clean** removes workspace `.ohjs/build` and module `build/` trees (build intermediates only; not sources or extension toolchain cache). **Debug** (`type: ohjs`): deploy (optional), device marker handshake, `hdc fport` to Jerry port 5001, then `@ohjs/debug-adapter` + `@ohjs/jerry-debug-client`.
 
 ### qemu-ide jsdebug
 

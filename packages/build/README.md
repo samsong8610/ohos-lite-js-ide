@@ -2,6 +2,8 @@
 
 One-click build for OpenHarmony Lite JS FA modules (G2, FR-BLD-002).
 
+The VS Code command **OHJS: Clean** calls `cleanBuildOutputs(workspaceRoot)` to delete `.ohjs/build` and each module's `build/` tree only.
+
 ## Backends
 
 | Backend          | When                                                                      |
