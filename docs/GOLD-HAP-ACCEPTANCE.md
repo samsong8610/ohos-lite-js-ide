@@ -46,12 +46,12 @@ assets/js/MainAbility/image_convert_result.txt
 
 ### Sam 构建日志应看到的标记
 
-| 输出 | 含义 |
-| ---- | ---- |
-| `build (ace-loader): …/entry-default.hap` | 走了 webpack + gold pack（正确路径） |
-| `build (fixture): …/entry.hap` | **仅** smoke/CI 源码树 HAP（含 `src/main/…`）；配置了 `aceLoaderPath`/`restoolPath` 时不应再静默出现 |
-| `BLD-TOOL-MISSING` + ace-loader 提示 | 路径未指到含 `webpack.lite.config.js` 且已 `npm install` 的 ace-loader 根目录 |
-| `BLD-FAILED` + webpack/restool 详情 | ace 或 restool 执行失败（API12 SDK 需在同一 ace-loader 目录安装依赖） |
+| 输出                                      | 含义                                                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `build (ace-loader): …/entry-default.hap` | 走了 webpack + gold pack（正确路径）                                                                 |
+| `build (fixture): …/entry.hap`            | **仅** smoke/CI 源码树 HAP（含 `src/main/…`）；配置了 `aceLoaderPath`/`restoolPath` 时不应再静默出现 |
+| `BLD-TOOL-MISSING` + ace-loader 提示      | 路径未指到含 `webpack.lite.config.js` 且已 `npm install` 的 ace-loader 根目录                        |
+| `BLD-FAILED` + webpack/restool 详情       | ace 或 restool 执行失败（API12 SDK 需在同一 ace-loader 目录安装依赖）                                |
 
 金样对照来自 **DevEco 3.1 / API 8**；API 12 SDK 的 ace-loader 在 webpack 成功跑通后仍应产出相同 **zip 布局**（`assets/js/<srcPath>/…`），字节级可能与 API 8 金样不同，但不应再是 `src/main` 源码 zip。
 
