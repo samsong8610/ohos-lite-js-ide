@@ -6,11 +6,13 @@ The VS Code command **OHJS: Clean** calls `cleanBuildOutputs(workspaceRoot)` to 
 
 ## Backends
 
-| Backend          | When                                                                      |
-| ---------------- | ------------------------------------------------------------------------- |
-| **`fixture`**    | Explicit backend or CI default when ace-loader is not configured          |
-| **`ace-loader`** | Webpack lite build + FA HAP pack (`config.json`, `assets/…`, `pack.info`) |
-| **`auto`**       | ace-loader when install is discovered; otherwise fixture                  |
+| Backend          | When                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| **`fixture`**    | Explicit backend or CI default when ace-loader is not configured                     |
+| **`ace-loader`** | Webpack lite build + FA HAP pack (`config.json`, `assets/…`, `pack.info`)            |
+| **`auto`**       | ace-loader when install is discovered; otherwise fixture (unless manual paths below) |
+
+When **`ohjs.build.aceLoaderPath`**, **`ohjs.tools.restoolPath`**, or env ace-loader overrides are set, OHJS **does not** silently fall back to the fixture source-tree HAP if webpack or pack fails — the build fails with `BLD-FAILED` / `BLD-TOOL-MISSING` instead. Check the OHJS output channel for `build (ace-loader):` vs `build (fixture):` (fixture is CI/smoke only, zip contains `src/main/…`, not gold `assets/js/…`).
 
 ## ace-loader discovery (in order)
 

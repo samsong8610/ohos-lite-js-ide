@@ -12,11 +12,13 @@ import {
   type AceLoaderProvisionerDeps,
 } from './ace-loader-provision';
 import { runAceLoaderBuild } from './ace-loader-backend';
+import { buildIntentFromOptions } from './build-intent';
 import { runFixtureBuild } from './fixture-backend';
 import { parseFaConfigJson } from './project-info';
 import type { BuildResult } from './types';
 
-export type BuildBackendKind = 'auto' | 'fixture' | 'ace-loader';
+export type { BuildBackendKind } from './build-service-types';
+import type { BuildBackendKind } from './build-service-types';
 
 export interface BuildOptions {
   workspaceRoot: string;
@@ -72,6 +74,7 @@ export async function buildProject(
   const module = parseFaConfigJson(text, configPath);
   const outDir = opts.outDir ?? path.join(opts.workspaceRoot, '.ohjs', 'build');
   const backend = opts.backend ?? (process.env.OHJS_BUILD_BACKEND as BuildBackendKind | undefined) ?? 'auto';
+  const intent = buildIntentFromOptions({ ...opts, backend });
 
   const discovery = {
     workspaceRoot: opts.workspaceRoot,
@@ -100,19 +103,32 @@ export async function buildProject(
           restoolPath: opts.restoolPath,
         });
       } catch (e) {
+        if (intent.requiresAceLoaderGoldPack) throw e;
         if (backend === 'ace-loader') throw e;
         if (e instanceof OhjsError && e.code === 'BLD-TOOL-MISSING') throw e;
-        // auto: fall back to fixture when webpack/pack fails (same as legacy ace-loader CLI stub).
+        opts.onBuildProgress?.(
+          'ace-loader failed; falling back to fixture backend (set ohjs.build.backend to ace-loader to surface errors)',
+        );
       }
+    } else if (intent.requiresAceLoaderGoldPack) {
+      throw new OhjsError(
+        'BLD-TOOL-MISSING',
+        'Gold HAP requires ace-loader (webpack.lite.config.js + webpack CLI after npm install). ' +
+          'Check ohjs.build.aceLoaderPath / OHJS_ACE_LOADER_ROOT points at developtools_ace_js2bundle ace-loader root.',
+        {
+          hint: discovery.aceLoaderPath ?? process.env.OHJS_ACE_LOADER_ROOT ?? opts.aceLoaderMain,
+        },
+      );
     }
   }
 
-  if (backend === 'ace-loader') {
+  if (backend === 'ace-loader' || intent.requiresAceLoaderGoldPack) {
     throw new OhjsError(
       'BLD-TOOL-MISSING',
       'ace-loader backend requested but ace-loader was not found (set OHJS_ACE_LOADER_MAIN, .ohjs/toolchain.json, or ohjs.build.aceLoaderPath)',
     );
   }
 
+  opts.onBuildProgress?.('Using fixture backend (source-tree HAP for CI/smoke only; not DevEco gold layout)');
   return runFixtureBuild(platform, module, outDir);
 }
