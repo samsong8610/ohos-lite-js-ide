@@ -7,10 +7,12 @@ import {
   DeviceProfileRegistry,
   NodeProcessRunner,
   createHostPlatform,
+  isOhjsError,
   type DeviceInfo,
   type DeviceProfile,
   type OutputEncoding,
 } from '@ohjs/core';
+import { formatOhjsHostError } from './deploy-host-ux';
 import { HdcToolchainResolver, HdcTransport } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
 import { buildHdcToolchainContext } from './hdc-context';
@@ -67,6 +69,7 @@ function registerDeviceCommands(
   context.subscriptions.push({ dispose: () => void runner.disposeAll() });
   context.subscriptions.push(
     vscode.commands.registerCommand('ohjs.device.refresh', async (): Promise<DeviceInfo[]> => {
+      output.show(true);
       try {
         const ctx = await buildHdcToolchainContext(context, runner, firmwareManifestPath);
         const bootstrap = resolver.locate(ctx);
@@ -86,8 +89,9 @@ function registerDeviceCommands(
         for (const t of targets) output.info(`  ${t.key} ${t.connType} ${t.state} ${t.name ?? ''}`);
         return targets;
       } catch (e) {
-        output.error(`device refresh failed: ${(e as Error).message}`);
-        void vscode.window.showErrorMessage((e as Error).message);
+        const { log, toast } = formatOhjsHostError(e);
+        output.error(isOhjsError(e) ? log : `device refresh failed: ${log}`);
+        void vscode.window.showErrorMessage(toast);
         return [];
       }
     }),

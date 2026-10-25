@@ -19,6 +19,8 @@ Optional env: `G3_MOCK_TCONN`, `G3_MOCK_HILOG_LINE`, `OHJS_FIXTURE_ROOT`, `SKIP_
 
 Prerequisites: Node 20+, `pnpm install`, `pnpm run ci:package`, mock hdc path configured.
 
+Deploy / Launch / Logs commands focus the **OHJS** Output channel automatically. If deploy fails with no device, use **OHJS: Refresh Devices** or `hdc tconn <ip>:8710` (mock TCP). **OHJS: Build, Deploy and Launch** stops on the first failed step (no silent continue after a failed build).
+
 | Step | Action                                                                                                                                                        | Expected                                                                                                                                        |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | Install VSIX from `packages/extension/*.vsix` (Extensions → Install from VSIX…)                                                                               | Extension **OHOS Lite JS IDE** appears; no activation error                                                                                     |
