@@ -14,6 +14,7 @@ import { buildProject, parseFaConfigJson, type BuildResult, type FaModuleInfo } 
 import { HdcToolchainResolver, HdcTransport, LiteDeployService } from '@ohjs/transport-hdc';
 import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
 import { buildHdcToolchainContext } from './hdc-context';
+import { depNoTargetHint } from './deploy-host-ux';
 
 export interface WorkspaceSession {
   profile: DeviceProfile;
@@ -53,12 +54,19 @@ export async function resolveDeviceTarget(
   const connected = targets.filter((t) => t.state === 'Connected' || t.state === 'Ready');
   if (configured) {
     const hit = connected.find((t) => t.key === configured);
-    if (!hit) throw new OhjsError('DEP-NO-TARGET', `Configured target "${configured}" is not connected`);
+    if (!hit) {
+      throw new OhjsError('DEP-NO-TARGET', `Configured target "${configured}" is not connected`, {
+        hint: depNoTargetHint(configured),
+      });
+    }
     return configured;
   }
   if (connected.length === 1) return connected[0]!.key;
-  if (connected.length === 0)
-    throw new OhjsError('DEP-NO-TARGET', 'No connected hdc target (Refresh Devices first)');
+  if (connected.length === 0) {
+    throw new OhjsError('DEP-NO-TARGET', 'No connected hdc target (Refresh Devices first)', {
+      hint: depNoTargetHint(),
+    });
+  }
   const pick = await vscode.window.showQuickPick(
     connected.map((t) => ({ label: t.key, description: t.connType, target: t })),
     { title: 'Select OHJS device' },
@@ -182,4 +190,8 @@ export async function stopLogTail(): Promise<void> {
 
 export function setLogTail(handle: { kill: () => Promise<void> } | undefined): void {
   logTail = handle;
+}
+
+export function isLogStreamActive(): boolean {
+  return logTail !== undefined;
 }
