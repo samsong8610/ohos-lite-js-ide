@@ -16,12 +16,13 @@ import {
 const templatesRoot = path.resolve(__dirname, '../../../../../templates');
 
 describe('validateBundleName (FR-PRJ-001)', () => {
-  it('accepts three-or-more segment names', () => {
+  it('accepts two-or-more segment names', () => {
+    expect(validateBundleName('me.listdemo').ok).toBe(true);
     expect(validateBundleName('com.example.demo').ok).toBe(true);
     expect(validateBundleName('com.my_co.app_v2').ok).toBe(true);
   });
   it('rejects too few segments and invalid characters', () => {
-    expect(validateBundleName('com.example').ok).toBe(false);
+    expect(validateBundleName('listdemo').ok).toBe(false);
     expect(validateBundleName('1com.example.app').ok).toBe(false);
     expect(validateBundleName('').ok).toBe(false);
   });

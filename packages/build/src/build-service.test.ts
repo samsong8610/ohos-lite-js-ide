@@ -37,7 +37,7 @@ describe('buildProject (fixture backend)', () => {
     });
     expect(r.backend).toBe('fixture');
     expect(fs.existsSync(r.hapPath)).toBe(true);
-    expect(r.hapPath.endsWith('.hap')).toBe(true);
+    expect(path.basename(r.hapPath)).toBe('com.example.ohjs.smoke.hap');
     runner.disposeAll();
   });
 

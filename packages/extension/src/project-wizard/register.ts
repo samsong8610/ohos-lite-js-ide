@@ -80,7 +80,7 @@ function createWizardUi(): ProjectWizardUi {
     async inputBundleName(initial?: string) {
       return vscode.window.showInputBox({
         title: vscode.l10n.t('New Project — bundle name'),
-        prompt: vscode.l10n.t('Reverse-DNS bundle name (e.g. com.example.myapp)'),
+        prompt: vscode.l10n.t('Reverse-DNS bundle name, at least two segments (e.g. me.listdemo)'),
         value: initial,
         ignoreFocusOut: true,
       });

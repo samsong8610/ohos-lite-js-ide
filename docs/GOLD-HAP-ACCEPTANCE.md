@@ -48,8 +48,8 @@ assets/js/MainAbility/image_convert_result.txt
 
 | 输出                                       | 含义                                                                                                                     |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `build (ace-loader): …/entry-default.hap`  | 走了 webpack + gold pack（正确路径）                                                                                     |
-| `build (fixture): …/entry.hap`             | **仅** smoke/CI 源码树 HAP（含 `src/main/…`）；配置了 `aceLoaderPath`/`restoolPath` 时不应再静默出现                     |
+| `build (ace-loader): …/<bundleName>.hap`   | 走了 webpack + gold pack（正确路径），文件名是 `config.json` 的 `app.bundleName`                                         |
+| `build (fixture): …/<bundleName>.hap`      | **仅** smoke/CI 源码树 HAP（含 `src/main/…`）；配置了 `aceLoaderPath`/`restoolPath` 时不应再静默出现                     |
 | `BLD-TOOL-MISSING` + ace-loader 提示       | 路径未指到含 `webpack.lite.config.js` 且已 `npm install` 的 ace-loader 根目录                                            |
 | `BLD-FAILED` + webpack/restool 详情        | ace 或 restool 执行失败（API12 SDK 需在同一 ace-loader 目录安装依赖）                                                    |
 | `BLD-FAILED` + missing Jerry lite snapshot | 多为 `buildMode=debug`（无 `.bc`）或 release 下缺少 `bin/jerry-snapshot`；IDE 默认 **release**（`ohjs.build.buildMode`） |

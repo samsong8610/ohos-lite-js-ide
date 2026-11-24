@@ -5,7 +5,12 @@
 import * as path from 'path';
 import type { FaModuleInfo } from './project-info';
 
-/** DevEco 3.1 Lite JS install HAP: `<module>/build/default/outputs/default/app/<module>-default.hap`. */
+/** Install HAP file name is the bundle name, e.g. `me.listdemo.hap`. */
+export function hapFileName(bundleName: string): string {
+  return `${bundleName}.hap`;
+}
+
+/** `<module>/build/default/outputs/default/app/<bundleName>.hap`. */
 export function devecoHapOutputPath(module: FaModuleInfo): string {
   return path.join(
     module.moduleRoot,
@@ -14,7 +19,7 @@ export function devecoHapOutputPath(module: FaModuleInfo): string {
     'outputs',
     'default',
     'app',
-    `${module.moduleName}-default.hap`,
+    hapFileName(module.bundleName),
   );
 }
 

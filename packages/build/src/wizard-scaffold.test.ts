@@ -46,7 +46,7 @@ describe('wizard scaffold (fixture build)', () => {
       outDir,
       backend: 'fixture',
     });
-    expect(fs.existsSync(r.hapPath)).toBe(true);
+    expect(path.basename(r.hapPath)).toBe('com.example.buildtest.hap');
     runner.disposeAll();
   });
 });

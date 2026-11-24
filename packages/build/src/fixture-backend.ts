@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { OhjsError, type IPlatform } from '@ohjs/core';
+import { hapFileName } from './hap-paths';
 import { packStagingToHap } from './zip-hap';
 import type { FaModuleInfo } from './project-info';
 import type { BuildResult } from './types';
@@ -41,7 +42,7 @@ export async function runFixtureBuild(
     JSON.stringify({ app: { bundleName: module.bundleName } }, null, 2),
   );
 
-  const hapPath = path.join(outDir, `${module.moduleName}.hap`);
+  const hapPath = path.join(outDir, hapFileName(module.bundleName));
   await packStagingToHap(staging, hapPath);
   return { hapPath, module, backend: 'fixture' };
 }

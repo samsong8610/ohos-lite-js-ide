@@ -123,7 +123,7 @@ describe('runProjectWizardWithChoices', () => {
       },
     );
     expect(bundleCalls).toBe(2);
-    expect(errors.some((e) => e.includes('three segments'))).toBe(true);
+    expect(errors.some((e) => e.includes('two segments'))).toBe(true);
     fs.rmSync(root, { recursive: true, force: true });
   });
 });

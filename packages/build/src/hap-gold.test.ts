@@ -132,6 +132,7 @@ describe('HAP gold acceptance (DevEco 3.1 Lite JS)', () => {
       aceLoaderPath: fakeAceRoot,
     });
     expect(r.hapPath).toBe(expectedHap);
+    expect(path.basename(r.hapPath)).toBe(`${module.bundleName}.hap`);
     expect(fs.existsSync(r.hapPath)).toBe(true);
 
     const builtPaths = listZipPaths(r.hapPath);
