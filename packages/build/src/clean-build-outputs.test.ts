@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanBuildOutputs, listCleanBuildOutputPaths } from './clean-build-outputs';
+import { cleanBuildOutputs, listCleanBuildOutputPaths, removeBuildTree } from './clean-build-outputs';
 
 const fixtureRoot = path.join(__dirname, '../../extension/test/fixtures/oh-project');
 
@@ -45,5 +45,19 @@ describe('cleanBuildOutputs', () => {
 
     const again = cleanBuildOutputs(root);
     expect(again.removed).toEqual([]);
+  });
+
+  it('treats a spurious ENOTEMPTY as success when the directory is already gone', () => {
+    const target = path.join(os.tmpdir(), `ohjs-rm-${process.pid}`);
+    const err = new Error(`ENOTEMPTY, Directory not empty: '${target}'`) as NodeJS.ErrnoException;
+    err.code = 'ENOTEMPTY';
+    expect(() =>
+      removeBuildTree(target, {
+        rmSync: () => {
+          throw err;
+        },
+        existsSync: () => false,
+      }),
+    ).not.toThrow();
   });
 });

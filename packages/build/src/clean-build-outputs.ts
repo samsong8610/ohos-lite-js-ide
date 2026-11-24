@@ -48,12 +48,39 @@ export function listCleanBuildOutputPaths(workspaceRoot: string): string[] {
   return [...paths].sort();
 }
 
+const RETRYABLE_RM = new Set(['ENOTEMPTY', 'EBUSY', 'EPERM', 'EACCES']);
+
+/**
+ * Windows `fs.rmSync` often throws `ENOTEMPTY` after the directory is already gone
+ * (or while a file lock is dropping). Retry, and treat a missing path as success.
+ */
+export function removeBuildTree(
+  target: string,
+  fsOps: { rmSync: typeof fs.rmSync; existsSync: typeof fs.existsSync } = fs,
+): void {
+  const opts: fs.RmOptions = { recursive: true, force: true, maxRetries: 5, retryDelay: 50 };
+  let last: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      fsOps.rmSync(target, opts);
+      return;
+    } catch (e) {
+      last = e;
+      const code = (e as NodeJS.ErrnoException).code;
+      if (!code || !RETRYABLE_RM.has(code)) throw e;
+      if (!fsOps.existsSync(target)) return;
+    }
+  }
+  if (!fsOps.existsSync(target)) return;
+  throw last;
+}
+
 /** Removes build staging under `.ohjs/build` and each module's `build/` tree. No-op when absent. */
 export function cleanBuildOutputs(workspaceRoot: string): CleanBuildOutputsResult {
   const removed: string[] = [];
   for (const target of listCleanBuildOutputPaths(workspaceRoot)) {
     if (!fs.existsSync(target)) continue;
-    fs.rmSync(target, { recursive: true, force: true });
+    removeBuildTree(target);
     removed.push(target);
   }
   return { removed };

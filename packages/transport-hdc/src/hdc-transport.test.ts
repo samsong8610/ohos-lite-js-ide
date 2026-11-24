@@ -12,6 +12,7 @@ import {
   createHostPlatform,
   isOhjsError,
   type IProcessRunner,
+  type ProcessResult,
 } from '@ohjs/core';
 import { createMockHdc, type MockHdc, type MockHdcScenario } from '@ohjs/test-kit';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -162,6 +163,37 @@ describe('HdcTransport', () => {
     const p = t.shell(USB, 'sleep', { token: cts.token });
     setTimeout(() => cts.cancel(), 200);
     expect(await code(p)).toBe('TRN-HDC-CANCELLED');
+  });
+
+  it('retries while the hdc channel is still starting', async () => {
+    const outputs = [
+      '[Fail][E000004]:The communication channel is being established.\n',
+      '[Fail][E000004]:The communication channel is being established.\n',
+      `${USB}\t\tUSB\tConnected\t2k0300\n`,
+    ];
+    const runner: IProcessRunner = {
+      async run(): Promise<ProcessResult> {
+        const stdout = outputs.shift() ?? '';
+        return {
+          exitCode: 0,
+          signal: null,
+          stdout,
+          stderr: '',
+          stdoutRaw: new Uint8Array(),
+          stderrRaw: new Uint8Array(),
+          durationMs: 1,
+        };
+      },
+      spawnStream() {
+        throw new Error('not used');
+      },
+      async disposeAll() {},
+    };
+    const t = new HdcTransport({ hdcPath: 'hdc', runner, retries: 0 });
+    await expect(t.listTargets()).resolves.toEqual([
+      { key: USB, connType: 'USB', state: 'Connected', name: '2k0300' },
+    ]);
+    expect(outputs).toEqual([]);
   });
 
   it('hdc server problems and unknown commands', async () => {

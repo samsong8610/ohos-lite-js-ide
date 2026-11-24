@@ -86,5 +86,27 @@ describe('renderProjectTemplate', () => {
     expect(config.app.bundleName).toBe('com.example.wizard');
     expect(config.module.deviceType).toEqual(['smartVision']);
     expect(config.module.js[0].pages[0]).toBe('pages/index/index');
+    expect(config.module.abilities[0].icon).toBe('$media:icon');
+    expect(config.module.abilities[0].srcPath).toBe('default');
+    expect(config.module.abilities[0].visible).toBeUndefined();
+    const icon = files.find((f) => f.relativePath.endsWith('resources/base/media/icon.png'))!.content;
+    expect(Buffer.from(icon.subarray(0, 4)).toString('hex')).toBe('89504e47');
+  });
+
+  it('list-demo shares the launcher icon and app_name string', () => {
+    const files = renderProjectTemplate(templatesRoot, 'list-demo', {
+      bundleName: 'com.example.list',
+      vendor: 'example',
+      sdkVersion: '6.1-lts',
+      deviceProfileId: '2k0300-1024x768',
+      display: { width: 1024, height: 768 },
+    });
+    expect(files.some((f) => f.relativePath.endsWith('resources/base/media/icon.png'))).toBe(true);
+    expect(files.some((f) => f.relativePath.endsWith('resources/base/element/string.json'))).toBe(true);
+    const config = JSON.parse(
+      new TextDecoder().decode(files.find((f) => f.relativePath.endsWith('config.json'))!.content),
+    );
+    expect(config.module.abilities[0].icon).toBe('$media:icon');
+    expect(config.module.abilities[0].srcPath).toBe('default');
   });
 });

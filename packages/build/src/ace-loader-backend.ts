@@ -22,6 +22,18 @@ export type AceDeviceType = 'smartVision' | 'liteWearable';
 /** Gold HAP / Jerry lite snapshot requires ace-loader `buildMode=release` (SnapshotPlugin). */
 export const DEFAULT_ACE_BUILD_MODE: AceBuildMode = 'release';
 
+/**
+ * Webpack 4 (OpenHarmony SDK ace-loader) hashes with MD4. OpenSSL 3 / Node 17+ rejects that
+ * (`ERR_OSSL_EVP_UNSUPPORTED`) unless the legacy provider is enabled for the child process.
+ */
+export const OPENSSL_LEGACY_PROVIDER = '--openssl-legacy-provider';
+
+export function withOpenSslLegacyProvider(env: Record<string, string>): Record<string, string> {
+  const parts = (env.NODE_OPTIONS ?? '').split(/\s+/).filter(Boolean);
+  if (parts.includes(OPENSSL_LEGACY_PROVIDER)) return env;
+  return { ...env, NODE_OPTIONS: [...parts, OPENSSL_LEGACY_PROVIDER].join(' ') };
+}
+
 export function resolveAceBuildMode(explicit?: AceBuildMode): AceBuildMode {
   if (explicit) return explicit;
   const env = process.env.OHJS_BUILD_MODE?.trim();
@@ -47,7 +59,7 @@ export function webpackLiteCommand(
     file: node,
     args: [install.webpackCli, '--config', install.webpackConfig, '--env', `buildMode=${buildMode}`],
     cwd: install.root,
-    env,
+    env: withOpenSslLegacyProvider(env),
   };
 }
 

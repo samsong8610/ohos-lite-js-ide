@@ -11,9 +11,11 @@ import { resolveAceLoaderInstall } from './ace-loader-config';
 import {
   aceLoaderWebpackEnv,
   DEFAULT_ACE_BUILD_MODE,
+  OPENSSL_LEGACY_PROVIDER,
   resolveAceBuildMode,
   runAceLoaderBuild,
   webpackLiteCommand,
+  withOpenSslLegacyProvider,
 } from './ace-loader-backend';
 import { buildProject, parseFaConfigJson } from './index';
 
@@ -150,6 +152,15 @@ describe('ace-loader backend', () => {
     expect(cmd.env?.aceModuleRoot).toBe('/proj/js/default');
     expect(cmd.env?.aceModuleBuild).toBe('/out/js');
     expect(cmd.env?.buildMode).toBe('debug');
+    expect(cmd.env?.NODE_OPTIONS).toBe(OPENSSL_LEGACY_PROVIDER);
+  });
+
+  it('keeps existing NODE_OPTIONS and does not duplicate the legacy provider', () => {
+    expect(withOpenSslLegacyProvider({ NODE_OPTIONS: '--max-old-space-size=4096' }).NODE_OPTIONS).toBe(
+      `--max-old-space-size=4096 ${OPENSSL_LEGACY_PROVIDER}`,
+    );
+    const once = withOpenSslLegacyProvider({ NODE_OPTIONS: OPENSSL_LEGACY_PROVIDER });
+    expect(withOpenSslLegacyProvider(once)).toBe(once);
   });
 
   it('runAceLoaderBuild packs FA hap with fake webpack + restool shim', async () => {

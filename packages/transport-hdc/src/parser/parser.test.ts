@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   classifyFailure,
   findFailure,
+  isHdcChannelStarting,
   guessConnType,
   lines,
   parseFileTransfer,
@@ -79,6 +80,7 @@ describe('failure classification', () => {
     ['[Fail]Remove forward ruler failed, ruler is not exist tcp:1 tcp:2', 'TRN-HDC-FPORT'],
     ['[Fail][E001001]Unknown command', 'TRN-HDC-UNKNOWN-COMMAND'],
     ['[Fail]Connect server failed', 'TRN-HDC-SERVER'],
+    ['[Fail][E000004]:The communication channel is being established.', 'TRN-HDC-FAILED'],
     ['[Fail]something new', 'TRN-HDC-FAILED'],
   ])('%s → %s', (out, code) => {
     expect(findFailure(`noise\r\n${out}\r\n`)?.code).toBe(code);
@@ -89,6 +91,12 @@ describe('failure classification', () => {
     expect(f.hint).toMatch(/tmpDir/);
     expect(classifyFailure('plain').hdcCode).toBeUndefined();
   });
+  it('E000004 is the channel still starting', () => {
+    const message = '[E000004]:The communication channel is being established.';
+    expect(isHdcChannelStarting(message)).toBe(true);
+    expect(classifyFailure(message).code).toBe('TRN-HDC-FAILED');
+  });
+
   it('no [Fail] line → undefined', () => {
     expect(findFailure('Connect OK\r\n')).toBeUndefined();
   });

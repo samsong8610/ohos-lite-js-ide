@@ -74,7 +74,30 @@ function refName(ref: string, prefix: string): string | undefined {
   return ref.slice(prefix.length);
 }
 
-/** Patch packaged `config.json` with apiVersion, mainAbility, virtualMachine, and resource ids. */
+export function findMediaFile(mediaDir: string, resourceName: string): string | undefined {
+  if (!fs.existsSync(mediaDir)) return undefined;
+  const hits = fs
+    .readdirSync(mediaDir, { withFileTypes: true })
+    .filter((e) => e.isFile() && path.parse(e.name).name === resourceName)
+    .map((e) => e.name)
+    .sort();
+  return hits.find((n) => n.toLowerCase().endsWith('.png')) ?? hits[0];
+}
+
+const DEFAULT_LAUNCHER_ICON = path.join(__dirname, '../resources/default-icon.png');
+
+/** Copy the built-in launcher icon when the staged module has no `icon` media file. */
+export function ensureDefaultLauncherIcon(entryAssetsRoot: string): void {
+  const mediaDir = path.join(entryAssetsRoot, 'resources', 'base', 'media');
+  if (findMediaFile(mediaDir, 'icon')) return;
+  if (!fs.existsSync(DEFAULT_LAUNCHER_ICON)) {
+    throw new OhjsError('BLD-FAILED', 'Built-in launcher icon is missing', { hint: DEFAULT_LAUNCHER_ICON });
+  }
+  fs.mkdirSync(mediaDir, { recursive: true });
+  fs.copyFileSync(DEFAULT_LAUNCHER_ICON, path.join(mediaDir, 'icon.png'));
+}
+
+/** Patch packaged `config.json` with apiVersion, mainAbility, virtualMachine, resource ids, and launcher icon. */
 export function enrichPackagedConfig(
   source: Record<string, unknown>,
   ctx: {
@@ -102,7 +125,7 @@ export function enrichPackagedConfig(
     const a = { ...raw };
     const desc = typeof a['description'] === 'string' ? refName(a['description'], '$string:') : undefined;
     const label = typeof a['label'] === 'string' ? refName(a['label'], '$string:') : undefined;
-    const icon = typeof a['icon'] === 'string' ? refName(a['icon'], '$media:') : undefined;
+    const isPage = a['type'] === undefined || a['type'] === 'page';
     if (desc) {
       const id = lookupResourceId(ctx.resourceTable, 'string', desc);
       if (id !== undefined) a['descriptionId'] = id;
@@ -111,8 +134,12 @@ export function enrichPackagedConfig(
       const id = lookupResourceId(ctx.resourceTable, 'string', label);
       if (id !== undefined) a['labelId'] = id;
     }
-    if (icon) {
-      const id = lookupResourceId(ctx.resourceTable, 'media', icon);
+    if (isPage && (typeof a['icon'] !== 'string' || a['icon'].length === 0)) {
+      a['icon'] = '$media:icon';
+    }
+    const iconRef = typeof a['icon'] === 'string' ? refName(a['icon'], '$media:') : undefined;
+    if (iconRef) {
+      const id = lookupResourceId(ctx.resourceTable, 'media', iconRef);
       if (id !== undefined) a['iconId'] = id;
     }
     return a;

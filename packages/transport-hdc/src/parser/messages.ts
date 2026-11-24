@@ -68,6 +68,11 @@ const RULES: Rule[] = [
   },
 ];
 
+/** hdc prints this while its server socket is still coming up. The next call usually works. */
+export function isHdcChannelStarting(message: string): boolean {
+  return /\[E000004\]|communication channel is being established/i.test(message);
+}
+
 /** Returns the failure carried by hdc output, or undefined when it does not contain a [Fail] line. */
 export function findFailure(output: string): HdcFailure | undefined {
   const failLine = lines(output).find((l) => l.trimStart().startsWith(MESSAGE_FAIL));

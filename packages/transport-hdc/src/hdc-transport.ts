@@ -23,7 +23,13 @@ import {
 } from '@ohjs/core';
 import { parseFileTransfer, type FileTransferStats } from './parser/file';
 import { parseFportAdd, parseFportList, parseFportRemove } from './parser/fport';
-import { findFailure, parseTconn, parseVersion, type HdcFailure } from './parser/messages';
+import {
+  findFailure,
+  isHdcChannelStarting,
+  parseTconn,
+  parseVersion,
+  type HdcFailure,
+} from './parser/messages';
 import { parseShellOutput, wrapWithRc } from './parser/shell';
 import { parseTargets } from './parser/targets';
 
@@ -129,8 +135,11 @@ export class HdcTransport implements IDeviceTransport {
       try {
         return await fn();
       } catch (e) {
-        const retryable = isOhjsError(e, 'TRN-HDC-TIMEOUT') || isOhjsError(e, 'TRN-HDC-SERVER');
-        if (!retryable || i >= retries) throw e;
+        const channel = isOhjsError(e) && isHdcChannelStarting(e.message);
+        const retryable = channel || isOhjsError(e, 'TRN-HDC-TIMEOUT') || isOhjsError(e, 'TRN-HDC-SERVER');
+        const limit = channel ? Math.max(retries, 4) : retries;
+        if (!retryable || i >= limit) throw e;
+        if (channel) await new Promise((resolve) => setTimeout(resolve, 100 * (i + 1)));
       }
     }
   }

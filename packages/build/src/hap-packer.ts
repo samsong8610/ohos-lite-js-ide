@@ -11,9 +11,11 @@ import { assertJerryBytecode } from './hap-content';
 import {
   compileEntryResourcesIndex,
   enrichPackagedConfig,
+  ensureDefaultLauncherIcon,
   stageEntryResources,
   type FaResourceEntry,
 } from './lite-resources';
+import { repairNegatedWebpackIife } from './webpack-iife';
 import { packStagingToHap } from './zip-hap';
 
 function copyDir(src: string, dst: string): void {
@@ -102,6 +104,22 @@ function ensureJsAbilitySidecars(jsAbilityDir: string, jsSourceRoot: string): vo
   }
 }
 
+/** ACE uses the script result as the ViewModel. Undo terser's `!function(){}()` wrap. */
+function repairWebpackBundles(dir: string): void {
+  if (!fs.existsSync(dir)) return;
+  for (const name of fs.readdirSync(dir)) {
+    const full = path.join(dir, name);
+    if (fs.statSync(full).isDirectory()) {
+      repairWebpackBundles(full);
+      continue;
+    }
+    if (!name.endsWith('.js')) continue;
+    const source = fs.readFileSync(full, 'utf8');
+    const repaired = repairNegatedWebpackIife(source);
+    if (repaired !== source) fs.writeFileSync(full, repaired);
+  }
+}
+
 /** Resolve webpack output to `assets/js/<srcPath>/…`. */
 export function stageJsAbilityTree(
   jsBuildDir: string,
@@ -116,6 +134,7 @@ export function stageJsAbilityTree(
   if (fs.existsSync(webpackAbilityDir)) {
     copyDir(webpackAbilityDir, destAbilityDir);
   }
+  repairWebpackBundles(destAbilityDir);
 
   ensureJsAbilitySidecars(destAbilityDir, jsSourceRoot);
   validateJerryBytecodeTree(destAbilityDir);
@@ -187,7 +206,7 @@ export interface FaHapPackInput {
 }
 
 /**
- * Stage FA HAP layout (`config.json`, `assets/js/<srcPath>/…`, `assets/entry/…`, `pack.info`) and zip.
+ * Stage FA HAP layout (`config.json`, `assets/js/<srcPath>/…`, `assets/<moduleName>/…`, `pack.info`) and zip.
  */
 export async function packFaHap(input: FaHapPackInput): Promise<void> {
   const staging = path.join(input.stagingRoot, 'fa-hap');
@@ -199,8 +218,10 @@ export async function packFaHap(input: FaHapPackInput): Promise<void> {
     unknown
   >;
   const layout = parseFaModuleConfig(sourceConfig);
-  const entryAssets = path.join(staging, 'assets', 'entry');
+  const moduleName = input.module.moduleName || 'entry';
+  const entryAssets = path.join(staging, 'assets', moduleName);
   const resourceTable: FaResourceEntry[] = stageEntryResources(input.module.moduleRoot, entryAssets);
+  ensureDefaultLauncherIcon(entryAssets);
   await compileEntryResourcesIndex({
     moduleRoot: input.module.moduleRoot,
     configPath: input.module.configPath,

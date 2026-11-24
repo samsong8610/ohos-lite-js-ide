@@ -176,7 +176,9 @@ describe('HAP gold acceptance (DevEco 3.1 Lite JS)', () => {
       descriptionId: goldAbilities[0]!['descriptionId'],
       labelId: goldAbilities[0]!['labelId'],
       iconId: goldAbilities[0]!['iconId'],
+      icon: '$media:icon',
     });
+    expect(builtAbilities[0]!['visible']).toBeUndefined();
 
     const builtPack = readZipJson(r.hapPath, 'pack.info') as Record<string, unknown>;
     const goldPack = readZipJson(goldHap, 'pack.info') as Record<string, unknown>;
