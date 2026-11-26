@@ -12,7 +12,7 @@ import { runProjectWizardWithChoices, type ProjectWizardUi } from './wizard';
 const templatesRoot = path.resolve(__dirname, '../../../../templates');
 
 const stubProfile: DeviceProfile = {
-  id: '2k0300-1024x768',
+  id: 'cp2a070-la401',
   name: 'Test profile',
   description: '',
   arch: 'loongarch64',
@@ -55,7 +55,8 @@ function mockUi(overrides: Partial<ProjectWizardUi> = {}): ProjectWizardUi {
   return {
     pickTemplate: async () => undefined,
     pickSdkVersion: async () => undefined,
-    pickDeviceProfile: async () => stubProfile,
+    pickDeviceTarget: async (_profiles, base) => ({ kind: 'profile', profile: base }),
+    inputDisplaySize: async (initial) => initial,
     inputBundleName: async () => 'com.example.mock',
     inputVendor: async () => 'example',
     pickTargetDirectory: async () => undefined,
@@ -124,6 +125,50 @@ describe('runProjectWizardWithChoices', () => {
     );
     expect(bundleCalls).toBe(2);
     expect(errors.some((e) => e.includes('two segments'))).toBe(true);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('custom display size writes a project profile and rescales px', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-wiz-ui-'));
+    const other: DeviceProfile = { ...stubProfile, id: 'cp2a101-la401', name: 'Other profile' };
+    const ui = mockUi({
+      pickDeviceTarget: async (_profiles, base) => ({ kind: 'custom', profile: base }),
+      inputDisplaySize: async () => ({ width: 800, height: 480 }),
+    });
+    const out = await runProjectWizardWithChoices(
+      {
+        templatesRoot,
+        deviceProfiles: [stubProfile, other],
+        ui,
+        isNonEmptyDirectory: async () => false,
+        writeProject: async (target, files) => {
+          for (const f of files) {
+            const dest = path.join(target, f.relativePath);
+            fs.mkdirSync(path.dirname(dest), { recursive: true });
+            fs.writeFileSync(dest, f.content);
+          }
+        },
+      },
+      {
+        templateId: 'empty',
+        sdkVersion: '5.0.3',
+        profiles: [stubProfile, other],
+        targetRoot: root,
+      },
+    );
+    expect(out).toBe(root);
+    const project = JSON.parse(fs.readFileSync(path.join(root, '.ohjs/project.json'), 'utf8'));
+    expect(project.defaultDeviceProfile).toBe('custom');
+    expect(project.deviceProfiles).toEqual(['custom']);
+    const custom = JSON.parse(fs.readFileSync(path.join(root, '.ohjs/device-profiles/custom.json'), 'utf8'));
+    expect(custom).toEqual({
+      id: 'custom',
+      extends: 'cp2a070-la401',
+      name: 'Custom 800×480',
+      display: { width: 800, height: 480 },
+    });
+    const css = fs.readFileSync(path.join(root, 'entry/src/main/js/default/pages/index/index.css'), 'utf8');
+    expect(css).toContain('font-size: 50px;');
     fs.rmSync(root, { recursive: true, force: true });
   });
 });

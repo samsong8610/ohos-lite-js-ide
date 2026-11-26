@@ -4,8 +4,14 @@
  */
 import * as vscode from 'vscode';
 import { DeviceProfileRegistry, type DeviceProfile, type TemplateManifest } from '@ohjs/core';
-import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from '../device-profiles';
-import { deviceProfileChoices, runProjectWizard, sdkVersionChoices, type ProjectWizardUi } from './wizard';
+import {
+  DEFAULT_PROFILE_ID,
+  builtinProfilesDir,
+  loadProfilesFromDir,
+  resolveProfiles,
+} from '../device-profiles';
+import { pickDeviceTarget, promptDisplaySize } from '../device-target';
+import { runProjectWizard, sdkVersionChoices, type ProjectWizardUi } from './wizard';
 
 function templatesRoot(context: vscode.ExtensionContext): string {
   return context.asAbsolutePath('templates');
@@ -62,20 +68,11 @@ function createWizardUi(): ProjectWizardUi {
       );
       return picked?.value;
     },
-    async pickDeviceProfile(profiles: DeviceProfile[]) {
-      const picked = await vscode.window.showQuickPick(
-        deviceProfileChoices(profiles).map((c) => ({
-          label: c.label,
-          description: c.description,
-          detail: c.detail,
-          profile: c.value,
-        })),
-        {
-          title: vscode.l10n.t('New Project — device profile'),
-          placeHolder: vscode.l10n.t('Target device resolution and profile'),
-        },
-      );
-      return picked?.profile;
+    async pickDeviceTarget(profiles, customBase) {
+      return pickDeviceTarget(profiles, customBase);
+    },
+    async inputDisplaySize(initial) {
+      return promptDisplaySize(initial);
     },
     async inputBundleName(initial?: string) {
       return vscode.window.showInputBox({
@@ -115,14 +112,7 @@ function createWizardUi(): ProjectWizardUi {
 function loadBuiltinProfiles(context: vscode.ExtensionContext): DeviceProfile[] {
   const registry = new DeviceProfileRegistry();
   loadProfilesFromDir(registry, builtinProfilesDir(context.extensionPath), 'builtin');
-  const profiles: DeviceProfile[] = [];
-  for (const { id } of registry.list()) {
-    try {
-      profiles.push(registry.resolve(id));
-    } catch {
-      // skip invalid entries
-    }
-  }
+  const profiles = resolveProfiles(registry);
   if (!profiles.some((p) => p.id === DEFAULT_PROFILE_ID)) {
     try {
       profiles.unshift(registry.resolve(DEFAULT_PROFILE_ID));

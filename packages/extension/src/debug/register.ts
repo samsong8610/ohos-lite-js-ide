@@ -62,7 +62,7 @@ class OhjsDebugConfigurationProvider implements vscode.DebugConfigurationProvide
 
     const runner = this.getRunner();
     const session = await createWorkspaceSession(this.context, runner);
-    const mod = await readModuleInfo(session);
+    const mod = await readModuleInfo();
     if (!cfg.bundle) cfg.bundle = mod.bundleName;
     if (!cfg.ability) cfg.ability = mod.abilityName;
 
@@ -83,7 +83,7 @@ class OhjsDebugConfigurationProvider implements vscode.DebugConfigurationProvide
     if (cfg.preDeploy) {
       let build = getLastBuild();
       if (!build) {
-        await runBuild(this.context, output, session);
+        await runBuild(this.context, output, runner);
         build = getLastBuild();
       }
       if (build?.hapPath) cfg.hapPath = build.hapPath;

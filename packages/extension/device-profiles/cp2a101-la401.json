@@ -1,12 +1,12 @@
 {
   "$schema": "../dist/schemas/device-profile.schema.json",
-  "id": "2k0300-1024x768",
-  "name": "2K0300 Linux small system, 1024×768",
-  "description": "Built-in profile for the 2K0300 (LoongArch64) board with the 1024×768 main screen. Paths marked 'default' are pending firmware confirmation (F-5, V-4, Q10).",
+  "id": "cp2a101-la401",
+  "name": "CP2A101-LA401 (10.1-inch dev board), 1024×600",
+  "description": "Built-in profile for the CP2A101-LA401 10.1-inch development board (LoongArch64). Paths marked 'default' are pending firmware confirmation (F-5, V-4, Q10).",
   "arch": "loongarch64",
   "kernel": "linux",
   "deviceType": "smartVision",
-  "display": { "width": 1024, "height": 768, "shape": "rect", "dpi": null },
+  "display": { "width": 1024, "height": 600, "shape": "rect", "dpi": null },
   "features": {
     "FEATURE_COMPONENT_CANVAS": true,
     "FEATURE_COMPONENT_QRCODE": true,
@@ -18,7 +18,7 @@
     "FEATURE_ROTATION_API": false,
     "FEATURE_MODULE_DIALOG": true
   },
-  "featuresSource": "assumed from upstream arkui_ace_engine_lite targets/linux/acelite_config.h (CAMERA/VIDEO require ACE_ENGINE_LITE_CAMERA_LITE_ENABLE / ACE_ENGINE_LITE_MEDIA_LITE_ENABLE); confirm against the 2K0300 firmware",
+  "featuresSource": "assumed from upstream arkui_ace_engine_lite targets/linux/acelite_config.h (CAMERA/VIDEO require ACE_ENGINE_LITE_CAMERA_LITE_ENABLE / ACE_ENGINE_LITE_MEDIA_LITE_ENABLE); confirm against the CP2A101-LA401 firmware",
   "connection": { "preferred": "tcp", "fallback": [], "tcpPort": 8710 },
   "paths": {
     "tmpDir": "/tmp/ohjs",

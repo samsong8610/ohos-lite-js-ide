@@ -28,7 +28,7 @@ describe(`activation (${process.env.OHJS_EXPECT})`, () => {
       assert.strictEqual(ext.exports.isProject, true);
       const profile = (ext.exports as { deviceProfile?: { id: string; display: { width: number } } })
         .deviceProfile;
-      assert.strictEqual(profile?.id, '2k0300-1024x768');
+      assert.strictEqual(profile?.id, 'cp2a070-la401');
       assert.strictEqual(profile?.display.width, 1024);
       const ms = (ext.exports as unknown as { activationMs: number }).activationMs;
       console.log(`      activate() took ${ms.toFixed(1)} ms`);

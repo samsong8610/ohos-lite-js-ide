@@ -33,7 +33,7 @@ describe('substituteTemplateText', () => {
     bundleName: 'com.test.app',
     vendor: 'test',
     sdkVersion: '6.1-lts' as const,
-    deviceProfileId: '2k0300-1024x768',
+    deviceProfileId: 'cp2a070-la401',
     display: { width: 1024, height: 768 },
   };
 
@@ -66,7 +66,7 @@ describe('renderProjectTemplate', () => {
       bundleName: 'com.example.wizard',
       vendor: 'example',
       sdkVersion: '5.0.3',
-      deviceProfileId: '2k0300-1024x768',
+      deviceProfileId: 'cp2a070-la401',
       display: { width: 1024, height: 768 },
     });
     const paths = files.map((f) => f.relativePath).sort();
@@ -99,7 +99,7 @@ describe('renderProjectTemplate', () => {
       bundleName: 'com.example.list',
       vendor: 'example',
       sdkVersion: '6.1-lts',
-      deviceProfileId: '2k0300-1024x768',
+      deviceProfileId: 'cp2a070-la401',
       display: { width: 1024, height: 768 },
     });
     expect(files.some((f) => f.relativePath.endsWith('resources/base/media/icon.png'))).toBe(true);

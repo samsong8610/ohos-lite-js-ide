@@ -30,7 +30,7 @@ const { HdcTransport, LiteDeployService } = await import('@ohjs/transport-hdc');
 const { DeviceProfileRegistry, NodeProcessRunner, createHostPlatform } = await import('@ohjs/core');
 
 const profileJson = JSON.parse(
-  readFileSync(join(__dir, '../../../extension/device-profiles/2k0300-linux-1024x768.json'), 'utf8'),
+  readFileSync(join(__dir, '../../../extension/device-profiles/cp2a070-la401.json'), 'utf8'),
 );
 const registry = new DeviceProfileRegistry();
 registry.add(profileJson, 'builtin');

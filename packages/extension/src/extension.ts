@@ -2,19 +2,33 @@
  * Copyright (c) 2026 ohos-lite-js-ide contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import {
+  CUSTOM_PROFILE_ID,
   DeviceProfileRegistry,
   NodeProcessRunner,
   createHostPlatform,
+  customProfileJson,
   isOhjsError,
+  mergeProjectDeviceTarget,
   type DeviceInfo,
   type DeviceProfile,
+  type DisplaySize,
   type OutputEncoding,
 } from '@ohjs/core';
 import { formatOhjsHostError } from './deploy-host-ux';
 import { HdcToolchainResolver, HdcTransport } from '@ohjs/transport-hdc';
-import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
+import {
+  DEFAULT_PROFILE_ID,
+  activeProfileId,
+  builtinProfilesDir,
+  loadProfilesFromDir,
+  projectProfilesDir,
+  resolveProfiles,
+} from './device-profiles';
+import { pickDeviceTarget, promptDisplaySize } from './device-target';
 import { buildHdcToolchainContext } from './hdc-context';
 import { startAceLoaderPrefetch } from './ace-loader-provision';
 import { registerDeployCommands } from './deploy-commands';
@@ -96,6 +110,56 @@ function registerDeviceCommands(
       }
     }),
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ohjs.device.setTarget', async () => {
+      const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!root) {
+        void vscode.window.showErrorMessage('Open an OHJS project folder first.');
+        return;
+      }
+      try {
+        const folders = (vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath);
+        const registry = new DeviceProfileRegistry();
+        loadProfilesFromDir(registry, builtinProfilesDir(context.extensionPath), 'builtin');
+        for (const folder of folders) loadProfilesFromDir(registry, projectProfilesDir(folder), 'project');
+        const builtins = resolveProfiles(registry).filter((p) => p.id !== CUSTOM_PROFILE_ID);
+        const base = builtins.find((p) => p.id === DEFAULT_PROFILE_ID) ?? builtins[0];
+        if (!base) throw new Error('No built-in device profiles are packaged.');
+
+        const choice = await pickDeviceTarget(builtins, base);
+        if (!choice) return;
+        let size: DisplaySize | undefined;
+        if (choice.kind === 'custom') {
+          size = await promptDisplaySize({ width: base.display.width, height: base.display.height });
+          if (!size) return;
+        }
+
+        const profileId = size ? CUSTOM_PROFILE_ID : choice.profile.id;
+        const ohjsDir = path.join(root, '.ohjs');
+        if (size) {
+          fs.mkdirSync(path.join(ohjsDir, 'device-profiles'), { recursive: true });
+          fs.writeFileSync(
+            path.join(ohjsDir, 'device-profiles', `${CUSTOM_PROFILE_ID}.json`),
+            customProfileJson(base.id, size),
+          );
+        }
+        const projectFile = path.join(ohjsDir, 'project.json');
+        const raw = fs.existsSync(projectFile) ? fs.readFileSync(projectFile, 'utf8') : undefined;
+        fs.mkdirSync(ohjsDir, { recursive: true });
+        fs.writeFileSync(projectFile, mergeProjectDeviceTarget(raw, profileId));
+
+        const display = size ?? choice.profile.display;
+        const label = `${profileId} ${display.width}×${display.height}`;
+        output.info(`device target: ${label}`);
+        void vscode.window.showInformationMessage(`OHJS: target device set to ${label}`);
+      } catch (e) {
+        const { log, toast } = formatOhjsHostError(e);
+        output.error(log);
+        void vscode.window.showErrorMessage(toast);
+      }
+    }),
+  );
 }
 
 /**
@@ -136,19 +200,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<OhjsEx
   try {
     const registry = new DeviceProfileRegistry();
     loadProfilesFromDir(registry, builtinProfilesDir(context.extensionPath), 'builtin');
-    for (const folder of vscode.workspace.workspaceFolders ?? []) {
-      loadProfilesFromDir(
-        registry,
-        vscode.Uri.joinPath(folder.uri, '.ohjs', 'device-profiles').fsPath,
-        'project',
-      );
+    const folders = (vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath);
+    for (const folder of folders) {
+      loadProfilesFromDir(registry, projectProfilesDir(folder), 'project');
     }
     const cfg = vscode.workspace.getConfiguration('ohjs.device');
     const display = cfg.get<{ width?: number; height?: number }>('display');
-    deviceProfile = registry.resolve(cfg.get<string>('profile') || DEFAULT_PROFILE_ID, {
-      ...cfg.get<object>('profileOverrides', {}),
-      ...(display ? { display } : {}),
-    });
+    deviceProfile = registry.resolve(
+      activeProfileId(folders, cfg.get<string>('profile') ?? '', DEFAULT_PROFILE_ID),
+      {
+        ...cfg.get<object>('profileOverrides', {}),
+        ...(display ? { display } : {}),
+      },
+    );
     output.info(
       `device profile: ${deviceProfile.id} ${deviceProfile.display.width}x${deviceProfile.display.height}`,
     );

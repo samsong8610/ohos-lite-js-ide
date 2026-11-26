@@ -12,7 +12,13 @@ import {
 } from '@ohjs/core';
 import { buildProject, parseFaConfigJson, type BuildResult, type FaModuleInfo } from '@ohjs/build';
 import { HdcToolchainResolver, HdcTransport, LiteDeployService } from '@ohjs/transport-hdc';
-import { DEFAULT_PROFILE_ID, builtinProfilesDir, loadProfilesFromDir } from './device-profiles';
+import {
+  DEFAULT_PROFILE_ID,
+  activeProfileId,
+  builtinProfilesDir,
+  loadProfilesFromDir,
+  projectProfilesDir,
+} from './device-profiles';
 import { buildHdcToolchainContext } from './hdc-context';
 import { depNoTargetHint } from './deploy-host-ux';
 
@@ -21,8 +27,6 @@ export interface WorkspaceSession {
   transport: HdcTransport;
   deploy: LiteDeployService;
   runner: NodeProcessRunner;
-  lastBuild?: BuildResult;
-  moduleInfo?: FaModuleInfo;
 }
 
 function mergeProcessEnv(extra?: Record<string, string>): Record<string, string> {
@@ -88,16 +92,13 @@ function hdcGlobalArgs(): string[] {
 function loadDeviceProfile(context: vscode.ExtensionContext): DeviceProfile {
   const registry = new DeviceProfileRegistry();
   loadProfilesFromDir(registry, builtinProfilesDir(context.extensionPath), 'builtin');
-  for (const folder of vscode.workspace.workspaceFolders ?? []) {
-    loadProfilesFromDir(
-      registry,
-      vscode.Uri.joinPath(folder.uri, '.ohjs', 'device-profiles').fsPath,
-      'project',
-    );
+  const folders = (vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath);
+  for (const folder of folders) {
+    loadProfilesFromDir(registry, projectProfilesDir(folder), 'project');
   }
   const cfg = vscode.workspace.getConfiguration('ohjs.device');
   const display = cfg.get<{ width?: number; height?: number }>('display');
-  return registry.resolve(cfg.get<string>('profile') || DEFAULT_PROFILE_ID, {
+  return registry.resolve(activeProfileId(folders, cfg.get<string>('profile') ?? '', DEFAULT_PROFILE_ID), {
     ...cfg.get<object>('profileOverrides', {}),
     ...(display ? { display } : {}),
   });
@@ -127,13 +128,13 @@ export async function createWorkspaceSession(
     env: mergeProcessEnv(ctx.env),
   });
   const deploy = new LiteDeployService({ transport, profile });
-  return { profile, transport, deploy, runner, lastBuild };
+  return { profile, transport, deploy, runner };
 }
 
 export async function runBuild(
   context: vscode.ExtensionContext,
   output: vscode.LogOutputChannel,
-  session: WorkspaceSession,
+  runner: NodeProcessRunner,
 ): Promise<BuildResult> {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!root) throw new OhjsError('BLD-NO-PROJECT', 'No workspace folder');
@@ -152,7 +153,7 @@ export async function runBuild(
       cancellable: false,
     },
     async () =>
-      buildProject(platform, session.runner, {
+      buildProject(platform, runner, {
         workspaceRoot: root,
         backend,
         aceLoaderPath,
@@ -164,14 +165,11 @@ export async function runBuild(
       }),
   );
   lastBuild = r;
-  session.lastBuild = r;
-  session.moduleInfo = r.module;
   output.info(`build (${r.backend}): ${r.hapPath}`);
   return r;
 }
 
-export async function readModuleInfo(session: WorkspaceSession): Promise<FaModuleInfo> {
-  if (session.moduleInfo) return session.moduleInfo;
+export async function readModuleInfo(): Promise<FaModuleInfo> {
   if (lastBuild?.module) return lastBuild.module;
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!root) throw new OhjsError('BLD-NO-PROJECT', 'No workspace folder');

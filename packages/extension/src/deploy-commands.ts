@@ -36,7 +36,7 @@ async function ensureHap(
   session: WorkspaceSession,
 ): Promise<string> {
   if (!getLastBuild()) {
-    await runBuild(context, output, session);
+    await runBuild(context, output, session.runner);
   }
   const hap = getLastBuild()?.hapPath;
   if (!hap) throw new Error('No HAP artifact; run OHJS: Build first');
@@ -59,7 +59,7 @@ async function runDeploy(
 
 async function runLaunch(output: vscode.LogOutputChannel, session: WorkspaceSession): Promise<void> {
   const target = await resolveDeviceTarget(output, session.transport);
-  const mod = await readModuleInfo(session);
+  const mod = await readModuleInfo();
   await session.deploy.startApp(target, { bundle: mod.bundleName, ability: mod.abilityName });
   output.info(`launch: ${mod.bundleName}/${mod.abilityName}`);
 }
@@ -125,7 +125,7 @@ export function registerDeployCommands(
     vscode.commands.registerCommand('ohjs.project.build', async () => {
       showOutput(output);
       try {
-        await withSession(async (s) => runBuild(context, output, s));
+        await runBuild(context, output, runner);
         void vscode.window.showInformationMessage('OHJS: build finished');
       } catch (e) {
         logError(output, e);
@@ -163,7 +163,7 @@ export function registerDeployCommands(
       try {
         await withSession(async (s) => {
           const target = await resolveDeviceTarget(output, s.transport);
-          const mod = await readModuleInfo(s);
+          const mod = await readModuleInfo();
           await s.deploy.stopApp(target, mod.bundleName);
           output.info(`stop: ${mod.bundleName}`);
         });
@@ -227,7 +227,7 @@ export function registerDeployCommands(
       showOutput(output);
       try {
         await withSession(async (s) => {
-          await runBuild(context, output, s);
+          await runBuild(context, output, s.runner);
           await runDeploy(context, output, s);
           await runLaunch(output, s);
         });

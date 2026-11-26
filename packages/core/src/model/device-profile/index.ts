@@ -7,3 +7,4 @@ export * from './types';
 export * from './template';
 export * from './validate';
 export * from './registry';
+export * from './custom-profile';

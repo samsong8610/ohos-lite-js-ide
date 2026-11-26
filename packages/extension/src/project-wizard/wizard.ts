@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
+  CUSTOM_PROFILE_ID,
   OhjsError,
   type DeviceProfile,
+  type DisplaySize,
   type OhSdkVersion,
   type TemplateManifest,
+  customProfileJson,
   listProjectTemplates,
   renderProjectTemplate,
   validateBundleName,
+  validateDisplaySize,
 } from '@ohjs/core';
 
 export interface WizardPickItem<T = string> {
@@ -19,10 +23,21 @@ export interface WizardPickItem<T = string> {
   value: T;
 }
 
+export interface DeviceTargetChoice {
+  /** `custom`: pick a display size instead of the profile's own. */
+  kind: 'profile' | 'custom';
+  /** Chosen built-in profile; for `custom` it is the base the size derives from. */
+  profile: DeviceProfile;
+}
+
 export interface ProjectWizardUi {
   pickTemplate(manifests: TemplateManifest[]): Promise<TemplateManifest | undefined>;
   pickSdkVersion(): Promise<OhSdkVersion | undefined>;
-  pickDeviceProfile(profiles: DeviceProfile[]): Promise<DeviceProfile | undefined>;
+  pickDeviceTarget(
+    profiles: DeviceProfile[],
+    customBase: DeviceProfile,
+  ): Promise<DeviceTargetChoice | undefined>;
+  inputDisplaySize(initial: DisplaySize): Promise<DisplaySize | undefined>;
   inputBundleName(initial?: string): Promise<string | undefined>;
   inputVendor(initial?: string): Promise<string | undefined>;
   pickTargetDirectory(): Promise<string | undefined>;
@@ -46,15 +61,6 @@ export function sdkVersionChoices(): WizardPickItem<OhSdkVersion>[] {
     value,
     label: value === '5.0.3' ? 'OpenHarmony 5.0.3' : 'OpenHarmony 6.1-LTS',
     description: value,
-  }));
-}
-
-export function deviceProfileChoices(profiles: DeviceProfile[]): WizardPickItem<DeviceProfile>[] {
-  return profiles.map((p) => ({
-    value: p,
-    label: p.name,
-    description: `${p.display.width}×${p.display.height} · ${p.deviceType}`,
-    detail: p.id,
   }));
 }
 
@@ -100,9 +106,30 @@ export async function runProjectWizardWithChoices(
     return undefined;
   }
 
-  const profile =
-    steps.profiles.length === 1 ? steps.profiles[0] : await deps.ui.pickDeviceProfile(steps.profiles);
-  if (!profile) return undefined;
+  const fallback = steps.profiles[0]!;
+  const customBase = steps.profiles.find((p) => p.id !== CUSTOM_PROFILE_ID) ?? fallback;
+  const choice =
+    steps.profiles.length === 1
+      ? { kind: 'profile' as const, profile: fallback }
+      : await deps.ui.pickDeviceTarget(steps.profiles, customBase);
+  if (!choice) return undefined;
+
+  let display: DisplaySize = {
+    width: choice.profile.display.width,
+    height: choice.profile.display.height,
+  };
+  let profileId = choice.profile.id;
+  if (choice.kind === 'custom') {
+    const size = await deps.ui.inputDisplaySize(display);
+    if (!size) return undefined;
+    const v = validateDisplaySize(size);
+    if (!v.ok) {
+      deps.ui.showError(v.message ?? 'Invalid display size.');
+      return undefined;
+    }
+    display = size;
+    profileId = CUSTOM_PROFILE_ID;
+  }
 
   let bundleName = steps.bundleName;
   while (bundleName === undefined) {
@@ -140,9 +167,15 @@ export async function runProjectWizardWithChoices(
       bundleName,
       vendor,
       sdkVersion: steps.sdkVersion,
-      deviceProfileId: profile.id,
-      display: { width: profile.display.width, height: profile.display.height },
+      deviceProfileId: profileId,
+      display,
     });
+    if (choice.kind === 'custom') {
+      files.push({
+        relativePath: `.ohjs/device-profiles/${CUSTOM_PROFILE_ID}.json`,
+        content: new TextEncoder().encode(customProfileJson(customBase.id, display)),
+      });
+    }
     await deps.writeProject(targetRoot, files);
     deps.ui.showInfo(`Created OpenHarmony Lite JS project at ${targetRoot}`);
     return targetRoot;

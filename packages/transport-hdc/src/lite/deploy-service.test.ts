@@ -16,10 +16,7 @@ const USB = '7001005458323933328a01ab';
 function loadProfile() {
   const registry = new DeviceProfileRegistry();
   const json = JSON.parse(
-    fs.readFileSync(
-      path.join(__dirname, '../../../extension/device-profiles/2k0300-linux-1024x768.json'),
-      'utf8',
-    ),
+    fs.readFileSync(path.join(__dirname, '../../../extension/device-profiles/cp2a070-la401.json'), 'utf8'),
   );
   registry.add(json, 'builtin');
   return registry.resolve(json.id);

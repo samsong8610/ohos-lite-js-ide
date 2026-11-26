@@ -114,7 +114,7 @@
         },
         "ohjs.device.profile": {
           "type": "string",
-          "default": "2k0300-1024x768",
+          "default": "cp2a070-la401",
           "scope": "resource",
           "description": "%config.device.profile%"
         },
@@ -242,6 +242,12 @@
       {
         "command": "ohjs.device.refresh",
         "title": "%command.device.refresh%",
+        "category": "OHJS",
+        "enablement": "ohjs.isProject"
+      },
+      {
+        "command": "ohjs.device.setTarget",
+        "title": "%command.device.setTarget%",
         "category": "OHJS",
         "enablement": "ohjs.isProject"
       },

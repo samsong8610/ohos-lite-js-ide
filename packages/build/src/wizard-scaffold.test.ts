@@ -25,7 +25,7 @@ describe('wizard scaffold (fixture build)', () => {
       bundleName: 'com.example.buildtest',
       vendor: 'example',
       sdkVersion: '6.1-lts',
-      deviceProfileId: '2k0300-1024x768',
+      deviceProfileId: 'cp2a070-la401',
       display: { width: 1024, height: 768 },
     });
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ohjs-wiz-'));

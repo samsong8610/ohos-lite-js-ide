@@ -25,6 +25,7 @@
   "config.device.profileOverrides": "Overrides for paths, ports and command templates of the active device profile.",
   "config.device.display": "Override the display resolution of the active device profile.",
   "command.device.refresh": "Refresh Devices",
+  "command.device.setTarget": "Set Target Device…",
   "debuggers.ohjs.label": "OpenHarmony Lite JS",
   "debuggers.ohjs.bundle": "Application bundle name (from config.json when empty).",
   "debuggers.ohjs.ability": "Main ability name (from config.json when empty).",
