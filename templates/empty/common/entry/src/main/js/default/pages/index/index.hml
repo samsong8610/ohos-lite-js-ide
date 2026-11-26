@@ -1,3 +1,13 @@
 <div class="container">
-  <text class="title">{{ title }}</text>
+  <div class="page-head">
+    <div class="back-btn" onclick="onExit">
+      <image class="back-icon" src="/common/back.png"></image>
+    </div>
+    <text class="head-title">{{ title }}</text>
+    <div class="back-spacer"></div>
+  </div>
+  <div class="head-line"></div>
+  <div class="page-content">
+    <text class="title">{{ title }}</text>
+  </div>
 </div>

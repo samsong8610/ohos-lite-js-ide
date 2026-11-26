@@ -1,8 +1,17 @@
-<div class="page">
-  <text class="heading">{{ heading }}</text>
-  <list class="list">
-    <list-item class="list-item" for="{{ items }}" tid="id">
-      <text value="{{ $item.title }}"></text>
-    </list-item>
-  </list>
+<div class="container">
+  <div class="page-head">
+    <div class="back-btn" onclick="onExit">
+      <image class="back-icon" src="/common/back.png"></image>
+    </div>
+    <text class="head-title">{{ title }}</text>
+    <div class="back-spacer"></div>
+  </div>
+  <div class="head-line"></div>
+  <div class="page-content">
+    <list class="list">
+      <list-item class="list-item" for="{{ items }}" tid="id">
+        <text class="item-title" value="{{ $item.title }}"></text>
+      </list-item>
+    </list>
+  </div>
 </div>
